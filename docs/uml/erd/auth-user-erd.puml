@@ -1,0 +1,37 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "users" {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR(255) <<UNIQUE>>
+  * password_hash : VARCHAR(255)
+  * role_id : INT <<FK>>
+  * status : ENUM('active', 'banned', 'pending')
+  created_at : TIMESTAMP
+}
+
+entity "profiles" {
+  * user_id : UUID <<PK, FK>>
+  --
+  full_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  avatar_url : TEXT
+  address : TEXT
+}
+
+entity "user_garage" {
+  * id : BIGINT <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * vin_code : VARCHAR(17) <<UNIQUE>>
+  license_plate : VARCHAR(20)
+  brand : VARCHAR(50)
+  model : VARCHAR(50)
+  odometer : INT
+}
+
+users ||--|| profiles
+users ||--o{ user_garage
+@enduml

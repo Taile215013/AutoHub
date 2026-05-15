@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin" as ad
+
+rectangle "AutoHub - Admin Control Panel" {
+    usecase "Manage Users (Customers/Staff)" as UC1
+    usecase "Manage Vehicles Catalog" as UC2
+    usecase "Manage Spare Parts Inventory" as UC3
+    usecase "Manage Services & Packages" as UC4
+    usecase "Manage Orders & Transactions" as UC5
+    usecase "Manage Service Bookings" as UC6
+    usecase "View Business Statistics & Reports" as UC7
+    usecase "Moderate Chat Reports & Logs" as UC8
+    usecase "System Configuration" as UC9
+}
+
+ad --> UC1
+ad --> UC2
+ad --> UC3
+ad --> UC4
+ad --> UC5
+ad --> UC6
+ad --> UC7
+ad --> UC8
+ad --> UC9
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "orders" {
+  * id : UUID <<PK>>
+  --
+  * customer_id : UUID <<FK>>
+  * total_amount : DECIMAL(15,2)
+  * status : VARCHAR(20)
+  shipping_address : TEXT
+  payment_method : VARCHAR(50)
+  created_at : TIMESTAMP
+}
+
+entity "order_items" {
+  * id : BIGINT <<PK>>
+  --
+  * order_id : UUID <<FK>>
+  * product_id : BIGINT <<FK>>
+  * quantity : INT
+  * unit_price : DECIMAL(15,2)
+}
+
+orders ||--|{ order_items
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam theme plain
+
+package "Authentication_Module" {
+    class User {
+        - UUID id
+        - String username
+        - String email
+        - String passwordHash
+        - String phoneNumber
+        - Boolean isActive
+        - DateTime lastLogin
+        + login(String email, String password): Token
+        + resetPassword(String newPassword): Boolean
+        + updateProfile(ProfileDTO data): Boolean
+    }
+
+    class Role {
+        - Int id
+        - String roleName
+        - List<String> permissions
+    }
+
+    class Profile {
+        - String fullName
+        - String address
+        - String avatarUrl
+        - DateTime dateOfBirth
+    }
+
+    class AccountStatus {
+        <<enumeration>>
+        ACTIVE
+        BANNED
+        PENDING_VERIFICATION
+    }
+}
+
+User "1" *-- "1" Profile
+User "n" -- "1" Role
+User -- AccountStatus
+@enduml

@@ -1,0 +1,57 @@
+@startuml
+autonumber
+skinparam style strictuml
+skinparam roundcorner 8
+
+' Color Palette: Steel Blue & Silver (Security/Profile style)
+skinparam sequence {
+    ArrowColor #283747
+    LifeLineBorderColor #283747
+    ParticipantBackgroundColor #FBFCFC
+    ParticipantBorderColor #283747
+}
+
+box "Presentation (Client)" #F2F3F4
+    actor "User" as User #5D6D7E
+    participant "Profile UI" as UI #5D6D7E
+end box
+
+box "Security Layer (.NET Core)" #EBF5FB
+    participant "UserController" as API #2E86C1
+    participant "Identity Manager" as Auth #2E86C1
+end box
+
+database "SQL Server" as DB #D6EAF8
+
+== Update Personal Info ==
+User -> UI: Edit Profile Data (Name, Phone, Address)
+UI -> API: PUT /api/v1/user/profile (ProfileDTO)
+activate API #2E86C1
+API -> DB: UPDATE Profiles SET ... WHERE UserId = @Id
+DB --> API: Success
+API --> UI: 200 OK (Updated Profile)
+UI --> User: Show "Profile Updated Successfully"
+deactivate API
+
+== Change Password ==
+User -> UI: Input Old & New Password
+UI -> API: POST /api/v1/user/change-password
+activate API #2E86C1
+API -> Auth: Verify Old Password Hash
+Auth -> DB: Fetch Hash
+DB --> Auth: Hash Data
+Auth -> Auth: Check match?
+alt Password Match
+    Auth -> Auth: Hash New Password
+    Auth -> DB: UPDATE Users SET PasswordHash = @NewHash
+    DB --> Auth: Success
+    Auth --> API: Success Result
+    API --> UI: 200 OK
+    UI --> User: Show "Password Changed"
+else Wrong Old Password
+    Auth --> API: Error (Invalid Credentials)
+    API --> UI: 400 Bad Request
+    UI --> User: Show "Incorrect Old Password"
+end
+deactivate API
+@enduml

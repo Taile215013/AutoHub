@@ -1,0 +1,17 @@
+@startuml
+node "Client Browser" as Client
+node "Cloud Load Balancer" as LB
+
+node "App Server (Nodejs/NestJS)" as App {
+    artifact "E-com API"
+    artifact "Booking Service"
+}
+
+database "SQL Server" as DB
+database "Redis (Chat Cache)" as Cache
+
+Client -- LB : HTTPS
+LB -- App : HTTP
+App -- DB : SQL
+App -- Cache : TCP/IP
+@enduml

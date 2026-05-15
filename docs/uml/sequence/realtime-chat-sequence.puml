@@ -1,0 +1,37 @@
+@startuml
+autonumber
+skinparam style strictuml
+
+' Color Palette: Vibrant Purple (Digital Interaction)
+skinparam sequence {
+    ParticipantBackgroundColor #F5EEF8
+    ParticipantBorderColor #8E44AD
+    ArrowColor #7D3C98
+}
+
+box "Customer Side" #F5EEF8
+    actor "Customer" as User #AF7AC5
+    participant "Chat UI" as UI #AF7AC5
+end box
+
+box "Server (SignalR Hub)" #EBEDEF
+    participant "ChatHub.cs" as Hub #5D6D7E
+    participant "ChatService.cs" as Logic #5D6D7E
+end box
+
+box "Admin Side" #E8F8F5
+    participant "Admin Dashboard" as Admin #48C9B0
+end box
+
+User -> UI: Open Chat & Type Message
+UI -> Hub: Invoke "SendMessage" (SignalR)
+activate Hub #8E44AD
+Hub -> Logic: Sanitize & Save Message
+database "SQL Server" as DB #D5DBDB
+Logic -> DB: INSERT INTO ChatHistory
+DB --> Logic: Success
+Hub -> Admin: ReceiveMessage(senderId, content)
+note right #D1F2EB: Message appears instantly on Admin screen
+Hub --> UI: MessageDeliverAck
+deactivate Hub
+@enduml

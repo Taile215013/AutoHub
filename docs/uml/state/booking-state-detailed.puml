@@ -1,0 +1,55 @@
+//Biểu đồ này mô tả vòng đời của một lịch hẹn từ lúc khách hàng gửi yêu cầu cho đến khi xe được bàn giao xong.
+@startuml
+header AutoHub Service Management
+title Detailed State Machine: Booking Lifecycle
+
+' Cấu hình màu sắc trạng thái
+skinparam state {
+    BackgroundColor<<Start>> #D6EAF8
+    BackgroundColor<<Process>> #FCF3CF
+    BackgroundColor<<Success>> #D5F5E3
+    BackgroundColor<<Failed>> #FADBD8
+    BorderColor #2E4053
+}
+
+[*] --> Pending : Customer submits request
+note on link: Created via Web/App
+
+state Pending <<Start>> {
+    Pending : system_checks_availability()
+}
+
+Pending --> Confirmed : Admin approves slot
+Pending --> Rejected : Staff rejects (busy/no parts)
+Pending --> Cancelled : Customer cancels
+
+state Confirmed <<Process>> {
+    [*] --> AwaitingArrival
+    AwaitingArrival --> CheckedIn : Vehicle arrives at garage
+    CheckedIn --> InProgress : Technician starts work
+    
+    state InProgress {
+        [*] --> Disassembling
+        Disassembling --> Repairing
+        Repairing --> Reassembling
+    }
+    
+    InProgress --> Testing : Mechanical work done
+    Testing --> InProgress : Test failed (Rework)
+}
+
+Confirmed --> Completed : Quality Assurance (QA) Passed <<Success>>
+Confirmed --> Cancelled : No-show (Auto-cancel after 2h) <<Failed>>
+
+Completed --> [*]
+Rejected --> [*]
+Cancelled --> [*]
+
+legend bottom
+    | Color | Description |
+    | <#D6EAF8> | Initial Stage |
+    | <#FCF3CF> | Active Processing |
+    | <#D5F5E3> | Successful End |
+    | <#FADBD8> | Terminated/Failed |
+end legend
+@enduml

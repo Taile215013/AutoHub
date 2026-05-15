@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Guest" as guest
+
+rectangle "AutoHub - Guest Portal" {
+    usecase "Browse Vehicles & Parts" as UC_BROWSE
+    usecase "Search with Advanced Filters" as UC_SEARCH
+    usecase "View Product Details" as UC_VIEW
+    usecase "Register New Account" as UC_REG
+    usecase "Login to System" as UC_LOGIN
+    usecase "Forgot / Reset Password" as UC_RESET_PWD
+    usecase "Contact via Guest Chat" as UC_CHAT
+}
+
+guest --> UC_BROWSE
+guest --> UC_SEARCH
+guest --> UC_VIEW
+guest --> UC_REG
+guest --> UC_LOGIN
+guest --> UC_RESET_PWD
+guest --> UC_CHAT
+@enduml

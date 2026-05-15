@@ -1,0 +1,54 @@
+@startuml
+!theme cerulean-outline
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+header AutoHub Software Architecture
+title Clean Architecture (Onion Architecture) for .NET 9/10
+
+node "External Layers" #F0F3F4 {
+    package "Infrastructure Layer" #D6EAF8 {
+        [EF Core / SQL Server] <<Component>>
+        [SignalR Hubs] <<Component>>
+        [Identity Service] <<Component>>
+        [Hangfire Jobs] <<Component>>
+    }
+
+    package "Presentation Layer (WebAPI)" #EBF5FB {
+        [Controllers / Minimal APIs] <<Component>>
+        [Swagger / OpenID] <<Component>>
+        [Middlewares] <<Component>>
+    }
+}
+
+package "Application Layer (Core)" #D5F5E3 {
+    [Interfaces / Contracts] <<Logic>>
+    [MediatR Handlers] <<Logic>>
+    [DTOs / Mapping] <<Logic>>
+    [Business Validators] <<Logic>>
+}
+
+package "Domain Layer (Core)" #FCF3CF {
+    [Entities] <<Entity>>
+    [Aggregates] <<Entity>>
+    [Value Objects] <<Entity>>
+    [Domain Exceptions] <<Entity>>
+}
+
+' Dependency Rules (Vòng ngoài phụ thuộc vòng trong)
+"Presentation Layer (WebAPI)" --> "Application Layer (Core)"
+"Infrastructure Layer" ..|> "Application Layer (Core)" : implements
+"Application Layer (Core)" --> "Domain Layer (Core)"
+
+note top of "Domain Layer (Core)" #FFF9C4
+  **The Heart of AutoHub**
+  No dependencies on other layers.
+  Contains Business Rules.
+end note
+
+note bottom of "Infrastructure Layer" #D1F2EB
+  External tools & implementations.
+  Can be swapped easily.
+end note
+
+@enduml

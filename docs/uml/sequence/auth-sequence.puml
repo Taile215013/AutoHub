@@ -1,0 +1,26 @@
+@startuml
+autonumber
+skinparam sequenceMessageAlign center
+skinparam sequence {
+    ParticipantBackgroundColor #F4ECF7
+    ParticipantBorderColor #8E44AD
+}
+
+actor "User" as User #E8DAEF
+participant "Identity API" as Auth #D2B4DE
+participant "Token Service" as JWT #D2B4DE
+database "SQL Server" as DB #AED6F1
+
+User -> Auth: Post Login(email, password)
+Auth -> DB: Get User by Email
+DB --> Auth: User Data & Hash Password
+Auth -> Auth: Verify Password Hash
+alt Authentication Success
+    Auth -> JWT: Generate JWT Token (Claims: Role, ID)
+    JWT --> Auth: Signed Token
+    Auth -> DB: Update LastLoginTime
+    Auth --> User: 200 OK (Token + Profile)
+else Authentication Failed
+    Auth --> User: 401 Unauthorized
+end
+@enduml

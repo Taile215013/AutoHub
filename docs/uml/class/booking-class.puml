@@ -1,0 +1,42 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Service_Booking" {
+    class MaintenanceService {
+        - Int id
+        - String serviceName
+        - Double price
+        - Int estimatedDuration
+        - String iconUrl
+    }
+
+    class Booking {
+        - UUID bookingId
+        - DateTime appointmentTime
+        - String customerNote
+        - BookingStatus status
+        - Double depositAmount
+        + reschedule(DateTime newTime)
+        + cancel(String reason)
+    }
+
+    class Technician {
+        - Int id
+        - String specialization
+        - List<String> certificateUrls
+        - AvailabilityStatus status
+    }
+
+    enum BookingStatus {
+        REQUESTED
+        CONFIRMED
+        IN_PROGRESS
+        COMPLETED
+        REJECTED
+    }
+}
+
+Booking "n" -- "1" MaintenanceService
+Booking "n" -- "1" Technician : assigned_to
+Booking "n" -- "1" Vehicle : for_vehicle
+@enduml

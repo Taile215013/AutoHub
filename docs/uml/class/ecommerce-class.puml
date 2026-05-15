@@ -1,0 +1,70 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Core_ECommerce" {
+    abstract class Product {
+        - Long id
+        - String name
+        - String slug
+        - Double basePrice
+        - Integer stockQuantity
+        - String description
+        - List<String> images
+        + updateStock(int amount)
+        + applyDiscount(float percentage)
+    }
+
+    class Vehicle {
+        - String vin
+        - String brand
+        - String model
+        - Int year
+        - String color
+        - String fuelType
+        - Double engineCapacity
+        - Float mileage
+    }
+
+    class SparePart {
+        - String sku
+        - String compatibilityNote
+        - String material
+        - Float weight
+    }
+
+    class Category {
+        - Int id
+        - String title
+        - Int parentId
+    }
+
+    class Order {
+        - UUID orderId
+        - DateTime createdAt
+        - Double totalAmount
+        - OrderStatus status
+        - String shippingAddress
+        + calculateTotal()
+        + updateStatus(OrderStatus newStatus)
+    }
+
+    class OrderItem {
+        - Int quantity
+        - Double priceAtPurchase
+    }
+
+    enum OrderStatus {
+        PENDING
+        PAID
+        SHIPPING
+        DELIVERED
+        CANCELLED
+    }
+}
+
+Product <|-- Vehicle
+Product <|-- SparePart
+Product "n" -- "1" Category
+Order "1" *-- "n" OrderItem
+OrderItem "n" -- "1" Product
+@enduml

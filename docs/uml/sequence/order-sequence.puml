@@ -1,0 +1,49 @@
+@startuml
+autonumber
+skinparam roundcorner 10
+skinparam sequenceMessageAlign center
+
+' Color Palette: Goldenrod & Slate (Trust & Commerce)
+skinparam sequence {
+    ArrowColor #5D6D7E
+    ParticipantBackgroundColor #FEF9E7
+    ParticipantBorderColor #D4AC0D
+}
+
+box "User" #FEF9E7
+    actor "Customer" as User #F7DC6F
+end box
+
+box "Application (.NET Core)" #EBF5FB
+    participant "OrderController" as Ctrl #85C1E9
+    participant "PaymentGateway" as Pay #85C1E9
+end box
+
+box "Infrastructure" #EAECEE
+    participant "Hangfire Worker" as Job #ABB2B9
+    database "SQL Server" as SQL #2E4053
+end box
+
+== Payment Process ==
+User -> Ctrl: Submit Order (Car/Parts)
+activate Ctrl #85C1E9
+Ctrl -> SQL: Save Order (Status: WaitingPayment)
+Ctrl -> Pay: Request Payment URL (VNPAY/Momo)
+Pay --> Ctrl: Return URL
+Ctrl --> User: Redirect to Gateway Page
+
+note over User, Pay: User performs transaction on External UI
+
+Pay -> Ctrl: Callback/Webhook (Payment Success)
+Ctrl -> SQL: Update Order Status (Paid)
+
+== Background Tasks ==
+Ctrl -> Job: EnqueueTask: SendConfirmationEmail
+note right #D1F2EB: Hangfire handles this asynchronously
+Job -> SQL: Get Customer & Order Detail
+Job -> "Mail Server": Send Invoice PDF
+Job --> Ctrl: Task Completed
+
+Ctrl --> User: Display "Order Completed Successfully"
+deactivate Ctrl
+@enduml

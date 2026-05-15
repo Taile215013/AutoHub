@@ -1,0 +1,57 @@
+@startuml
+autonumber
+skinparam style strictuml
+skinparam roundcorner 8
+skinparam sequenceMessageAlign center
+
+' Color Palette: Ocean Blue & Mint (Professional .NET Style)
+skinparam sequence {
+    ArrowColor #2E4053
+    LifeLineBorderColor #2E4053
+    ParticipantBackgroundColor #D6EAF8
+    ParticipantBorderColor #2E4053
+    BoxBackgroundColor #F4F6F7
+}
+
+box "Presentation (Client)" #EBF5FB
+    actor "Customer" as User #AED6F1
+    participant "Frontend UI" as UI #AED6F1
+end box
+
+box "Logic Layer (.NET Core)" #D5F5E3
+    participant "BookingController" as API #82E0AA
+    participant "BookingService" as Service #82E0AA
+    participant "SignalR Hub" as Hub #2ECC71
+end box
+
+box "Data Layer (Persistence)" #FADBD8
+    participant "EF Core (SQL Server)" as DB #EC7063
+end box
+
+== 1. Availability Check ==
+User -> UI: Choose Service & DateTime
+UI -> API: GET /api/v1/bookings/check-slots
+API -> Service: GetAvailableSlots(date)
+Service -> DB: Query Available Technicians
+DB --> Service: Data List
+Service --> API: AvailableSlotsDTO
+API --> UI: Display Slots to User
+
+== 2. Booking Execution ==
+User -> UI: Click "Confirm Booking"
+UI -> API: POST /api/v1/bookings (BookingData)
+activate API #82E0AA
+API -> Service: CreateBooking(dto)
+activate Service #82E0AA
+Service -> DB: INSERT INTO Bookings (Status=Pending)
+DB --> Service: New Booking ID
+Service -> Hub: NotifyNewBooking(adminId, bookingId)
+Hub -> "Admin UI": broadcast("New Appointment Alert")
+note right #FCF3CF: Real-time via SignalR
+Service --> API: Success Result
+deactivate Service
+API --> UI: 201 Created
+deactivate API
+
+UI --> User: Show Confirmation & SMS Sent
+@enduml

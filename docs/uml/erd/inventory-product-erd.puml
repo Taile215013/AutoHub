@@ -1,0 +1,44 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "categories" {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(100)
+  parent_id : INT <<FK>>
+}
+
+entity "products" {
+  * id : BIGINT <<PK>>
+  --
+  * category_id : INT <<FK>>
+  * name : VARCHAR(255)
+  * slug : VARCHAR(255)
+  price : DECIMAL(15,2)
+  stock_quantity : INT
+  product_type : ENUM('vehicle', 'part')
+}
+
+entity "vehicle_specs" {
+  * product_id : BIGINT <<PK, FK>>
+  --
+  engine_type : VARCHAR(50)
+  fuel_type : VARCHAR(20)
+  transmission : VARCHAR(20)
+  year : INT
+  color : VARCHAR(30)
+}
+
+entity "spare_part_specs" {
+  * product_id : BIGINT <<PK, FK>>
+  --
+  sku : VARCHAR(50) <<UNIQUE>>
+  manufacturer : VARCHAR(100)
+  compatibility : TEXT
+}
+
+categories ||--o{ products
+products ||--|| vehicle_specs
+products ||--|| spare_part_specs
+@enduml

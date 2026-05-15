@@ -1,0 +1,13 @@
+//big picture
+@startuml
+!include auth-user-erd.puml
+!include inventory-product-erd.puml
+!include sales-order-erd.puml
+!include booking-service-erd.puml
+
+' Cross-Module Linkages
+users ||--o{ orders
+users ||--o{ bookings
+user_garage ||--o{ bookings
+products ||--o{ order_items
+@enduml

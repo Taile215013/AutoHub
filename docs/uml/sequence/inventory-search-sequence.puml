@@ -1,0 +1,27 @@
+//Mô tả cách Admin quản lý sản phẩm hoặc Khách hàng sử dụng Advanced Filter (Bộ lọc nâng cao) để tìm xe. Đây là phần bạn có nhắc tới (xe hơi, xe máy, phụ tùng).
+
+@startuml
+autonumber
+skinparam sequence {
+    ParticipantBackgroundColor #E8F8F5
+    ParticipantBorderColor #1D8348
+}
+
+actor "Customer" as User
+participant "Product UI" as UI
+participant "Product API" as API
+participant "Caching (Redis)" as Cache
+database "SQL Server" as DB
+
+User -> UI: Input Filter (Brand, Price, Type)
+UI -> API: GET /api/products?brand=Toyota...
+API -> Cache: Try get filtered result
+alt Cache Hit
+    Cache --> API: Return Data
+else Cache Miss
+    API -> DB: Execute Dynamic SQL Query
+    DB --> API: Result Set
+    API -> Cache: Set Cache (Expired in 10m)
+end
+API --> UI: Display Result List
+@enduml

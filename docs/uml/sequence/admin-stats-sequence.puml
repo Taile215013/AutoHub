@@ -1,0 +1,22 @@
+@startuml
+autonumber
+skinparam sequence {
+    ParticipantBackgroundColor #FFF3E0
+    ParticipantBorderColor #E67E22
+}
+
+actor "Admin" as Admin
+participant "Admin Dashboard" as Dashboard
+participant "Report API" as API
+participant "Aggregation Service" as Stats
+database "SQL Server" as DB
+
+Admin -> Dashboard: Access Reports Page
+Dashboard -> API: GET /api/v1/stats/sales-summary
+API -> Stats: Compute Monthly Revenue
+Stats -> DB: SUM(TotalAmount) FROM Orders...
+DB --> Stats: Raw Data
+Stats -> Stats: Format Data for Chart (JSON)
+Stats --> API: Stats Report DTO
+API --> Dashboard: Render Charts (Chart.js/MudBlazor)
+@enduml

@@ -1,0 +1,64 @@
+//Tôi sử dụng tone màu Cobalt & Steel (Phong cách hạ tầng công nghệ cao).
+@startuml
+skinparam node {
+    BackgroundColor #F8F9F9
+    BorderColor #2E4053
+    FontColor #2E4053
+}
+skinparam cloud {
+    BackgroundColor #EBF5FB
+    BorderColor #2E86C1
+}
+skinparam database {
+    BackgroundColor #FADBD8
+    BorderColor #C0392B
+}
+
+header AutoHub Infrastructure Architecture
+title Deployment Diagram: .NET Core & SQL Server Environment
+
+cloud "Internet" as internet
+
+node "Customer Browser / Mobile App" as Client #D6EAF8
+
+node "Azure / Web Server Host" <<Windows/Linux>> {
+    
+    node "IIS / Kestrel Web Server" #AED6F1 {
+        artifact "AutoHub.WebAPI.dll" as API <<.NET 9/10>>
+        artifact "SignalR Service" as SignalR <<Real-time>>
+    }
+    
+    node "Background Service" #D5DBDB {
+        artifact "Hangfire.Server.exe" as Hangfire <<Jobs>>
+    }
+}
+
+node "Database Server" <<High Availability>> {
+    database "MS SQL Server 2026" as SQL #EC7063 {
+        [AutoHub_DB]
+    }
+    database "Redis Cache" as Redis #F1948A {
+        [Session_Data]
+    }
+}
+
+node "External Services" #FCF3CF {
+    [VNPAY / Momo API] as Payment
+    [SMTP Mail Server] as Mail
+}
+
+' Connections
+Client -- internet : HTTPS / WSS
+internet -- API : Port 443
+API -- SQL : EF Core (TCP/IP)
+API -- Redis : StackExchange.Redis
+API -- SignalR : WebSockets
+
+Hangfire -- SQL : Poll Jobs
+API -- Payment : REST API
+Hangfire -- Mail : SMTP
+
+note right of Hangfire : Handles automatic maintenance\nreminders & invoice generation.
+note bottom of SignalR : Direct persistent connection\nfor Live Chat.
+
+@enduml

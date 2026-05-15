@@ -1,0 +1,16 @@
+@startuml
+left to right direction
+actor "Seller/Dealer" as seller
+
+rectangle "Seller Center" {
+    usecase "List Vehicles/Parts for Sale" as UC_POST
+    usecase "Manage Shop Orders" as UC_SHOP_ORDER
+    usecase "Real-time Customer Support" as UC_SHOP_CHAT
+    usecase "Monitor Revenue Statistics" as UC_SHOP_STATS
+}
+
+seller --> UC_POST
+seller --> UC_SHOP_ORDER
+seller --> UC_SHOP_CHAT
+seller --> UC_SHOP_STATS
+@enduml

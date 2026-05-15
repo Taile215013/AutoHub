@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Customer" as cu
+
+rectangle "AutoHub - Customer Dashboard" {
+    usecase "Manage Profile & Personal Garage" as UC_PROFILE
+    usecase "Change Password" as UC_CHG_PWD
+    usecase "Manage Shopping Cart" as UC_CART
+    usecase "Proceed to Checkout" as UC_CHECKOUT
+    usecase "View Order History" as UC_ORDER_HIST
+    usecase "Track Shipment Status" as UC_TRACKING
+    usecase "Book Maintenance Service" as UC_BOOKING
+    usecase "Manage My Bookings" as UC_MY_BOOKINGS
+    usecase "Submit Product & Service Review" as UC_REVIEW
+    usecase "Live Chat with Support" as UC_CHAT
+}
+
+cu --> UC_PROFILE
+cu --> UC_CHG_PWD
+cu --> UC_CART
+cu --> UC_CHECKOUT
+cu --> UC_ORDER_HIST
+cu --> UC_TRACKING
+cu --> UC_BOOKING
+cu --> UC_MY_BOOKINGS
+cu --> UC_REVIEW
+cu --> UC_CHAT
+@enduml

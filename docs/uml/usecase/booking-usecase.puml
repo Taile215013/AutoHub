@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+
+actor "Customer" as cu
+actor "Technical Staff" as staff
+actor "Admin" as ad
+
+rectangle "Service Booking Module" {
+    usecase "Select Service (Decal/Engine/...)" as B1
+    usecase "Schedule Appointment" as B2
+    usecase "Confirm Booking (Deposit)" as B3
+    usecase "Update Service Progress" as B4
+    usecase "Manage Technician Assignments" as B5
+}
+
+cu --> B1
+cu --> B2
+cu --> B3
+
+staff --> B4
+
+ad --> B5
+ad --> B4
+@enduml

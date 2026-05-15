@@ -1,0 +1,147 @@
+@startuml
+skinparam linetype ortho
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+' Cấu hình màu sắc để phân biệt Aggregate
+skinparam package {
+    BackgroundColor<<User>> #E1F5FE
+    BackgroundColor<<Inventory>> #E8F5E9
+    BackgroundColor<<Sales>> #FFF3E0
+    BackgroundColor<<Booking>> #F3E5F5
+}
+
+header AutoHub Domain-Driven Design (Aggregates)
+
+' --- USER AGGREGATE ---
+package "User Aggregate" <<User>> {
+    class User <<Aggregate Root>> {
+        + UUID id
+        + String email
+        + String passwordHash
+        + Role role
+        + AccountStatus status
+        + changePassword(old, new)
+        + deactivateAccount()
+    }
+
+    class Profile <<Value Object>> {
+        + String fullName
+        + String phone
+        + String avatarUrl
+    }
+
+    class Garage <<Entity>> {
+        + List<OwnedVehicle> vehicleList
+        + addVehicleToGarage(OwnedVehicle v)
+        + getMaintenanceHistory(vehicleId)
+    }
+
+    class OwnedVehicle <<Entity>> {
+        + String vinCode
+        + String licensePlate
+        + Int currentOdometer
+    }
+}
+
+' --- INVENTORY AGGREGATE ---
+package "Product Inventory Aggregate" <<Inventory>> {
+    abstract class Product <<Aggregate Root>> {
+        + Long productId
+        + String name
+        + Double basePrice
+        + Int stockQuantity
+        + updateStock(quantity)
+        + setPricing(newPrice)
+    }
+
+    class VehicleProduct {
+        + String modelCode
+        + String color
+        + Year productionYear
+        + String engineSpecs
+    }
+
+    class SparePartProduct {
+        + String sku
+        + String compatibilityList
+        + String manufacturer
+    }
+    
+    class Category <<Entity>> {
+        + Int id
+        + String title
+    }
+}
+
+' --- SALES AGGREGATE ---
+package "Sales Aggregate" <<Sales>> {
+    class Order <<Aggregate Root>> {
+        + UUID orderId
+        + DateTime orderDate
+        + OrderStatus status
+        + Double totalAmount
+        + processPayment()
+        + shipOrder()
+    }
+
+    class OrderItem <<Entity>> {
+        + Int quantity
+        + Double priceAtPurchase
+        + Double taxAmount
+    }
+    
+    class ShippingInfo <<Value Object>> {
+        + String address
+        + String recipientName
+        + String trackingNumber
+    }
+}
+
+' --- SERVICE BOOKING AGGREGATE ---
+package "Service Aggregate" <<Booking>> {
+    class Booking <<Aggregate Root>> {
+        + UUID bookingId
+        + DateTime scheduledSlot
+        + BookingStatus status
+        + Double depositAmount
+        + assignTechnician(techId)
+        + updateProgress(percent)
+    }
+
+    class MaintenanceService <<Entity>> {
+        + Int serviceId
+        + String serviceName
+        + Double laborFee
+    }
+}
+
+' --- RELATIONSHIPS (Cross-Aggregate) ---
+
+' User owns a Garage
+User "1" *-- "1" Profile
+User "1" *-- "1" Garage
+
+' Garage contains vehicles owned by user
+Garage "1" *-- "0..*" OwnedVehicle
+
+' Order is placed by User and contains items from Inventory
+User "1" -- "0..*" Order : "places"
+Order "1" *-- "1..*" OrderItem
+Order *-- ShippingInfo
+OrderItem "n" -- "1" Product : "refers to"
+
+' Booking links User, Service and the specific OwnedVehicle
+User "1" -- "0..*" Booking : "schedules"
+Booking "n" -- "1" MaintenanceService : "type of"
+Booking "n" -- "1" OwnedVehicle : "performs on"
+
+' Products hierarchy
+Product <|-- VehicleProduct
+Product <|-- SparePartProduct
+Product "n" -- "1" Category
+
+note bottom of Order : Payment creates a snapshot\nof Product prices in OrderItem.
+note bottom of Booking : Can only be scheduled for\nVehicles existing in User's Garage.
+
+@enduml
