@@ -22,6 +22,8 @@ builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 builder.Services.AddScoped<IVehicleRepository, EfVehicleRepository>();
 builder.Services.AddScoped<IServiceRepository, EfServiceRepository>();
 builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
+builder.Services.AddScoped<IBrandRepository, EfBrandRepository>();
+builder.Services.AddScoped<ISparePartRepository, EfSparePartRepository>();
 
 builder.Services.AddControllersWithViews();
 

@@ -1,0 +1,116 @@
+@model IEnumerable<AutoHub.Models.Entities.Brand>
+
+@{
+    ViewData["Title"] = "Quản Lý Thương Hiệu - AutoHub";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản Lý Thương Hiệu</title>
+    <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <div class="admin-layout">
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
+                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
+                    &equiv;
+                </button>
+            </div>
+            <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Index", "Admin")">
+                        <span>🚗</span>
+                        <span class="sidebar-text">Quản Lý Xe</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("SpareParts", "Admin")">
+                        <span>🛠️</span>
+                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item active">
+                    <a href="@Url.Action("Brands", "Admin")">
+                        <span>🏷️</span>
+                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Index", "Home")">
+                        <span>🏪</span>
+                        <span class="sidebar-text">Xem Cửa Hàng</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="admin-content">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Thương Hiệu</h1>
+                <a href="@Url.Action("CreateBrand", "Admin")" class="btn-premium-dark text-decoration-none">Thêm Hãng Mới</a>
+            </div>
+
+            <div class="premium-card">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
+                            <th>Tên Thương Hiệu</th>
+                            <th>Quốc Gia</th>
+                            <th>Lĩnh Vực Hoạt Động</th>
+                            <th class="text-end">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var brand in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold fs-5">@brand.Name</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary py-2 px-3">@(brand.Country != null ? brand.Country.Name : "N/A")</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (brand.IsVehicleBrand)
+                                        {
+                                            <span class="badge bg-danger text-uppercase" style="font-size:0.75rem;">Sản Xuất Xe</span>
+                                        }
+                                        @if (brand.IsPartBrand)
+                                        {
+                                            <span class="badge bg-primary text-uppercase" style="font-size:0.75rem;">Sản Xuất Phụ Tùng</span>
+                                        }
+                                        @if (brand.IsToyBrand)
+                                        {
+                                            <span class="badge bg-warning text-dark text-uppercase" style="font-size:0.75rem;">Sản Xuất Đồ Chơi</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <form method="post" action="@Url.Action("DeleteBrand", "Admin", new { id = brand.Id })" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hãng này? Việc xóa hãng có thể ảnh hưởng tới các sản phẩm liên quan.')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            $('#sidebar').toggleClass('collapsed');
+        }
+    </script>
+</body>
+</html>

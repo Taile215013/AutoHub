@@ -1,0 +1,36 @@
+@startuml
+header AutoHub Commerce
+title Detailed State Machine: Order & Payment Lifecycle
+
+skinparam state {
+    BackgroundColor #F4F6F7
+    BorderColor #2C3E50
+}
+
+[*] --> Unpaid : Order Created
+note right: Waiting for Payment Gateway callback
+
+state Unpaid {
+    Unpaid --> Paid : Payment Success (VNPAY/Momo)
+    Unpaid --> PaymentFailed : Transaction Rejected
+    Unpaid --> Expired : Timeout (30 mins)
+}
+
+PaymentFailed --> Unpaid : Retry Payment
+Expired --> [*]
+
+state Paid <<Success>> {
+    [*] --> Processing : Warehouse notified
+    Processing --> ReadyForShipping : Items packed
+    ReadyForShipping --> OutForDelivery : Handed to carrier
+    OutForDelivery --> Delivered : Customer signed
+}
+
+state Refunded <<Failed>> {
+    Paid --> Refunded : Customer returns items
+}
+
+Delivered --> [*]
+Refunded --> [*]
+
+@enduml

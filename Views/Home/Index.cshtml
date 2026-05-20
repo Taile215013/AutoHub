@@ -1,8 +1,241 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model IEnumerable<AutoHub.Models.Entities.Vehicle>
+
+@{
+    ViewData["Title"] = "AutoHub - Bộ Sưu Tập Xe & Dịch Vụ Hạng Sang";
+    var services = ViewBag.Services as IEnumerable<AutoHub.Models.Entities.Service> ?? new List<AutoHub.Models.Entities.Service>();
+    var districts = ViewBag.Districts as List<string> ?? new List<string>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-banner" style="background: linear-gradient(135deg, #0f0f11 0%, #1c1c22 100%); border-bottom: 3px solid var(--accent-ferrari);">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 style="text-shadow: 0 4px 15px rgba(0,0,0,0.5);">AutoHub Luxury</h1>
+        <p>Khám phá bộ sưu tập siêu xe và dịch vụ chăm sóc đỉnh cao dành riêng cho giới tinh hoa</p>
+        <a href="#collection-section" class="btn-premium-dark">Trải Nghiệm Ngay</a>
+    </div>
 </div>
+
+<div class="container px-4 py-5" id="collection-section">
+    <h2 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Bộ Sưu Tập Xe Sẵn Có</h2>
+
+    <form method="get" action="@Url.Action("Index", "Home")" class="filter-bar">
+        <div class="filter-group">
+            <label>Phân Loại Xe</label>
+            <select name="vehicleType" class="filter-select">
+                <option value="">Tất cả</option>
+                <option value="Auto" selected="@(ViewBag.VehicleType == "Auto")">Ô Tô (Auto)</option>
+                <option value="Motorbike" selected="@(ViewBag.VehicleType == "Motorbike")">Xe Máy (Motorbike)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Dáng Xe</label>
+            <input type="text" name="bodyStyle" value="@ViewBag.BodyStyle" placeholder="Ví dụ: Sedan, Underbone..." class="filter-input" />
+        </div>
+        <div class="filter-group">
+            <label>Nhiên Liệu</label>
+            <select name="fuelType" class="filter-select">
+                <option value="">Tất cả</option>
+                <option value="Gasoline" selected="@(ViewBag.FuelType == "Gasoline")">Xăng (Gasoline)</option>
+                <option value="Electric" selected="@(ViewBag.FuelType == "Electric")">Điện (Electric)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-premium-dark py-2">Tìm Kiếm</button>
+        <a href="@Url.Action("Index", "Home")" class="btn-premium-outline py-2 text-decoration-none text-center">Xóa Lọc</a>
+    </form>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var vehicle in Model)
+            {
+                <div class="col">
+                    <div class="premium-card h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge bg-dark text-uppercase tracking-wider px-2 py-1" style="font-size:0.75rem;">@vehicle.VehicleType</span>
+                                <span class="badge bg-danger px-2 py-1" style="font-size:0.75rem;">@vehicle.Transmission</span>
+                            </div>
+                            <h3 style="font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">@vehicle.Name</h3>
+                            <p class="text-muted mb-2">Động cơ: @vehicle.EngineType @(vehicle.EngineCapacity.HasValue ? $"({vehicle.EngineCapacity}L/CC)" : "")</p>
+                            <p class="text-muted mb-3">Kiểu dáng: @(vehicle.BodyStyle ?? "Tiêu chuẩn")</p>
+                            
+                            <div class="d-flex flex-wrap gap-1 mb-4">
+                                @foreach (var color in vehicle.Colors)
+                                {
+                                    <span class="badge border text-dark bg-white" style="font-size:0.8rem;">@color.ColorName</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                                @if (vehicle.Quantity.HasValue && vehicle.Quantity.Value > 0)
+                                {
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.85rem;">Giá Bán Lẻ</div>
+                                        <div class="text-danger" style="font-weight: 800; font-size: 1.25rem;">@string.Format("{0:N0}", vehicle.CurrentPrice) đ</div>
+                                    </div>
+                                    <button class="btn-premium-dark px-3 py-2" onclick="orderProduct('Xe: @vehicle.Name', '@vehicle.CurrentPrice')">Đặt lịch mua</button>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <div class="text-muted" style="font-size:0.85rem;">Trạng thái</div>
+                                        <div class="text-muted" style="font-weight: 800; font-size: 1.1rem;">Hết hàng / Sắp về</div>
+                                    </div>
+                                    <button class="btn-premium-outline px-3 py-2" onclick="openConsultation('Xe: @vehicle.Name')">Liên hệ tư vấn</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">Không tìm thấy dòng xe nào khớp với điều kiện lọc.</p>
+            </div>
+        }
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-6">
+            <h2 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Bảng Giá Dịch Vụ Đỉnh Cao</h2>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var service in services)
+                {
+                    <div class="premium-card d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 style="font-weight: 700; margin: 0 0 0.25rem 0;">@service.ServiceName</h4>
+                            <span class="badge bg-secondary text-uppercase" style="font-size:0.75rem;">@service.VehicleType</span>
+                        </div>
+                        <div class="text-end">
+                            @if (service.RequiresQuote)
+                            {
+                                <div class="text-muted mb-2" style="font-weight:700; font-size:0.9rem;">Cần khảo sát báo giá</div>
+                                <button class="btn-premium-outline py-2 px-3" onclick="openConsultation('Dịch vụ: @service.ServiceName')">Tư vấn ngay</button>
+                            }
+                            else
+                            {
+                                <div class="text-danger mb-2" style="font-weight: 800; font-size: 1.15rem;">@string.Format("{0:N0}", service.BasePrice) đ</div>
+                                <button class="btn-premium-dark py-2 px-3" onclick="orderProduct('Dịch vụ: @service.ServiceName', '@service.BasePrice')">Đặt lịch</button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <h2 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Địa Chỉ Khách Hàng (Nghị Định 2026)</h2>
+            <div class="premium-card">
+                <div class="mb-3">
+                    <label class="form-label text-uppercase text-muted" style="font-weight:600; font-size:0.85rem;">Tỉnh / Thành Phố</label>
+                    <select class="form-select border-secondary py-2" id="citySelect">
+                        <option value="Hồ Chí Minh">Thành phố Hồ Chí Minh</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-uppercase text-muted" style="font-weight:600; font-size:0.85rem;">Quận / Huyện (Phân cấp mới 2026)</label>
+                    <select class="form-select border-secondary py-2" id="districtSelect">
+                        <option value="">-- Chọn Quận --</option>
+                        @foreach (var dist in districts)
+                        {
+                            <option value="@dist">@dist</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-uppercase text-muted" style="font-weight:600; font-size:0.85rem;">Phường / Xã (Phân cấp mới 2026)</label>
+                    <select class="form-select border-secondary py-2" id="wardSelect" disabled>
+                        <option value="">-- Chọn Phường --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-uppercase text-muted" style="font-weight:600; font-size:0.85rem;">Số nhà / Đường phố</label>
+                    <input type="text" class="form-control border-secondary py-2" placeholder="Ví dụ: 123 Nguyễn Văn Bảo" />
+                </div>
+                <button class="btn-premium-dark w-100" onclick="alert('Đã cập nhật cấu trúc địa chỉ mới của bạn!')">Lưu Địa Chỉ Mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chatbox-popup" id="consultationChatbox">
+    <div class="chatbox-header">
+        <span style="font-weight:800; letter-spacing:0.5px;">AutoHub Assistant</span>
+        <button class="btn-close btn-close-white" onclick="closeChatbox()"></button>
+    </div>
+    <div class="chatbox-body" id="chatboxBody">
+        <div class="chatbox-msg system">
+            Xin chào quý khách! Hệ thống nhận thấy bạn đang quan tâm đến sản phẩm/dịch vụ đặc thù cần tư vấn khảo sát.
+        </div>
+        <div class="chatbox-msg system" id="chatboxTopicMsg">
+            Chúng tôi có thể giúp gì cho bạn?
+        </div>
+    </div>
+    <div class="chatbox-footer">
+        <input type="text" class="chatbox-input" id="chatInput" placeholder="Nhập tin nhắn của bạn..." onkeypress="handleChatKey(event)" />
+        <button class="btn-premium-dark py-1 px-3" onclick="sendChatMessage()">Gửi</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#districtSelect').change(function() {
+                var district = $(this).val();
+                if (district) {
+                    $.getJSON('@Url.Action("GetWards", "Home")', { district: district }, function(data) {
+                        var wardSelect = $('#wardSelect');
+                        wardSelect.empty().append('<option value="">-- Chọn Phường --</option>');
+                        $.each(data, function(index, value) {
+                            wardSelect.append('<option value="' + value + '">' + value + '</option>');
+                        });
+                        wardSelect.prop('disabled', false);
+                    });
+                } else {
+                    $('#wardSelect').empty().append('<option value="">-- Chọn Phường --</option>').prop('disabled', true);
+                }
+            });
+        });
+
+        function openConsultation(topicName) {
+            $('#consultationChatbox').css('display', 'flex');
+            $('#chatboxTopicMsg').text("Bạn đang cần hỗ trợ đặc biệt về: " + topicName + ". Vui lòng nhập số điện thoại hoặc gõ câu hỏi để nhân viên liên hệ tư vấn trực tiếp trong 5 phút!");
+            var chatBody = $('#chatboxBody');
+            chatBody.scrollTop(chatBody[0].scrollHeight);
+        }
+
+        function closeChatbox() {
+            $('#consultationChatbox').hide();
+        }
+
+        function handleChatKey(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            var input = $('#chatInput');
+            var text = input.val().trim();
+            if (!text) return;
+
+            var chatBody = $('#chatboxBody');
+            chatBody.append('<div class="chatbox-msg user">' + text + '</div>');
+            input.val('');
+            chatBody.scrollTop(chatBody[0].scrollHeight);
+
+            setTimeout(function() {
+                chatBody.append('<div class="chatbox-msg system">Yêu cầu đã được ghi nhận thành công! Đội ngũ tư vấn viên chuyên nghiệp của AutoHub sẽ trực tiếp liên lạc với bạn qua Zalo hoặc Số Điện Thoại trong ít phút tới. Xin trân trọng cảm ơn!</div>');
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+            }, 1000);
+        }
+
+        function orderProduct(name, price) {
+            alert('Quý khách đã đăng ký thành công đặt lịch hẹn cho: ' + name + '\nNhân viên sẽ gọi điện xác nhận lịch hẹn trong vòng 10 phút.');
+        }
+    </script>
+}

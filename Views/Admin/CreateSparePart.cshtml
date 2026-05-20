@@ -1,0 +1,160 @@
+@model AutoHub.Models.Entities.SparePart
+
+@{
+    ViewData["Title"] = "Thêm Phụ Tùng Mới - AutoHub";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thêm Phụ Tùng Mới</title>
+    <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <div class="admin-layout">
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
+                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
+                    &equiv;
+                </button>
+            </div>
+            <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Index", "Admin")">
+                        <span>🚗</span>
+                        <span class="sidebar-text">Quản Lý Xe</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item active">
+                    <a href="@Url.Action("SpareParts", "Admin")">
+                        <span>🛠️</span>
+                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Brands", "Admin")">
+                        <span>🏷️</span>
+                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Index", "Home")">
+                        <span>🏪</span>
+                        <span class="sidebar-text">Xem Cửa Hàng</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="admin-content">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Phụ Tùng Mới</h1>
+                <a href="@Url.Action("SpareParts", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
+            </div>
+
+            <div class="premium-card">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger border-danger p-3 mb-4 rounded">
+                        <ul class="mb-0">
+                            @foreach (var modelState in ViewData.ModelState.Values)
+                            {
+                                foreach (var error in modelState.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post" action="@Url.Action("CreateSparePart", "Admin")" onsubmit="return validatePrices()">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tên Phụ Tùng / Phụ Kiện</label>
+                            <input type="text" name="Name" class="form-control border-secondary py-2" required placeholder="Ví dụ: Phuộc Brembo, Má phanh Nissin, Pô Akrapovic" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Hãng Sản Xuất</label>
+                            <select name="BrandId" class="form-select border-secondary py-2" required>
+                                @if (ViewBag.Brands != null)
+                                {
+                                    foreach (var brand in ViewBag.Brands)
+                                    {
+                                        <option value="@brand.Id">@brand.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phân Loại Danh Mục</label>
+                            <select name="Category" class="form-select border-secondary py-2" required>
+                                <option value="Engine">Động Cơ (Engine)</option>
+                                <option value="Brake">Phanh / An Toàn (Brake)</option>
+                                <option value="Suspension">Giảm Xóc (Suspension)</option>
+                                <option value="Lighting">Hệ Thống Đèn (Lighting)</option>
+                                <option value="Toy">Đồ Chơi / Đồ Trang Trí (Toy)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Số Lượng Nhập Kho</label>
+                            <input type="number" name="StockQuantity" class="form-control border-secondary py-2" required value="50" min="0" />
+                        </div>
+                        <div class="col-md-4"></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase text-muted text-danger" style="font-size:0.8rem; font-weight:700;">Giá Nhập Kho (Giá Gốc từ Hãng)</label>
+                            <input type="number" step="0.01" id="costPriceInput" name="CostPrice" class="form-control border-danger py-2" required placeholder="Nhập giá nhập kho" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase text-muted text-success" style="font-size:0.8rem; font-weight:700;">Giá Bán Lẻ Ra Thị Trường</label>
+                            <input type="number" step="0.01" id="priceInput" name="Price" class="form-control border-success py-2" required placeholder="Nhập giá bán khách hàng" />
+                            <div class="text-danger mt-1 fw-semibold" id="priceValidationError" style="display:none; font-size:0.85rem;">
+                                Giá bán ra phải lớn hơn giá gốc nhập vào để đảm bảo có lợi nhuận!
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-5">
+                            <button type="submit" class="btn-premium-dark w-100 py-3">Lưu Phụ Tùng</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            $('#sidebar').toggleClass('collapsed');
+        }
+
+        function validatePrices() {
+            var cost = parseFloat($('#costPriceInput').val());
+            var price = parseFloat($('#priceInput').val());
+            if (!isNaN(cost) && !isNaN(price)) {
+                if (price <= cost) {
+                    $('#priceValidationError').show();
+                    $('#priceInput').addClass('is-invalid');
+                    return false;
+                }
+            }
+            $('#priceValidationError').hide();
+            $('#priceInput').removeClass('is-invalid');
+            return true;
+        }
+
+        $(document).ready(function() {
+            $('#costPriceInput, #priceInput').on('input', function() {
+                validatePrices();
+            });
+        });
+    </script>
+</body>
+</html>
