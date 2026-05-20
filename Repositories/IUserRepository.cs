@@ -1,0 +1,19 @@
+using System.Threading.Tasks;
+using AutoHub.Models.Entities;
+
+namespace AutoHub.Repositories;
+
+public interface IUserRepository
+{
+    Task<User?> GetByIdAsync(int id);
+
+    Task<User?> GetByEmailOrPhoneAsync(string loginInput);
+
+    Task<bool> IsEmailTakenAsync(string email, int excludeUserId);
+
+    Task<bool> IsPhoneTakenAsync(string phoneNumber, int excludeUserId);
+
+    Task AddAsync(User user);
+
+    Task UpdateAsync(User user);
+}

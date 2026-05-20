@@ -1,3 +1,33 @@
+## ==========================================
+## 1. HỒ SƠ BẢO MẬT (BẮT BUỘC CHẶN)
+## ==========================================
+# Chặn file cấu hình môi trường chứa mật khẩu SQL Server, Secret Key
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+## ==========================================
+## 2. FILE TỰ SINH CỦA VISUAL STUDIO / .NET (CHẶN)
+## ==========================================
+# Thư mục cấu hình ẩn của Visual Studio
 .vs/
-bin/
-obj/
+
+# Thư mục chứa file thực thi sau khi Build code
+[Bb]in/
+[Oo]bj/
+
+# Các file log và file tạm khi chạy ứng dụng
+*.log
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## ==========================================
+## 3. FILE TÀI LIỆU (MỞ KHÓA - CHO PHÉP ĐẨY LÊN)
+## ==========================================
+# Đảm bảo các file tài liệu thiết kế hệ thống luôn được đưa lên Git
+!*.md
+!*.txt

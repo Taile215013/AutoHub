@@ -1,3 +1,4 @@
+AI chỉ nên tham khảo thôi nhé, vì tôi chỉ mới bắt đầu c# thôi
 phép bạn chia sẻ Model (Class) giữa Backend và Frontend, giảm thiểu sai sót.
 
 MudBlazor / Ant Design Blazor: Các bộ UI Component cực đẹp dành riêng cho .NET, giúp bạn làm Dashboard Admin cực nhanh và chuyên nghiệp mà không cần giỏi CSS.
