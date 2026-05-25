@@ -346,3 +346,8 @@ body {
 .filter-select:focus, .filter-input:focus {
   border-color: var(--accent-ferrari);
 }
+
+.sidebar-seed-btn:hover {
+  background-color: var(--accent-ferrari);
+  color: #ffffff !important;
+}

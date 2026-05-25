@@ -1,0 +1,77 @@
+@model AutoHub.Models.Entities.User
+
+@{
+    ViewData["Title"] = "Đăng Ký Thành Viên - AutoHub";
+}
+
+<div class="hero-banner" style="background: linear-gradient(135deg, #0f0f11 0%, #1c1c22 100%); min-height: 100vh; display: flex; align-items: center; border-radius: 0; padding: 5rem 0;">
+    <div class="container px-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="premium-card p-5" style="border-color: var(--accent-gold);">
+                    <div class="text-center mb-4">
+                        <h2 class="text-uppercase mb-2" style="font-weight: 900; letter-spacing: 1px;">Gia Nhập AutoHub</h2>
+                        <p class="text-muted" style="font-size: 0.9rem;">Khởi tạo hồ sơ khách hàng V.I.P</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.Error))
+                    {
+                        <div class="alert alert-danger py-2 mb-4" style="font-size: 0.85rem; border-left: 4px solid var(--accent-ferrari); background-color: rgba(255, 40, 40, 0.1); color: var(--accent-ferrari); border-radius: 0;">
+                            <strong>Lỗi:</strong> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("Register", "Home")">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Họ và chữ lót</label>
+                                <input type="text" name="LastName" value="@Model?.LastName" class="form-control bg-dark text-white border-secondary py-2" required placeholder="Nguyễn Văn..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Tên</label>
+                                <input type="text" name="FirstName" value="@Model?.FirstName" class="form-control bg-dark text-white border-secondary py-2" required placeholder="A..." />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Số điện thoại</label>
+                                <input type="text" name="PhoneNumber" value="@Model?.PhoneNumber" class="form-control bg-dark text-white border-secondary py-2" placeholder="0901..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Email</label>
+                                <input type="email" name="Email" value="@Model?.Email" class="form-control bg-dark text-white border-secondary py-2" placeholder="example@email.com" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Giới tính</label>
+                            <select name="Gender" class="form-select bg-dark text-white border-secondary py-2">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Mật khẩu</label>
+                                <input type="password" name="Password" class="form-control bg-dark text-white border-secondary py-2" required placeholder="••••••••" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Xác nhận mật khẩu</label>
+                                <input type="password" name="ConfirmPassword" class="form-control bg-dark text-white border-secondary py-2" required placeholder="••••••••" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-premium-dark w-100 py-3 mb-3" style="font-size: 1.1rem; font-weight: 800; background-color: var(--accent-gold); color: #000;">XÁC NHẬN HỒ SƠ</button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted" style="font-size: 0.85rem;">Đã sở hữu thẻ thành viên? <a href="@Url.Action("Login", "Home")" class="text-white" style="font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--accent-gold);">Đăng nhập ngay</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

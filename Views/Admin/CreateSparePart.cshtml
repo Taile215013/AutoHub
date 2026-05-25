@@ -25,6 +25,12 @@
             </div>
             <ul class="admin-menu">
                 <li class="admin-menu-item">
+                    <a href="@Url.Action("Dashboard", "Admin")">
+                        <span>📊</span>
+                        <span class="sidebar-text">Tổng Quan Dashboard</span>
+                    </a>
+                </li>
+                <li class="admin-menu-item">
                     <a href="@Url.Action("Index", "Admin")">
                         <span>🚗</span>
                         <span class="sidebar-text">Quản Lý Xe</span>
@@ -95,11 +101,13 @@
                         <div class="col-md-4">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phân Loại Danh Mục</label>
                             <select name="Category" class="form-select border-secondary py-2" required>
-                                <option value="Engine">Động Cơ (Engine)</option>
-                                <option value="Brake">Phanh / An Toàn (Brake)</option>
-                                <option value="Suspension">Giảm Xóc (Suspension)</option>
-                                <option value="Lighting">Hệ Thống Đèn (Lighting)</option>
-                                <option value="Toy">Đồ Chơi / Đồ Trang Trí (Toy)</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat.Code">@cat.Value</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-4">

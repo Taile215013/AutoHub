@@ -24,6 +24,12 @@
                 </button>
             </div>
             <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Dashboard", "Admin")">
+                        <span>📊</span>
+                        <span class="sidebar-text">Tổng Quan Dashboard</span>
+                    </a>
+                </li>
                 <li class="admin-menu-item active">
                     <a href="@Url.Action("Index", "Admin")">
                         <span>🚗</span>
@@ -40,12 +46,6 @@
                     <a href="@Url.Action("Brands", "Admin")">
                         <span>🏷️</span>
                         <span class="sidebar-text">Quản Lý Thương Hiệu</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Home")">
-                        <span>🏪</span>
-                        <span class="sidebar-text">Xem Cửa Hàng</span>
                     </a>
                 </li>
             </ul>

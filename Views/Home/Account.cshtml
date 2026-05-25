@@ -5,6 +5,12 @@
 }
 
 <div class="container px-4 py-5">
+    @if (!string.IsNullOrEmpty(ViewBag.Warning))
+    {
+        <div class="alert alert-warning py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-gold); background-color: rgba(212, 175, 55, 0.1); color: #856404; border-radius: 0;">
+            <i class="me-2 fw-bold">⚠️</i> <strong>Hệ Thống Đang Bảo Trì:</strong> @ViewBag.Warning
+        </div>
+    }
     <div class="row g-4 mb-5">
         <div class="col-lg-4">
             <div class="premium-card text-center py-5">
@@ -17,7 +23,7 @@
                 <div class="text-start">
                     <p class="mb-2"><strong>Email:</strong> @(Model.Email ?? "Chưa thiết lập")</p>
                     <p class="mb-2"><strong>Số Điện Thoại:</strong> @(Model.PhoneNumber ?? "Chưa thiết lập")</p>
-                    <p class="mb-4"><strong>Địa Chỉ:</strong> @Model.HouseNumber, @Model.StreetName, @Model.Ward, @Model.District, @Model.City</p>
+                    <p class="mb-4"><strong>Địa Chỉ:</strong> @(string.IsNullOrWhiteSpace(Model.HouseNumber) ? "" : Model.HouseNumber + ", ") @Model.StreetName, @Model.Ward, @Model.District, @Model.City</p>
                 </div>
                 <button class="btn-premium-dark w-100" onclick="openSecureUpdateModal()">Đổi Thông Tin Liên Hệ</button>
             </div>
@@ -35,15 +41,17 @@
                         <div class="circuit-progress-bar" style="width: 75%;"></div>
                     </div>
                     <div class="d-flex justify-content-between text-muted" style="font-size: 0.8rem;">
-                        <span>Bronze (Giảm 0%)</span>
-                        <span>Silver (Giảm 2%)</span>
-                        <span class="text-danger" style="font-weight:700;">Gold (Giảm 5%)</span>
-                        <span>Diamond (Giảm 10%)</span>
+                        <span class="@(Model.RankLevel == "Bronze" ? "text-danger fw-bold" : "")">Bronze (Giảm 0%)</span>
+                        <span class="@(Model.RankLevel == "Silver" ? "text-danger fw-bold" : "")">Silver (Giảm 2%)</span>
+                        <span class="@(Model.RankLevel == "Gold" ? "text-danger fw-bold" : "text-muted")" style="@(Model.RankLevel == "Gold" ? "font-weight:700;" : "")">Gold (Giảm 5%)</span>
+                        <span class="@(Model.RankLevel == "Diamond" ? "text-danger fw-bold" : "")">Diamond (Giảm 10%)</span>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
                     <div class="p-2 border rounded text-center flex-grow-1">
-                        <div style="font-weight:800; font-size:1.5rem;" class="text-danger">5%</div>
+                        <div style="font-weight:800; font-size:1.5rem;" class="text-danger">
+                            @(Model.RankLevel == "Gold" ? "5%" : Model.RankLevel == "Silver" ? "2%" : Model.RankLevel == "Diamond" ? "10%" : "0%")
+                        </div>
                         <div class="text-muted" style="font-size:0.75rem;">Giảm giá Xe & Phụ Tùng hiện tại</div>
                     </div>
                     <div class="p-2 border rounded text-center flex-grow-1">
@@ -72,12 +80,40 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><strong>Honda Civic (Sedan)</strong></td>
-                                    <td>15/04/2026</td>
-                                    <td class="text-danger" style="font-weight: 700;">730.000.000 đ</td>
-                                    <td><span class="badge bg-success">Đã bàn giao</span></td>
-                                </tr>
+                                @if (ViewBag.Orders != null)
+                                {
+                                    var hasVehicles = false;
+                                    foreach (var order in ViewBag.Orders)
+                                    {
+                                        foreach (var detail in order.OrderDetails)
+                                        {
+                                            if (detail.ProductType == "Vehicle")
+                                            {
+                                                hasVehicles = true;
+                                                var vehicle = ((IEnumerable<AutoHub.Models.Entities.Vehicle>)ViewBag.Vehicles)
+                                                    .FirstOrDefault(v => v.Id == detail.ProductId);
+                                                <tr>
+                                                    <td><strong>@(vehicle?.Name ?? "Dòng xe khác")</strong></td>
+                                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                                    <td class="text-danger" style="font-weight: 700;">@detail.Price.ToString("N0") đ</td>
+                                                    <td><span class="badge bg-success">Đã bàn giao</span></td>
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                    if (!hasVehicles)
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-3">Bạn chưa mua chiếc xe nào.</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Bạn chưa mua chiếc xe nào.</td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -95,7 +131,7 @@
                                 <tr>
                                     <td><strong>Rửa xe bọt tuyết & Phủ bóng Nano</strong></td>
                                     <td>18/05/2026</td>
-                                    <td class="text-danger" style="font-weight: 700;">150.000.000 đ</td>
+                                    <td class="text-danger" style="font-weight: 700;">150.000 đ</td>
                                     <td><span class="badge bg-success">Hoàn thành</span></td>
                                 </tr>
                             </tbody>

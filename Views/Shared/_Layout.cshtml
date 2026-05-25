@@ -22,11 +22,35 @@
                             <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Index">Bộ Sưu Tập</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Dashboard">Thành Viên</a>
+                            <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Account">Thành Viên</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-uppercase font-weight-medium text-danger" asp-area="" asp-controller="Admin" asp-action="Index">Quản Trị Admin</a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto align-items-center gap-3">
+                        @using Microsoft.AspNetCore.Http
+                        @inject IHttpContextAccessor HttpContextAccessor
+                        @{
+                            var userId = HttpContextAccessor.HttpContext?.Session.GetInt32("UserId");
+                            var userName = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
+                        }
+                        @if (userId != null)
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="text-muted me-2" style="font-size: 0.85rem; margin-top:2px;">Cơ trưởng,</span>
+                                <span class="text-white" style="font-weight: 700; font-size: 0.9rem;">@userName</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn-premium-outline py-1 px-3 d-inline-block" style="font-size: 0.75rem; border-color: var(--accent-ferrari); color: var(--accent-ferrari);" href="@Url.Action("Logout", "Home")">TẮT ĐỘNG CƠ (Thoát)</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn-premium-dark py-1 px-4 d-inline-block" style="font-size: 0.8rem;" href="@Url.Action("Login", "Home")">KHỞI ĐỘNG (Đăng nhập)</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

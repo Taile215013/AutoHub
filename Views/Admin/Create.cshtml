@@ -24,6 +24,12 @@
                 </button>
             </div>
             <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Dashboard", "Admin")">
+                        <span>📊</span>
+                        <span class="sidebar-text">Tổng Quan Dashboard</span>
+                    </a>
+                </li>
                 <li class="admin-menu-item active">
                     <a href="@Url.Action("Index", "Admin")">
                         <span>🚗</span>
@@ -67,24 +73,38 @@
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phân Loại</label>
                             <select name="VehicleType" class="form-select border-secondary py-2" required>
-                                <option value="Auto">Auto (Ô Tô)</option>
-                                <option value="Motorbike">Motorbike (Xe Máy)</option>
+                                @if (ViewBag.VehicleTypes != null)
+                                {
+                                    foreach (var type in ViewBag.VehicleTypes)
+                                    {
+                                        <option value="@type.Code">@type.Value</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Nhiên Liệu</label>
                             <select name="FuelType" class="form-select border-secondary py-2" required>
-                                <option value="Gasoline">Xăng (Gasoline)</option>
-                                <option value="Electric">Điện (Electric)</option>
+                                @if (ViewBag.FuelTypes != null)
+                                {
+                                    foreach (var fuel in ViewBag.FuelTypes)
+                                    {
+                                        <option value="@fuel.Code">@fuel.Value</option>
+                                    }
+                                }
                             </select>
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Hộp Số</label>
                             <select name="Transmission" class="form-select border-secondary py-2" required>
-                                <option value="Automatic">Automatic (Tự Động / Ga)</option>
-                                <option value="Manual">Manual (Số Sàn / Cơ)</option>
-                                <option value="Clutch">Clutch (Xe Côn Tay)</option>
+                                @if (ViewBag.Transmissions != null)
+                                {
+                                    foreach (var trans in ViewBag.Transmissions)
+                                    {
+                                        <option value="@trans.Code">@trans.Value</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -101,7 +121,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Loại Động Cơ</label>
-                            <input type="text" name="EngineType" class="form-control border-secondary py-2" required placeholder="Ví dụ: V6, I4, Điện AC" />
+                            <select name="EngineType" class="form-select border-secondary py-2" required>
+                                @if (ViewBag.EngineTypes != null)
+                                {
+                                    foreach (var engine in ViewBag.EngineTypes)
+                                    {
+                                        <option value="@engine.Code">@engine.Value</option>
+                                    }
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Dung Tích Động Cơ</label>
@@ -118,7 +146,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Dáng Xe (Body Style)</label>
-                            <input type="text" name="BodyStyle" class="form-control border-secondary py-2" placeholder="Ví dụ: Sedan, SUV, Scooter" />
+                            <select name="BodyStyle" class="form-select border-secondary py-2" required>
+                                @if (ViewBag.BodyStyles != null)
+                                {
+                                    foreach (var body in ViewBag.BodyStyles)
+                                    {
+                                        <option value="@body.Code">@body.Value</option>
+                                    }
+                                }
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tồn Kho (Quantity)</label>
@@ -141,7 +177,15 @@
                             </div>
                             <div id="colorContainer" class="d-flex flex-column gap-2">
                                 <div class="input-group color-row">
-                                    <input type="text" name="colors" class="form-control border-secondary" placeholder="Tên màu (Ví dụ: Đỏ, Trắng-Đen, Xám Xi Măng)" required />
+                                    <select name="colors" class="form-select border-secondary" required>
+                                        @if (ViewBag.VehicleColors != null)
+                                        {
+                                            foreach (var color in ViewBag.VehicleColors)
+                                            {
+                                                <option value="@color.Value">@color.Value</option>
+                                            }
+                                        }
+                                    </select>
                                     <button type="button" class="btn btn-outline-danger" onclick="removeColorRow(this)">&times;</button>
                                 </div>
                             </div>
@@ -163,8 +207,18 @@
         }
 
         function addColorRow() {
+            var optionsHtml = '';
+            @if (ViewBag.VehicleColors != null)
+            {
+                foreach (var color in ViewBag.VehicleColors)
+                {
+                    <text>optionsHtml += '<option value="@color.Value">@color.Value</option>';</text>
+                }
+            }
             var row = $('<div class="input-group color-row">' +
-                        '<input type="text" name="colors" class="form-control border-secondary" placeholder="Tên màu" required />' +
+                        '<select name="colors" class="form-select border-secondary" required>' +
+                        optionsHtml +
+                        '</select>' +
                         '<button type="button" class="btn btn-outline-danger" onclick="removeColorRow(this)">&times;</button>' +
                         '</div>');
             $('#colorContainer').append(row);

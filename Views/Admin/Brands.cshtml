@@ -13,6 +13,25 @@
     <title>Quản Lý Thương Hiệu</title>
     <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        @@keyframes highlightMint {
+            0% { background-color: rgba(46, 229, 157, 0.4); }
+            100% { background-color: transparent; }
+        }
+        @@keyframes highlightGold {
+            0% { background-color: rgba(212, 175, 55, 0.4); }
+            100% { background-color: transparent; }
+        }
+        .row-highlight-add {
+            animation: highlightMint 2s ease-out;
+        }
+        .row-highlight-edit {
+            animation: highlightGold 2s ease-out;
+        }
+        .table-hover tbody tr {
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="admin-layout">
@@ -24,6 +43,12 @@
                 </button>
             </div>
             <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Dashboard", "Admin")">
+                        <span>📊</span>
+                        <span class="sidebar-text">Tổng Quan Dashboard</span>
+                    </a>
+                </li>
                 <li class="admin-menu-item">
                     <a href="@Url.Action("Index", "Admin")">
                         <span>🚗</span>
@@ -42,61 +67,60 @@
                         <span class="sidebar-text">Quản Lý Thương Hiệu</span>
                     </a>
                 </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Home")">
-                        <span>🏪</span>
-                        <span class="sidebar-text">Xem Cửa Hàng</span>
-                    </a>
-                </li>
             </ul>
         </aside>
 
         <main class="admin-content">
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Thương Hiệu</h1>
-                <a href="@Url.Action("CreateBrand", "Admin")" class="btn-premium-dark text-decoration-none">Thêm Hãng Mới</a>
+                <button type="button" class="btn-premium-dark" onclick="openAddBrandModal()">Thêm Hãng Mới</button>
             </div>
 
             <div class="premium-card">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="brandsTable">
                     <thead>
                         <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
                             <th>Tên Thương Hiệu</th>
                             <th>Quốc Gia</th>
                             <th>Lĩnh Vực Hoạt Động</th>
-                            <th class="text-end">Thao Tác</th>
+                            <th class="text-end" style="width: 150px;">Thao Tác</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="brandsTableBody">
                         @foreach (var brand in Model)
                         {
-                            <tr>
+                            <tr id="brand-row-@brand.Id" 
+                                data-id="@brand.Id" 
+                                data-name="@brand.Name" 
+                                data-country="@brand.CountryId" 
+                                data-vehicle="@brand.IsVehicleBrand.ToString().ToLower()" 
+                                data-part="@brand.IsPartBrand.ToString().ToLower()" 
+                                data-toy="@brand.IsToyBrand.ToString().ToLower()">
                                 <td>
-                                    <div class="fw-bold fs-5">@brand.Name</div>
+                                    <div class="fw-bold fs-5 brand-name-cell">@brand.Name</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary py-2 px-3">@(brand.Country != null ? brand.Country.Name : "N/A")</span>
+                                    <span class="badge bg-secondary py-2 px-3 brand-country-cell">@(brand.Country != null ? brand.Country.Name : "N/A")</span>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="d-flex flex-wrap gap-2 brand-scopes-cell">
                                         @if (brand.IsVehicleBrand)
                                         {
-                                            <span class="badge bg-danger text-uppercase" style="font-size:0.75rem;">Sản Xuất Xe</span>
+                                            <span class="badge bg-danger text-uppercase badge-vehicle" style="font-size:0.75rem;">Sản Xuất Xe</span>
                                         }
                                         @if (brand.IsPartBrand)
                                         {
-                                            <span class="badge bg-primary text-uppercase" style="font-size:0.75rem;">Sản Xuất Phụ Tùng</span>
+                                            <span class="badge bg-primary text-uppercase badge-part" style="font-size:0.75rem;">Sản Xuất Phụ Tùng</span>
                                         }
                                         @if (brand.IsToyBrand)
                                         {
-                                            <span class="badge bg-warning text-dark text-uppercase" style="font-size:0.75rem;">Sản Xuất Đồ Chơi</span>
+                                            <span class="badge bg-warning text-dark text-uppercase badge-toy" style="font-size:0.75rem;">Sản Xuất Đồ Chơi</span>
                                         }
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <form method="post" action="@Url.Action("DeleteBrand", "Admin", new { id = brand.Id })" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hãng này? Việc xóa hãng có thể ảnh hưởng tới các sản phẩm liên quan.')">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-warning border-0 me-1 fw-bold" onclick="openEditBrandModal(@brand.Id)">Sửa</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger border-0 fw-bold" onclick="deleteBrandAjax(@brand.Id)">Xóa</button>
                                 </td>
                             </tr>
                         }
@@ -106,10 +130,255 @@
         </main>
     </div>
 
+    <!-- Modal Thêm/Sửa Thương Hiệu -->
+    <div class="modal fade" id="brandModal" tabindex="-1" aria-labelledby="brandModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border-radius: 12px;">
+                <div class="modal-header border-0 bg-dark text-white py-3" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title text-uppercase fw-bold fs-5" id="brandModalLabel" style="letter-spacing: 1px;">Thêm Thương Hiệu Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="brandForm">
+                        <input type="hidden" id="brandId" name="Id" value="0" />
+                        
+                        <div class="mb-3">
+                            <label for="brandName" class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Tên Thương Hiệu</label>
+                            <input type="text" class="form-control border-secondary py-2 px-3" id="brandName" name="Name" required placeholder="Ví dụ: Honda, Brembo, Akrapovic" style="border-radius: 6px;" />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="brandCountry" class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Quốc Gia Sở Hữu</label>
+                            <select class="form-select border-secondary py-2 px-3" id="brandCountry" name="CountryId" required style="border-radius: 6px;">
+                                @if (ViewBag.Countries != null)
+                                {
+                                    foreach (var country in ViewBag.Countries)
+                                    {
+                                        <option value="@country.Id">@country.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-uppercase text-muted fw-bold d-block mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">Lĩnh Vực Hoạt Động (Chọn nhiều)</label>
+                            <div class="d-flex flex-column gap-2 p-3 bg-light rounded border border-secondary" style="border-radius: 8px;">
+                                <div class="form-check">
+                                    <input class="form-check-input border-secondary" type="checkbox" name="IsVehicleBrand" value="true" id="isVehicleBrand">
+                                    <label class="form-check-label fw-bold text-dark" style="font-size: 0.85rem;" for="isVehicleBrand">
+                                        🚗 Hãng Sản Xuất Xe (Motorbike / Auto)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input border-secondary" type="checkbox" name="IsPartBrand" value="true" id="isPartBrand">
+                                    <label class="form-check-label fw-bold text-dark" style="font-size: 0.85rem;" for="isPartBrand">
+                                        🛠️ Hãng Sản Xuất Phụ Tùng sửa chữa
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input border-secondary" type="checkbox" name="IsToyBrand" value="true" id="isToyBrand">
+                                    <label class="form-check-label fw-bold text-dark" style="font-size: 0.85rem;" for="isToyBrand">
+                                        🏷️ Hãng Sản Xuất Đồ Chơi / Đồ độ xe
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-danger py-2 d-none" id="errorMessage" style="font-size: 0.85rem; border-radius: 6px;"></div>
+                        
+                        <div class="mt-4 d-flex gap-3">
+                            <button type="button" class="btn btn-outline-secondary w-50 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 6px;">Hủy</button>
+                            <button type="submit" class="btn btn-dark w-50 py-2 fw-bold" style="border-radius: 6px;">Lưu Lại</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Thông Báo Góc Màn Hình -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        <div id="appToast" class="toast align-items-center text-white bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius: 8px;">
+            <div class="d-flex py-1">
+                <div class="toast-body fw-bold" id="toastMessage" style="font-size: 0.9rem;">
+                    Thông báo mặc định
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Khởi tạo Bootstrap Elements
+        var brandModal;
+        var appToast;
+
+        $(document).ready(function() {
+            brandModal = new bootstrap.Modal(document.getElementById('brandModal'));
+            appToast = new bootstrap.Toast(document.getElementById('appToast'), { delay: 3500 });
+            
+            // Xử lý submit form thêm/sửa bằng AJAX
+            $('#brandForm').on('submit', function(e) {
+                e.preventDefault();
+                $('#errorMessage').addClass('d-none').text('');
+
+                // Thu thập dữ liệu form thủ công để xử lý các thuộc tính checkbox boolean chính xác
+                var formData = {
+                    Id: parseInt($('#brandId').val()) || 0,
+                    Name: $('#brandName').val().trim(),
+                    CountryId: parseInt($('#brandCountry').val()),
+                    IsVehicleBrand: $('#isVehicleBrand').is(':checked'),
+                    IsPartBrand: $('#isPartBrand').is(':checked'),
+                    IsToyBrand: $('#isToyBrand').is(':checked')
+                };
+
+                $.ajax({
+                    url: '@Url.Action("SaveBrand", "Admin")',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    data: formData,
+                    success: function(res) {
+                        if (res.success) {
+                            brandModal.hide();
+                            showToast(res.message);
+                            
+                            var brand = res.data;
+                            var scopesHtml = '';
+                            if (brand.isVehicleBrand) scopesHtml += '<span class="badge bg-danger text-uppercase badge-vehicle" style="font-size:0.75rem; margin-right: 0.5rem;">Sản Xuất Xe</span>';
+                            if (brand.isPartBrand) scopesHtml += '<span class="badge bg-primary text-uppercase badge-part" style="font-size:0.75rem; margin-right: 0.5rem;">Sản Xuất Phụ Tùng</span>';
+                            if (brand.isToyBrand) scopesHtml += '<span class="badge bg-warning text-dark text-uppercase badge-toy" style="font-size:0.75rem;">Sản Xuất Đồ Chơi</span>';
+
+                            if (formData.Id === 0) {
+                                // Thêm mới dòng vào đầu bảng
+                                var newRowHtml = `
+                                    <tr id="brand-row-${brand.id}" 
+                                        data-id="${brand.id}" 
+                                        data-name="${brand.name}" 
+                                        data-country="${formData.CountryId}" 
+                                        data-vehicle="${brand.isVehicleBrand}" 
+                                        data-part="${brand.isPartBrand}" 
+                                        data-toy="${brand.isToyBrand}"
+                                        class="row-highlight-add">
+                                        <td>
+                                            <div class="fw-bold fs-5 brand-name-cell">${brand.name}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary py-2 px-3 brand-country-cell">${brand.countryName}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-2 brand-scopes-cell">${scopesHtml}</div>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-warning border-0 me-1 fw-bold" onclick="openEditBrandModal(${brand.id})">Sửa</button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger border-0 fw-bold" onclick="deleteBrandAjax(${brand.id})">Xóa</button>
+                                        </td>
+                                    </tr>
+                                `;
+                                $('#brandsTableBody').prepend(newRowHtml);
+                                
+                                // Xóa hiệu ứng highlight sau khi chạy xong
+                                setTimeout(function() {
+                                    $(`#brand-row-${brand.id}`).removeClass('row-highlight-add');
+                                }, 2000);
+                            } else {
+                                // Cập nhật dòng hiện tại
+                                var $row = $(`#brand-row-${brand.id}`);
+                                $row.attr('data-name', brand.name);
+                                $row.attr('data-country', formData.CountryId);
+                                $row.attr('data-vehicle', brand.isVehicleBrand);
+                                $row.attr('data-part', brand.isPartBrand);
+                                $row.attr('data-toy', brand.isToyBrand);
+                                
+                                $row.find('.brand-name-cell').text(brand.name);
+                                $row.find('.brand-country-cell').text(brand.countryName);
+                                $row.find('.brand-scopes-cell').html(scopesHtml);
+                                
+                                $row.addClass('row-highlight-edit');
+                                
+                                setTimeout(function() {
+                                    $row.removeClass('row-highlight-edit');
+                                }, 2000);
+                            }
+                        } else {
+                            $('#errorMessage').removeClass('d-none').text(res.message);
+                        }
+                    },
+                    error: function() {
+                        $('#errorMessage').removeClass('d-none').text('Không thể kết nối đến máy chủ. Vui lòng thử lại!');
+                    }
+                });
+            });
+        });
+
         function toggleSidebar() {
             $('#sidebar').toggleClass('collapsed');
+        }
+
+        function showToast(msg) {
+            $('#toastMessage').text(msg);
+            appToast.show();
+        }
+
+        function openAddBrandModal() {
+            $('#brandModalLabel').text('Thêm Thương Hiệu Mới');
+            $('#brandId').val(0);
+            $('#brandName').val('');
+            $('#brandCountry').val($('#brandCountry option:first').val());
+            $('#isVehicleBrand').prop('checked', false);
+            $('#isPartBrand').prop('checked', false);
+            $('#isToyBrand').prop('checked', false);
+            $('#errorMessage').addClass('d-none').text('');
+            brandModal.show();
+        }
+
+        function openEditBrandModal(id) {
+            var $row = $(`#brand-row-${id}`);
+            if ($row.length === 0) return;
+
+            var name = $row.attr('data-name');
+            var countryId = $row.attr('data-country');
+            var isVehicle = $row.attr('data-vehicle') === 'true';
+            var isPart = $row.attr('data-part') === 'true';
+            var isToy = $row.attr('data-toy') === 'true';
+
+            $('#brandModalLabel').text('Cập Nhật Thương Hiệu');
+            $('#brandId').val(id);
+            $('#brandName').val(name);
+            $('#brandCountry').val(countryId);
+            $('#isVehicleBrand').prop('checked', isVehicle);
+            $('#isPartBrand').prop('checked', isPart);
+            $('#isToyBrand').prop('checked', isToy);
+            $('#errorMessage').addClass('d-none').text('');
+            
+            brandModal.show();
+        }
+
+        function deleteBrandAjax(id) {
+            var $row = $(`#brand-row-${id}`);
+            var name = $row.attr('data-name') || 'thương hiệu này';
+            
+            if (confirm(`Bạn có chắc chắn muốn xóa hãng "${name}"? Việc xóa hãng có thể ảnh hưởng tới các sản phẩm liên quan.`)) {
+                $.ajax({
+                    url: '@Url.Action("DeleteBrandAjax", "Admin")/' + id,
+                    type: 'POST',
+                    success: function(res) {
+                        if (res.success) {
+                            showToast(res.message);
+                            $row.css('background-color', 'rgba(255, 40, 40, 0.15)')
+                                .fadeOut(500, function() {
+                                    $(this).remove();
+                                });
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Không thể thực hiện yêu cầu xóa. Vui lòng thử lại!');
+                    }
+                });
+            }
         }
     </script>
 </body>

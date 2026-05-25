@@ -23,8 +23,13 @@
             <label>Phân Loại Xe</label>
             <select name="vehicleType" class="filter-select">
                 <option value="">Tất cả</option>
-                <option value="Auto" selected="@(ViewBag.VehicleType == "Auto")">Ô Tô (Auto)</option>
-                <option value="Motorbike" selected="@(ViewBag.VehicleType == "Motorbike")">Xe Máy (Motorbike)</option>
+                @if (ViewBag.VehicleTypes != null)
+                {
+                    foreach (var type in ViewBag.VehicleTypes)
+                    {
+                        <option value="@type.Code" selected="@(ViewBag.VehicleType == type.Code)">@type.Value</option>
+                    }
+                }
             </select>
         </div>
         <div class="filter-group">
@@ -35,8 +40,13 @@
             <label>Nhiên Liệu</label>
             <select name="fuelType" class="filter-select">
                 <option value="">Tất cả</option>
-                <option value="Gasoline" selected="@(ViewBag.FuelType == "Gasoline")">Xăng (Gasoline)</option>
-                <option value="Electric" selected="@(ViewBag.FuelType == "Electric")">Điện (Electric)</option>
+                @if (ViewBag.FuelTypes != null)
+                {
+                    foreach (var fuel in ViewBag.FuelTypes)
+                    {
+                        <option value="@fuel.Code" selected="@(ViewBag.FuelType == fuel.Code)">@fuel.Value</option>
+                    }
+                }
             </select>
         </div>
         <button type="submit" class="btn-premium-dark py-2">Tìm Kiếm</button>
@@ -53,7 +63,7 @@
                         <div>
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <span class="badge bg-dark text-uppercase tracking-wider px-2 py-1" style="font-size:0.75rem;">@vehicle.VehicleType</span>
-                                <span class="badge bg-danger px-2 py-1" style="font-size:0.75rem;">@vehicle.Transmission</span>
+                                @* <span class="badge bg-danger px-2 py-1" style="font-size:0.75rem;">@vehicle.Transmission</span> *@
                             </div>
                             <h3 style="font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">@vehicle.Name</h3>
                             <p class="text-muted mb-2">Động cơ: @vehicle.EngineType @(vehicle.EngineCapacity.HasValue ? $"({vehicle.EngineCapacity}L/CC)" : "")</p>

@@ -1,0 +1,107 @@
+[
+  {
+    "Type": "VehicleType",
+    "Code": "Auto",
+    "Value": "Auto (Ô Tô)"
+  },
+  {
+    "Type": "VehicleType",
+    "Code": "Motorbike",
+    "Value": "Motorbike (Xe Máy)"
+  },
+  {
+    "Type": "FuelType",
+    "Code": "Gasoline",
+    "Value": "Xăng (Gasoline)"
+  },
+  {
+    "Type": "FuelType",
+    "Code": "Electric",
+    "Value": "Điện (Electric)"
+  },
+  {
+    "Type": "Transmission",
+    "Code": "Automatic",
+    "Value": "Automatic (Tự Động / Ga)"
+  },
+  {
+    "Type": "Transmission",
+    "Code": "Manual",
+    "Value": "Manual (Số Sàn / Cơ)"
+  },
+  {
+    "Type": "Transmission",
+    "Code": "Clutch",
+    "Value": "Clutch (Xe Côn Tay)"
+  },
+  {
+    "Type": "SparePartCategory",
+    "Code": "Engine",
+    "Value": "Động Cơ (Engine)"
+  },
+  {
+    "Type": "SparePartCategory",
+    "Code": "Brake",
+    "Value": "Phanh / An Toàn (Brake)"
+  },
+  {
+    "Type": "SparePartCategory",
+    "Code": "Suspension",
+    "Value": "Giảm Xóc (Suspension)"
+  },
+  {
+    "Type": "SparePartCategory",
+    "Code": "Lighting",
+    "Value": "Hệ Thống Đèn (Lighting)"
+  },
+  {
+    "Type": "SparePartCategory",
+    "Code": "Exterior",
+    "Value": "Ngoại Thất / Trang Trí (Exterior)"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Red",
+    "Value": "Đỏ"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "White",
+    "Value": "Trắng"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Black",
+    "Value": "Đen"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Sand",
+    "Value": "Vàng Cát"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Blue",
+    "Value": "Xanh Dương"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Grey",
+    "Value": "Xám"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Silver",
+    "Value": "Bạc"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Orange",
+    "Value": "Cam"
+  },
+  {
+    "Type": "VehicleColor",
+    "Code": "Yellow",
+    "Value": "Vàng"
+  }
+]

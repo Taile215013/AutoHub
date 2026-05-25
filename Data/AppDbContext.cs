@@ -18,6 +18,7 @@ namespace AutoHub.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
+        public DbSet<SystemDictionary> SystemDictionaries { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,7 @@ namespace AutoHub.Data
             modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Order>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<OrderDetail>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SystemDictionary>().HasQueryFilter(e => !e.IsDeleted);
 
             modelBuilder.Entity<Brand>()
                 .HasOne(b => b.Country)
