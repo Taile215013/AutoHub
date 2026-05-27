@@ -1,0 +1,86 @@
+@startuml ImageUploadFlow
+title Sơ Đồ Kiến Trúc Xử Lý Hình Ảnh (AutoHub)
+
+skinparam responseMessageBelowArrow true
+skinparam maxmessagesize 200
+skinparam ParticipantPadding 30
+skinparam BoxPadding 10
+skinparam NoteBackgroundColor #FEFEFE
+skinparam NoteBorderColor #CCCCCC
+
+actor "Admin\n(Trình duyệt)" as Admin
+box "AutoHub Web Server (C#)" #EAF8FD
+    participant "Trang Tạo Sản Phẩm\n(AdminController)" as Controller
+    participant "Bộ Xử Lý Ảnh\n(ImageSharp)" as Optimizer
+    participant "Dịch Vụ Cloud\n(CloudinaryService)" as Service
+end box
+database "SQL Server\n(Database)" as DB
+participant "Cloudinary\n(Máy Chủ Lưu Trữ)" as Cloudinary
+actor "Khách Hàng\n(Trình duyệt)" as Customer
+
+== GIAI ĐOẠN 1: THÊM SẢN PHẨM MỚI (UPLOAD) ==
+
+Admin -> Controller: 1. Upload ảnh gốc (Ví dụ: JPEG 5MB)
+activate Controller
+
+Controller -> Optimizer: 2. Gửi file gốc yêu cầu tối ưu
+activate Optimizer
+note right of Optimizer
+  **ÉP CÂN (Tại Server C#):**
+  - Thu nhỏ chiều ngang tối đa 1920px.
+  - Chuyển định dạng thành WebP.
+  - Dung lượng giảm từ 5MB -> 200KB.
+end note
+Optimizer --> Controller: 3. Trả về ảnh đã nén (WebP 200KB)
+deactivate Optimizer
+
+Controller -> Service: 4. Yêu cầu tải ảnh đã nén lên mạng
+activate Service
+Service -> Cloudinary: 5. Gửi file WebP (200KB)
+activate Cloudinary
+note right of Cloudinary
+  **LƯU TRỮ (Tại Cloudinary):**
+  Vì ảnh đã được Server C# nén,
+  Cloudinary chỉ cần lưu thẳng vào ổ cứng,
+  tiết kiệm dung lượng gói 5GB tối đa.
+end note
+Cloudinary --> Service: 6. Trả về đường link (https://...)
+deactivate Cloudinary
+Service --> Controller: 7. Trả về đường link
+deactivate Service
+
+Controller -> DB: 8. Lưu đường link vào Database
+activate DB
+DB --> Controller: 9. Lưu thành công
+deactivate DB
+
+Controller --> Admin: 10. Báo tạo sản phẩm thành công!
+deactivate Controller
+
+== GIAI ĐOẠN 2: KHÁCH HÀNG XEM SẢN PHẨM (DOWNLOAD) ==
+
+Customer -> Controller: 1. Truy cập trang chủ xem xe
+activate Controller
+Controller -> DB: 2. Lấy dữ liệu xe (Gồm cả link ảnh)
+activate DB
+DB --> Controller: 3. Trả về dữ liệu
+deactivate DB
+Controller --> Customer: 4. Hiển thị Website
+deactivate Controller
+
+note right of Customer
+  Lúc này, trình duyệt của Khách hàng
+  sẽ thấy thẻ <img> và đọc link ảnh.
+end note
+
+Customer -> Cloudinary: 5. Yêu cầu tải ảnh từ link
+activate Cloudinary
+Cloudinary --> Customer: 6. Trả về bức ảnh WebP (200KB)
+deactivate Cloudinary
+note right of Customer
+  **KẾT QUẢ:**
+  - Tải ảnh siêu nhanh vì dung lượng nhỏ.
+  - Server C# không bị tốn băng thông trả ảnh.
+end note
+
+@enduml

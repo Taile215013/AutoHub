@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using AutoHub.Models.Entities;
 using AutoHub.Repositories;
 using AutoHub.Data;
+using AutoHub.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace AutoHub.Controllers
 {
@@ -15,17 +17,20 @@ namespace AutoHub.Controllers
         private readonly IVehicleRepository _vehicleRepository;
         private readonly IBrandRepository _brandRepository;
         private readonly ISparePartRepository _sparePartRepository;
+        private readonly IFileService _fileService;
         private readonly AppDbContext _context;
 
         public AdminController(
             IVehicleRepository vehicleRepository,
             IBrandRepository brandRepository,
             ISparePartRepository sparePartRepository,
+            IFileService fileService,
             AppDbContext context)
         {
             _vehicleRepository = vehicleRepository;
             _brandRepository = brandRepository;
             _sparePartRepository = sparePartRepository;
+            _fileService = fileService;
             _context = context;
         }
 
@@ -92,8 +97,13 @@ namespace AutoHub.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Vehicle vehicle, List<string> colors)
+        public async Task<IActionResult> Create(Vehicle vehicle, List<string> colors, IFormFile? ImageFile)
         {
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                vehicle.ImageUrl = await _fileService.UploadImageAsync(ImageFile, "vehicles");
+            }
+
             vehicle.CreatedAt = DateTime.UtcNow;
             vehicle.IsDeleted = false;
 
@@ -279,7 +289,7 @@ namespace AutoHub.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSparePart(SparePart sparePart)
+        public async Task<IActionResult> CreateSparePart(SparePart sparePart, IFormFile? ImageFile)
         {
             if (sparePart.Price <= sparePart.CostPrice)
             {
@@ -292,6 +302,11 @@ namespace AutoHub.Controllers
                     .ToListAsync();
 
                 return View(sparePart);
+            }
+
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                sparePart.ImageUrl = await _fileService.UploadImageAsync(ImageFile, "spareparts");
             }
 
             sparePart.CreatedAt = DateTime.UtcNow;

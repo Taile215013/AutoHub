@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi"> <!-- Đổi sang 'vi' cho đúng ngôn ngữ Việt Nam -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ViewData["Title"] được truyền từ trang con (View) để hiển thị tiêu đề tab trình duyệt -->
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Nhúng thư viện CSS Bootstrap để có sẵn các Grid và Class thiết kế UI -->
+    <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Nhúng file CSS tùy chỉnh của toàn hệ thống -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- Cho phép các View con chèn thêm CSS riêng nếu cần (RenderSection) -->
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-light">
+    <!-- KHUNG BAO NGOÀI CỦA TRANG ADMIN (Gồm Sidebar bên trái và Content bên phải) -->
+    <div class="admin-layout">
+        
+        <!-- SIDEBAR: Thanh điều hướng bên trái -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
+                <!-- Nút ẩn/hiện Sidebar -->
+                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
+                    &equiv;
+                </button>
+            </div>
+
+            <!-- Xác định xem chúng ta đang ở Action (Trang) nào để bôi màu mục đó (Menu Active) -->
+            @{
+                var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+            }
+
+            <!-- DANH SÁCH MENU BÊN TRÁI -->
+            <ul class="admin-menu">
+                <!-- Mục Dashboard -->
+                <li class="admin-menu-item @(currentAction == "Dashboard" ? "active" : "")">
+                    <a href="@Url.Action("Dashboard", "Admin")">
+                        <span>📊</span>
+                        <span class="sidebar-text">Tổng Quan Dashboard</span>
+                    </a>
+                </li>
+                
+                <!-- Mục Quản Lý Xe Ô tô (Chứa Index, Create) -->
+                <li class="admin-menu-item @(currentAction == "Index" || currentAction == "Create" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Admin")">
+                        <span>🚗</span>
+                        <span class="sidebar-text">Quản Lý Xe</span>
+                    </a>
+                </li>
+                
+                <!-- Mục Quản Lý Phụ Tùng (Chứa SpareParts, CreateSparePart) -->
+                <li class="admin-menu-item @(currentAction == "SpareParts" || currentAction == "CreateSparePart" ? "active" : "")">
+                    <a href="@Url.Action("SpareParts", "Admin")">
+                        <span>🛠️</span>
+                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
+                    </a>
+                </li>
+                
+                <!-- Mục Quản Lý Thương Hiệu (Chứa Brands, CreateBrand) -->
+                <li class="admin-menu-item @(currentAction == "Brands" || currentAction == "CreateBrand" ? "active" : "")">
+                    <a href="@Url.Action("Brands", "Admin")">
+                        <span>🏷️</span>
+                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
+                    </a>
+                </li>
+                
+                <!-- Mục quay về giao diện Cửa hàng -->
+                <li class="admin-menu-item">
+                    <a href="@Url.Action("Index", "Home")">
+                        <span>🏪</span>
+                        <span class="sidebar-text">Xem Cửa Hàng</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- KHU VỰC NỘI DUNG CHÍNH (Nằm bên phải Sidebar) -->
+        <main class="admin-content">
+            
+            <!-- Đây là nơi 'Lắp Ghép' nội dung từ các file View con (Dashboard.cshtml, Index.cshtml,...) vào -->
+            <!-- Giống như cái khung tranh, RenderBody() là bức tranh được lồng vào -->
+            @RenderBody()
+
+        </main>
+    </div>
+
+    <!-- NHÚNG CÁC THƯ VIỆN JAVASCRIPT CHUNG -->
+    <!-- JQuery giúp thao tác với HTML dễ hơn (Ví dụ: $('#id').hide()) -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Hàm ẩn/hiện Sidebar dùng chung cho toàn bộ giao diện Admin -->
+    <script>
+        // Toggle (Đảo ngược) trạng thái của Sidebar khi bấm nút
+        function toggleSidebar() {
+            $('#sidebar').toggleClass('collapsed');
+        }
+    </script>
+
+    <!-- Cho phép các View con chèn thêm Code JS riêng nếu cần -->
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

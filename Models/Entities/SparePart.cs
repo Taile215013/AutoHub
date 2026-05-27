@@ -6,6 +6,8 @@ public class SparePart : BaseEntity
 
     public int BrandId { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public string Category { get; set; } = string.Empty;
 
     public decimal CostPrice { get; set; }

@@ -2,60 +2,13 @@
 
 @{
     ViewData["Title"] = "Hệ Thống Quản Trị - AutoHub";
-    Layout = null;
+    Layout = "_AdminLayout";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản Trị AutoHub</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="bg-light">
-    <div class="admin-layout">
-        <aside class="admin-sidebar" id="sidebar">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
-                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
-                    &equiv;
-                </button>
-            </div>
-            <ul class="admin-menu">
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Dashboard", "Admin")">
-                        <span>📊</span>
-                        <span class="sidebar-text">Tổng Quan Dashboard</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item active">
-                    <a href="@Url.Action("Index", "Admin")">
-                        <span>🚗</span>
-                        <span class="sidebar-text">Quản Lý Xe</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("SpareParts", "Admin")">
-                        <span>🛠️</span>
-                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Brands", "Admin")">
-                        <span>🏷️</span>
-                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <main class="admin-content">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Kho Xe Hơi</h1>
-                <a href="@Url.Action("Create", "Admin")" class="btn-premium-dark text-decoration-none">Thêm Xe Mới</a>
-            </div>
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Kho Xe Hơi</h1>
+    <a href="@Url.Action("Create", "Admin")" class="btn-premium-dark text-decoration-none">Thêm Xe Mới</a>
+</div>
 
             <div class="premium-card">
                 <table class="table table-hover align-middle">
@@ -102,14 +55,4 @@
                     </tbody>
                 </table>
             </div>
-        </main>
-    </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script>
-        function toggleSidebar() {
-            $('#sidebar').toggleClass('collapsed');
-        }
-    </script>
-</body>
-</html>

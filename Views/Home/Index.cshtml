@@ -93,7 +93,7 @@
                                         <div class="text-muted" style="font-size:0.85rem;">Trạng thái</div>
                                         <div class="text-muted" style="font-weight: 800; font-size: 1.1rem;">Hết hàng / Sắp về</div>
                                     </div>
-                                    <button class="btn-premium-outline px-3 py-2" onclick="openConsultation('Xe: @vehicle.Name')">Liên hệ tư vấn</button>
+                                    <button class="btn-premium-outline px-3 py-2" onclick="alert('Tính năng tư vấn trực tuyến đang được bảo trì. Vui lòng gọi Hotline!')">Liên hệ tư vấn</button>
                                 }
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                             @if (service.RequiresQuote)
                             {
                                 <div class="text-muted mb-2" style="font-weight:700; font-size:0.9rem;">Cần khảo sát báo giá</div>
-                                <button class="btn-premium-outline py-2 px-3" onclick="openConsultation('Dịch vụ: @service.ServiceName')">Tư vấn ngay</button>
+                                <button class="btn-premium-outline py-2 px-3" onclick="alert('Tính năng tư vấn trực tuyến đang được bảo trì. Vui lòng gọi Hotline!')">Tư vấn ngay</button>
                             }
                             else
                             {
@@ -172,24 +172,7 @@
     </div>
 </div>
 
-<div class="chatbox-popup" id="consultationChatbox">
-    <div class="chatbox-header">
-        <span style="font-weight:800; letter-spacing:0.5px;">AutoHub Assistant</span>
-        <button class="btn-close btn-close-white" onclick="closeChatbox()"></button>
-    </div>
-    <div class="chatbox-body" id="chatboxBody">
-        <div class="chatbox-msg system">
-            Xin chào quý khách! Hệ thống nhận thấy bạn đang quan tâm đến sản phẩm/dịch vụ đặc thù cần tư vấn khảo sát.
-        </div>
-        <div class="chatbox-msg system" id="chatboxTopicMsg">
-            Chúng tôi có thể giúp gì cho bạn?
-        </div>
-    </div>
-    <div class="chatbox-footer">
-        <input type="text" class="chatbox-input" id="chatInput" placeholder="Nhập tin nhắn của bạn..." onkeypress="handleChatKey(event)" />
-        <button class="btn-premium-dark py-1 px-3" onclick="sendChatMessage()">Gửi</button>
-    </div>
-</div>
+
 
 @section Scripts {
     <script>
@@ -211,38 +194,7 @@
             });
         });
 
-        function openConsultation(topicName) {
-            $('#consultationChatbox').css('display', 'flex');
-            $('#chatboxTopicMsg').text("Bạn đang cần hỗ trợ đặc biệt về: " + topicName + ". Vui lòng nhập số điện thoại hoặc gõ câu hỏi để nhân viên liên hệ tư vấn trực tiếp trong 5 phút!");
-            var chatBody = $('#chatboxBody');
-            chatBody.scrollTop(chatBody[0].scrollHeight);
-        }
 
-        function closeChatbox() {
-            $('#consultationChatbox').hide();
-        }
-
-        function handleChatKey(event) {
-            if (event.key === 'Enter') {
-                sendChatMessage();
-            }
-        }
-
-        function sendChatMessage() {
-            var input = $('#chatInput');
-            var text = input.val().trim();
-            if (!text) return;
-
-            var chatBody = $('#chatboxBody');
-            chatBody.append('<div class="chatbox-msg user">' + text + '</div>');
-            input.val('');
-            chatBody.scrollTop(chatBody[0].scrollHeight);
-
-            setTimeout(function() {
-                chatBody.append('<div class="chatbox-msg system">Yêu cầu đã được ghi nhận thành công! Đội ngũ tư vấn viên chuyên nghiệp của AutoHub sẽ trực tiếp liên lạc với bạn qua Zalo hoặc Số Điện Thoại trong ít phút tới. Xin trân trọng cảm ơn!</div>');
-                chatBody.scrollTop(chatBody[0].scrollHeight);
-            }, 1000);
-        }
 
         function orderProduct(name, price) {
             alert('Quý khách đã đăng ký thành công đặt lịch hẹn cho: ' + name + '\nNhân viên sẽ gọi điện xác nhận lịch hẹn trong vòng 10 phút.');

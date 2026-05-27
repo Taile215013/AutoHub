@@ -143,9 +143,15 @@ namespace AutoHub.Controllers
                     return View(user);
                 }
 
-                if (string.IsNullOrWhiteSpace(user.Email) && string.IsNullOrWhiteSpace(user.PhoneNumber))
+                if (string.IsNullOrWhiteSpace(user.Username))
                 {
-                    ViewBag.Error = "Vui lòng nhập Email hoặc Số điện thoại!";
+                    ViewBag.Error = "Vui lòng nhập Tên đăng nhập!";
+                    return View(user);
+                }
+
+                if (await _userRepository.IsUsernameTakenAsync(user.Username, 0))
+                {
+                    ViewBag.Error = "Tên đăng nhập này đã có người sử dụng!";
                     return View(user);
                 }
 
@@ -165,7 +171,7 @@ namespace AutoHub.Controllers
                 user.StreetName = user.StreetName ?? "Chưa cập nhật";
                 user.Ward = user.Ward ?? "Chưa cập nhật";
                 user.District = user.District ?? "Chưa cập nhật";
-                user.City = "Hồ Chí Minh";
+                user.City = user.City ?? "Chưa cập nhật";
                 
                 await _userRepository.AddAsync(user);
 

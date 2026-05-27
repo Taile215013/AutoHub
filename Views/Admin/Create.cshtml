@@ -2,69 +2,16 @@
 
 @{
     ViewData["Title"] = "Thêm Xe Mới - AutoHub";
-    Layout = null;
+    Layout = "_AdminLayout";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thêm Xe Mới</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="bg-light">
-    <div class="admin-layout">
-        <aside class="admin-sidebar" id="sidebar">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
-                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
-                    &equiv;
-                </button>
-            </div>
-            <ul class="admin-menu">
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Dashboard", "Admin")">
-                        <span>📊</span>
-                        <span class="sidebar-text">Tổng Quan Dashboard</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item active">
-                    <a href="@Url.Action("Index", "Admin")">
-                        <span>🚗</span>
-                        <span class="sidebar-text">Quản Lý Xe</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("SpareParts", "Admin")">
-                        <span>🛠️</span>
-                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Brands", "Admin")">
-                        <span>🏷️</span>
-                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Home")">
-                        <span>🏪</span>
-                        <span class="sidebar-text">Xem Cửa Hàng</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <main class="admin-content">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Xe Ô Tô Mới</h1>
-                <a href="@Url.Action("Index", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
-            </div>
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Xe Ô Tô Mới</h1>
+    <a href="@Url.Action("Index", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
+</div>
 
             <div class="premium-card">
-                <form method="post" action="@Url.Action("Create", "Admin")">
+                <form method="post" action="@Url.Action("Create", "Admin")" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tên Xe</label>
@@ -160,6 +107,13 @@
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tồn Kho (Quantity)</label>
                             <input type="number" name="Quantity" class="form-control border-secondary py-2" placeholder="Trống = Hết / Sắp về" />
                         </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">Hình Ảnh (Tối ưu WebP Cloudinary)</label>
+                            <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInput" />
+                            <div class="mt-2 text-center d-none" id="previewContainer">
+                                <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height: 250px;" />
+                            </div>
+                        </div>
 
                         <div class="col-md-6">
                             <label class="form-label text-uppercase text-muted text-danger" style="font-size:0.8rem; font-weight:700;">Giá Thu Vào (Đại Lý Mua Cũ)</label>
@@ -196,16 +150,10 @@
                         </div>
                     </div>
                 </form>
-            </div>
-        </main>
-    </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+@section Scripts {
     <script>
-        function toggleSidebar() {
-            $('#sidebar').toggleClass('collapsed');
-        }
-
+        // Chức năng thêm dòng chọn màu sắc mới cho xe
         function addColorRow() {
             var optionsHtml = '';
             @if (ViewBag.VehicleColors != null)
@@ -224,6 +172,7 @@
             $('#colorContainer').append(row);
         }
 
+        // Chức năng xóa bớt dòng chọn màu (phải giữ lại ít nhất 1 dòng)
         function removeColorRow(button) {
             var rows = $('.color-row');
             if (rows.length > 1) {
@@ -232,6 +181,22 @@
                 alert('Phải có ít nhất 1 màu cho xe!');
             }
         }
+
+        // Real-time Preview: Hiển thị ngay ảnh xe khi Admin chọn file
+        $(document).ready(function() {
+            $('#imageInput').change(function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').attr('src', e.target.result);
+                        $('#previewContainer').removeClass('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#previewContainer').addClass('d-none');
+                }
+            });
+        });
     </script>
-</body>
-</html>
+}

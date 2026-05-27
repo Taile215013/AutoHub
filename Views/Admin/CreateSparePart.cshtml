@@ -2,66 +2,13 @@
 
 @{
     ViewData["Title"] = "Thêm Phụ Tùng Mới - AutoHub";
-    Layout = null;
+    Layout = "_AdminLayout";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thêm Phụ Tùng Mới</title>
-    <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="bg-light">
-    <div class="admin-layout">
-        <aside class="admin-sidebar" id="sidebar">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
-                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
-                    &equiv;
-                </button>
-            </div>
-            <ul class="admin-menu">
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Dashboard", "Admin")">
-                        <span>📊</span>
-                        <span class="sidebar-text">Tổng Quan Dashboard</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Admin")">
-                        <span>🚗</span>
-                        <span class="sidebar-text">Quản Lý Xe</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item active">
-                    <a href="@Url.Action("SpareParts", "Admin")">
-                        <span>🛠️</span>
-                        <span class="sidebar-text">Quản Lý Phụ Tùng</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Brands", "Admin")">
-                        <span>🏷️</span>
-                        <span class="sidebar-text">Quản Lý Thương Hiệu</span>
-                    </a>
-                </li>
-                <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Home")">
-                        <span>🏪</span>
-                        <span class="sidebar-text">Xem Cửa Hàng</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <main class="admin-content">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Phụ Tùng Mới</h1>
-                <a href="@Url.Action("SpareParts", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
-            </div>
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Phụ Tùng Mới</h1>
+    <a href="@Url.Action("SpareParts", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
+</div>
 
             <div class="premium-card">
                 @if (!ViewData.ModelState.IsValid)
@@ -79,7 +26,7 @@
                     </div>
                 }
 
-                <form method="post" action="@Url.Action("CreateSparePart", "Admin")" onsubmit="return validatePrices()">
+                <form method="post" action="@Url.Action("CreateSparePart", "Admin")" onsubmit="return validatePrices()" enctype="multipart/form-data">
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tên Phụ Tùng / Phụ Kiện</label>
@@ -114,7 +61,13 @@
                             <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Số Lượng Nhập Kho</label>
                             <input type="number" name="StockQuantity" class="form-control border-secondary py-2" required value="50" min="0" />
                         </div>
-                        <div class="col-md-4"></div>
+                        <div class="col-md-12">
+                            <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">Hình Ảnh (Tối ưu WebP Cloudinary)</label>
+                            <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInputSp" />
+                            <div class="mt-2 text-center d-none" id="previewContainerSp">
+                                <img id="imagePreviewSp" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height: 250px;" />
+                            </div>
+                        </div>
 
                         <div class="col-md-6">
                             <label class="form-label text-uppercase text-muted text-danger" style="font-size:0.8rem; font-weight:700;">Giá Nhập Kho (Giá Gốc từ Hãng)</label>
@@ -134,15 +87,10 @@
                     </div>
                 </form>
             </div>
-        </main>
-    </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+@section Scripts {
     <script>
-        function toggleSidebar() {
-            $('#sidebar').toggleClass('collapsed');
-        }
-
+        // Kiểm tra hợp lệ: Giá bán ra phải lớn hơn giá gốc
         function validatePrices() {
             var cost = parseFloat($('#costPriceInput').val());
             var price = parseFloat($('#priceInput').val());
@@ -159,10 +107,25 @@
         }
 
         $(document).ready(function() {
+            // Tự động kiểm tra giá khi người dùng nhập dữ liệu
             $('#costPriceInput, #priceInput').on('input', function() {
                 validatePrices();
             });
+
+            // Hiển thị ảnh xem trước khi Admin chọn file
+            $('#imageInputSp').change(function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreviewSp').attr('src', e.target.result);
+                        $('#previewContainerSp').removeClass('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#previewContainerSp').addClass('d-none');
+                }
+            });
         });
     </script>
-</body>
-</html>
+}

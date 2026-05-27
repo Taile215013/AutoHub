@@ -8,6 +8,8 @@ public class Vehicle : BaseEntity
 
     public int BrandId { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public string VehicleType { get; set; } = string.Empty;
 
     public string FuelType { get; set; } = string.Empty;

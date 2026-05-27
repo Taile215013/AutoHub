@@ -9,6 +9,8 @@ public interface IUserRepository
 
     Task<User?> GetByEmailOrPhoneAsync(string loginInput);
 
+    Task<bool> IsUsernameTakenAsync(string username, int excludeUserId);
+
     Task<bool> IsEmailTakenAsync(string email, int excludeUserId);
 
     Task<bool> IsPhoneTakenAsync(string phoneNumber, int excludeUserId);

@@ -22,7 +22,13 @@ public class EfUserRepository : IUserRepository
     public async Task<User?> GetByEmailOrPhoneAsync(string loginInput)
     {
         return await _context.Users
-            .FirstOrDefaultAsync(u => u.Email == loginInput || u.PhoneNumber == loginInput);
+            .FirstOrDefaultAsync(u => u.Username == loginInput || u.Email == loginInput || u.PhoneNumber == loginInput);
+    }
+
+    public async Task<bool> IsUsernameTakenAsync(string username, int excludeUserId)
+    {
+        return await _context.Users
+            .AnyAsync(u => u.Username == username && u.Id != excludeUserId);
     }
 
     public async Task<bool> IsEmailTakenAsync(string email, int excludeUserId)

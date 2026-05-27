@@ -22,6 +22,11 @@
                     }
 
                     <form method="post" action="@Url.Action("Register", "Home")">
+                        <div class="mb-3">
+                            <label class="form-label text-uppercase text-white" style="font-size: 0.75rem; font-weight: 700;">Tên Đăng Nhập <span class="text-danger">*</span></label>
+                            <input type="text" name="Username" value="@Model?.Username" class="form-control bg-dark text-white border-secondary py-2" required placeholder="Viết liền không dấu..." />
+                        </div>
+                        
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Họ và chữ lót</label>
@@ -35,31 +40,48 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Số điện thoại</label>
-                                <input type="text" name="PhoneNumber" value="@Model?.PhoneNumber" class="form-control bg-dark text-white border-secondary py-2" placeholder="0901..." />
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Ngày Sinh</label>
+                                <input type="date" name="DateOfBirth" class="form-control bg-dark text-white border-secondary py-2" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Email</label>
-                                <input type="email" name="Email" value="@Model?.Email" class="form-control bg-dark text-white border-secondary py-2" placeholder="example@email.com" />
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Giới tính</label>
+                                <select name="Gender" class="form-select bg-dark text-white border-secondary py-2">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Giới tính</label>
-                            <select name="Gender" class="form-select bg-dark text-white border-secondary py-2">
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            </select>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Tỉnh / Thành</label>
+                                <input type="text" name="City" value="@Model?.City" class="form-control bg-dark text-white border-secondary py-2" placeholder="TP. Hồ Chí Minh" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Quận / Huyện</label>
+                                <input type="text" name="District" value="@Model?.District" class="form-control bg-dark text-white border-secondary py-2" placeholder="Quận 1..." />
+                            </div>
                         </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Mật khẩu</label>
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Số điện thoại <span style="font-size:0.6rem; color:#888;">(Tùy chọn)</span></label>
+                                <input type="text" name="PhoneNumber" value="@Model?.PhoneNumber" class="form-control bg-dark text-white border-secondary py-2" placeholder="0901..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Email <span style="font-size:0.6rem; color:#888;">(Tùy chọn)</span></label>
+                                <input type="email" name="Email" value="@Model?.Email" class="form-control bg-dark text-white border-secondary py-2" placeholder="example@email.com" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase text-white" style="font-size: 0.75rem; font-weight: 700;">Mật khẩu <span class="text-danger">*</span></label>
                                 <input type="password" name="Password" class="form-control bg-dark text-white border-secondary py-2" required placeholder="••••••••" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700;">Xác nhận mật khẩu</label>
+                                <label class="form-label text-uppercase text-white" style="font-size: 0.75rem; font-weight: 700;">Xác nhận mật khẩu <span class="text-danger">*</span></label>
                                 <input type="password" name="ConfirmPassword" class="form-control bg-dark text-white border-secondary py-2" required placeholder="••••••••" />
                             </div>
                         </div>
