@@ -1,0 +1,89 @@
+/* ==========================================================================
+   LAYER 5 — COMPONENTS: BUTTONS (Các loại nút bấm)
+   ==========================================================================
+   Tất cả các nút tùy chỉnh (KHÔNG phải Bootstrap .btn-primary).
+   
+   DANH SÁCH BUTTON TRONG FILE NÀY:
+   - .btn-neon    → Nút viền vàng, hover fill vàng (dùng trong navbar)
+   - .btn-danger-outline → Nút viền đỏ Ferrari
+   ========================================================================== */
+
+/* --- BTN NEON (Nút vàng đặc trưng AutoHub) ---
+   Dùng trong: Navbar (Đăng nhập, Đăng xuất)
+   HTML mẫu: <a class="btn-neon" href="...">KHỞI ĐỘNG</a> */
+.btn-neon {
+  /* Layout */
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-sm);
+
+  /* Typography */
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none; /* Xoá gạch chân mặc định của thẻ <a> */
+  white-space: nowrap;   /* Không cho text xuống dòng */
+
+  /* Màu sắc — Trạng thái bình thường: viền vàng, nền trong suốt */
+  color: var(--color-gold);
+  background-color: transparent;
+  border: 1.5px solid var(--color-gold);
+
+  /* Hiệu ứng */
+  cursor: pointer;
+  transition: var(--transition-base);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.12);
+}
+
+/* Hover: fill nền vàng, chữ đen */
+.btn-neon:hover {
+  background-color: var(--color-gold);
+  color: #000000;
+  box-shadow: 0 0 22px rgba(212, 175, 55, 0.45);
+  transform: translateY(-2px); /* Nổi lên 2px → cảm giác nhấn */
+  text-decoration: none;
+}
+
+/* Active: nhấn xuống */
+.btn-neon:active {
+  transform: translateY(0);
+}
+
+/* --- BTN FERRARI (Nút đỏ Ferrari) ---
+   Dùng cho: các action nguy hiểm hoặc quan trọng
+   HTML mẫu: <button class="btn-ferrari">Xoá</button> */
+.btn-ferrari {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  color: var(--color-ferrari);
+  background-color: transparent;
+  border: 1.5px solid var(--color-ferrari);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.btn-ferrari:hover {
+  background-color: var(--color-ferrari);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* --- SIDEBAR SEED BUTTON (Nút trong sidebar Admin) --- */
+.sidebar-seed-btn {
+  transition: var(--transition-base);
+}
+
+.sidebar-seed-btn:hover {
+  background-color: var(--color-ferrari) !important;
+  color: #ffffff !important;
+  border-color: var(--color-ferrari) !important;
+}

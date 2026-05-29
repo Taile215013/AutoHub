@@ -7,10 +7,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-5">
     <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Kho Xe Hơi</h1>
-    <a href="@Url.Action("Create", "Admin")" class="btn-premium-dark text-decoration-none">Thêm Xe Mới</a>
+    <a href="@Url.Action("Create", "Admin")" class="btn-neon text-decoration-none">Thêm Xe Mới</a>
 </div>
 
-            <div class="premium-card">
+            <div class="tech-panel">
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
@@ -19,10 +19,10 @@
                             <th>Nhiên Liệu</th>
                             <th>Giá Thu Vào</th>
                             <th>Giá Bán Ra</th>
-                            <th>Tồn Kho</th>
+             >Tồn Kho</th>
                             <th>Màu Sắc</th>
                             <th class="text-end">Thao Tác</th>
-                        </tr>
+                        </tr>               <th
                     </thead>
                     <tbody>
                         @foreach (var vehicle in Model)
@@ -46,6 +46,8 @@
                                     </div>
                                 </td>
                                 <td class="text-end">
+                                    <a href="@Url.Action("Edit", "Admin", new { id = vehicle.Id })" class="btn btn-sm btn-outline-light border-secondary text-dark text-decoration-none">Sửa </a>
+
                                     <form method="post" action="@Url.Action("Delete", "Admin", new { id = vehicle.Id })" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa xe này?')">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
                                     </form>

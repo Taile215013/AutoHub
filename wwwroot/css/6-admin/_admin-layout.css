@@ -1,0 +1,99 @@
+/* ==========================================================================
+   LAYER 6 — ADMIN: LAYOUT (Khung bố cục trang Admin)
+   ==========================================================================
+   ⚠️  FILE NÀY CHỈ ĐƯỢC IMPORT TRONG admin.css — KHÔNG bao giờ trong main.css
+   
+   Lý do: Style này chỉ có nghĩa với giao diện Admin. Load nó sang Client
+   là lãng phí băng thông và có thể gây conflict với CSS client.
+
+   CẤU TRÚC HTML (trong _AdminLayout.cshtml):
+   <div class="admin-layout">
+     <aside class="admin-sidebar" id="sidebar">...</aside>
+     <main class="admin-main">@RenderBody()</main>
+   </div>
+   ========================================================================== */
+
+/* --- ADMIN LAYOUT (Khung 2 cột: Sidebar trái + Content phải) --- */
+.admin-layout {
+  display: flex;       /* Hai cột nằm ngang */
+  min-height: 100vh;   /* Luôn chiếm toàn bộ chiều cao màn hình */
+}
+
+/* --- ADMIN SIDEBAR (Thanh điều hướng bên trái) --- */
+.admin-sidebar {
+  /* Kích thước */
+  width: 260px;
+  flex-shrink: 0; /* Không bị co lại khi màn hình nhỏ */
+
+  /* Màu sắc — nền đen Piano, chữ trắng */
+  background-color: var(--color-text-primary);
+  color: #ffffff;
+
+  /* Layout bên trong */
+  padding: var(--space-lg) 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+
+  /* Cố định sidebar khi scroll trang */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  /* Chuyển cảnh mượt khi toggle */
+  transition: width 0.3s ease;
+  overflow: hidden; /* Ẩn text khi sidebar thu nhỏ */
+  z-index: 100;
+}
+
+/* --- SIDEBAR COLLAPSED (Trạng thái thu nhỏ — chỉ hiện icon) ---
+   Toggle bằng JS: $('#sidebar').toggleClass('admin-sidebar--collapsed') */
+.admin-sidebar--collapsed {
+  width: 68px;
+}
+
+/* Ẩn text khi sidebar thu nhỏ */
+.admin-sidebar--collapsed .sidebar-text {
+  display: none;
+}
+
+/* Giữ tương thích class cũ .collapsed */
+.admin-sidebar.collapsed {
+  width: 68px;
+}
+.admin-sidebar.collapsed .sidebar-text {
+  display: none;
+}
+
+/* --- SIDEBAR BRAND HEADER (Phần đầu sidebar: Logo + Nút Toggle) --- */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap; /* Không xuống dòng khi thu nhỏ */
+}
+
+/* --- ADMIN MAIN (Khu vực nội dung chính bên phải sidebar) --- */
+.admin-main {
+  flex-grow: 1;          /* Chiếm toàn bộ không gian còn lại */
+  padding: var(--space-xl);
+  background-color: var(--color-bg-main);
+  min-width: 0;          /* Fix overflow trong flexbox */
+  overflow-y: auto;      /* Scroll riêng nội dung, sidebar cố định */
+}
+
+/* Giữ tương thích class cũ .admin-content */
+.admin-content {
+  flex-grow: 1;
+  padding: var(--space-xl);
+  background-color: var(--color-bg-main);
+  min-width: 0;
+}

@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi"> <!-- Đổi sang 'vi' cho đúng ngôn ngữ Việt Nam -->
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- ViewData["Title"] được truyền từ trang con (View) để hiển thị tiêu đề tab trình duyệt -->
-    <title>@ViewData["Title"]</title>
-    
-    <!-- Nhúng thư viện CSS Bootstrap để có sẵn các Grid và Class thiết kế UI -->
-    <link class="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Nhúng file CSS tùy chỉnh của toàn hệ thống -->
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    
-    <!-- Cho phép các View con chèn thêm CSS riêng nếu cần (RenderSection) -->
+    <title>@ViewData["Title"] - AutoHub Admin</title>
+
+    <!--
+        THỨ TỰ NHÚNG CSS ADMIN:
+        1. Bootstrap  - Framework base
+        2. admin.css  - Toàn bộ CSS Admin (không có CSS client)
+        3. AutoHub.styles.css - CSS Isolation tự động
+        4. RenderSection Styles - View Admin con có thể chèn thêm
+    -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AutoHub.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="bg-light">
@@ -20,11 +23,12 @@
         
         <!-- SIDEBAR: Thanh điều hướng bên trái -->
         <aside class="admin-sidebar" id="sidebar">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fs-4 fw-bold tracking-wider text-uppercase sidebar-text" style="letter-spacing:1.5px;">AutoHub Db</span>
+            <div class="sidebar-header">
+                <!-- Tên thương hiệu — class sidebar-text sẽ bị ẩn khi sidebar thu nhỏ -->
+                <span class="fs-4 fw-bold sidebar-brand sidebar-text">AutoHub Db</span>
                 <!-- Nút ẩn/hiện Sidebar -->
-                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()">
-                    &equiv;
+                <button class="btn btn-sm btn-outline-light border-0" onclick="toggleSidebar()" title="Mở/Đóng menu">
+                    &#9776;
                 </button>
             </div>
 

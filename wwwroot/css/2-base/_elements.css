@@ -1,0 +1,38 @@
+/* ==========================================================================
+   LAYER 2 — BASE: ELEMENTS (Style mặc định cho các HTML tag)
+   ==========================================================================
+   Đây là style "baseline" cho toàn bộ app — không cần class, 
+   tự động áp dụng cho mọi trang.
+
+   QUY TẮC: Chỉ dùng HTML selector (body, a, h1...) — KHÔNG dùng class ở đây.
+   ========================================================================== */
+
+/* --- BODY --- */
+body {
+  font-family: 'Outfit', sans-serif; /* Font thương hiệu của AutoHub */
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  
+  margin: 0;
+  padding: 0;
+  min-height: 100vh; /* Phủ kín chiều cao màn hình */
+
+  /* Flex column giúp footer luôn dính đáy trang
+     dù nội dung trang có ít hay nhiều */
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- LINKS (thẻ <a>) --- */
+a {
+  color: var(--bs-link-color);
+  /* Không set text-decoration ở đây → để Bootstrap xử lý theo component */
+}
+
+/* --- HEADINGS --- 
+   Font-weight 700 mặc định cho tiêu đề để khớp với Outfit font */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 0; /* Xoá margin-top mặc định của trình duyệt */
+}

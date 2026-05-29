@@ -7,10 +7,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-5">
     <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Xe Ô Tô Mới</h1>
-    <a href="@Url.Action("Index", "Admin")" class="btn-premium-outline text-decoration-none">Quay Lại</a>
+    <a href="@Url.Action("Index", "Admin")" class="btn-neon text-white text-decoration-none">Quay Lại</a>
 </div>
 
-            <div class="premium-card">
+            <div class="tech-panel">
                 <form method="post" action="@Url.Action("Create", "Admin")" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -109,7 +109,8 @@
                         </div>
                         <div class="col-md-12">
                             <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">Hình Ảnh (Tối ưu WebP Cloudinary)</label>
-                            <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInput" />
+                            <input type="file" name="uploadedFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInput" />
+                            @* <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInput" /> *@
                             <div class="mt-2 text-center d-none" id="previewContainer">
                                 <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height: 250px;" />
                             </div>
@@ -146,7 +147,7 @@
                         </div>
 
                         <div class="col-12 mt-5">
-                            <button type="submit" class="btn-premium-dark w-100 py-3">Lưu Dữ Liệu Xe</button>
+                            <button type="submit" class="btn-neon w-100 py-3">Lưu Dữ Liệu Xe</button>
                         </div>
                     </div>
                 </form>

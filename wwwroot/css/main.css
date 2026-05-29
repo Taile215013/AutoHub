@@ -1,0 +1,43 @@
+/* ==========================================================================
+   ENTRY POINT: main.css — Giao Diện CLIENT (Người Dùng)
+   ==========================================================================
+   Đây là file CSS DUY NHẤT được nhúng vào _Layout.cshtml (Client).
+   
+   NÓ KHÔNG CHỨA CSS TRỰC TIẾP — chỉ @import các file partial theo đúng
+   thứ tự ITCSS (từ generic → specific).
+
+   THỨ TỰ IMPORT RẤT QUAN TRỌNG:
+   ① Settings  → Phải load trước để các file sau dùng được biến (--color-...)
+   ② Base      → Reset trình duyệt, style HTML element mặc định
+   ③ Overrides → Ghi đè Bootstrap (load sau Bootstrap, trước components)
+   ④ Layouts   → Khung bố cục trang (navbar, footer)
+   ⑤ Components→ UI components cụ thể (hero, button, form...)
+   ⑦ Utilities → Class helper dùng nhanh (load cuối để override khi cần)
+
+   ⚠️  KHÔNG IMPORT: 6-admin/ → Admin CSS không được load ở trang Client
+   ========================================================================== */
+
+/* ① SETTINGS — Biến toàn cục & Font */
+@import '1-settings/_typography.css';
+@import '1-settings/_variables.css';
+
+/* ② BASE — Reset & HTML defaults */
+@import '2-base/_reset.css';
+@import '2-base/_elements.css';
+
+/* ③ OVERRIDES — Bootstrap customization */
+@import '3-overrides/_bootstrap.css';
+
+/* ④ LAYOUTS — Cấu trúc trang Client */
+@import '4-layouts/_navbar.css';
+@import '4-layouts/_footer.css';
+
+/* ⑤ COMPONENTS - UI Components */
+@import '5-components/_buttons.css';
+@import '5-components/_hero.css';
+@import '5-components/_filters.css';   /* Dùng chung Client + Admin */
+@import '5-components/_forms.css';
+@import '5-components/_progress.css';
+
+/* ⑦ UTILITIES — Helper classes */
+@import '7-utilities/_helpers.css';

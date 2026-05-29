@@ -1,0 +1,92 @@
+/* ==========================================================================
+   LAYER 6 — ADMIN: MENU (Menu điều hướng sidebar)
+   ==========================================================================
+   ⚠️  CHỈ IMPORT TRONG admin.css
+
+   CẤU TRÚC HTML (trong _AdminLayout.cshtml):
+   <ul class="admin-menu">
+     <li class="admin-menu-item active">        ← active = đang ở trang này
+       <a class="admin-menu-item__link" href="...">
+         <span class="admin-menu-item__icon">📊</span>
+         <span class="sidebar-text">Tổng Quan</span>
+       </a>
+     </li>
+   </ul>
+
+   GHI CHÚ BEM:
+   Block   → .admin-menu
+   Element → .admin-menu-item  /  .admin-menu-item__link  /  .admin-menu-item__icon
+   Modifier→ .admin-menu-item--active  (hoặc class .active hiện tại)
+   ========================================================================== */
+
+/* --- ADMIN MENU (List điều hướng) --- */
+.admin-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* --- ADMIN MENU ITEM (Từng mục menu) --- */
+.admin-menu-item {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* --- LINK BÊN TRONG MỖI ITEM --- */
+.admin-menu-item a {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+
+  /* Màu mặc định: trắng mờ 70% */
+  color: rgba(255, 255, 255, 0.68);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  transition: var(--transition-fast);
+}
+
+/* --- HOVER STATE --- */
+.admin-menu-item a:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* --- ACTIVE STATE (Trang hiện tại đang mở) ---
+   Nền đỏ Ferrari — nổi bật, dễ nhận ra ngay */
+.admin-menu-item.active a,
+.admin-menu-item--active a {
+  background-color: var(--color-ferrari);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Hover trên item đang active → đậm hơn chút */
+.admin-menu-item.active a:hover,
+.admin-menu-item--active a:hover {
+  background-color: #e02020;
+}
+
+/* --- ICON BÊN TRÁI --- */
+.admin-menu-item__icon {
+  font-size: 1.1rem;
+  flex-shrink: 0; /* Icon không bị co lại khi sidebar thu nhỏ */
+  width: 20px;
+  text-align: center;
+}
+
+/* --- DIVIDER (Đường kẻ ngăn nhóm menu) ---
+   HTML: <li class="admin-menu__divider"></li> */
+.admin-menu__divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin: 0.5rem 0;
+}

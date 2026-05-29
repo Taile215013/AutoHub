@@ -1,0 +1,62 @@
+/* ==========================================================================
+   LAYER 3 — OVERRIDES: BOOTSTRAP
+   ==========================================================================
+   ĐÂY LÀ NƠI DUY NHẤT được phép "ghi đè" style của Bootstrap.
+   
+   TẠI SAO CẦN FILE NÀY?
+   Bootstrap có style mặc định rất generic. Ta ghi đè để khớp màu 
+   thương hiệu AutoHub mà không sửa vào file bootstrap gốc.
+
+   QUY TẮC VÀNG: Chỉ ghi đè khi THỰC SỰ cần. Không ghi đè vô tội vạ.
+   ========================================================================== */
+
+/* --- NAVBAR BRAND (Logo/Tên thương hiệu trong thanh nav) ---
+   Bootstrap mặc định cho phép xuống dòng → ta fix lại */
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* --- NÚT PRIMARY ---
+   Bootstrap dùng màu xanh mặc định → ta đổi sang màu thương hiệu
+   Màu được lấy từ --bs-primary trong _variables.css */
+.btn-primary {
+  color: #fff;
+  background-color: var(--bs-primary);
+  border-color: #1861ac;
+}
+
+.btn-primary:hover {
+  background-color: #1558a0;
+  border-color: #1045 80;
+}
+
+/* --- NAVIGATION PILLS ACTIVE STATE --- */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: var(--bs-primary);
+  border-color: #1861ac;
+}
+
+/* --- BORDER UTILITIES ---
+   Bootstrap dùng màu xám mặc định khác → ta đồng bộ */
+.border-top {
+  border-top: 1px solid #e5e5e5 !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5 !important;
+}
+
+/* --- BOX SHADOW UTILITY --- */
+.box-shadow {
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+}
+
+/* --- ACCEPT POLICY BUTTON --- */
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}

@@ -1,0 +1,19 @@
+/* ==========================================================================
+   LAYER 4 — LAYOUTS: FOOTER (Chân trang)
+   ==========================================================================
+   Style cho footer của giao diện Client.
+   Admin không có footer → file này KHÔNG được import vào admin.css
+   ========================================================================== */
+
+/* --- FOOTER CONTAINER ---
+   Dùng class .site-footer trong HTML để tránh conflict với Bootstrap .footer */
+.site-footer {
+  margin-top: auto; /* Đẩy footer xuống đáy trang khi nội dung ít */
+  padding: 1.5rem 0;
+}
+
+/* --- GIỮ LẠI TƯƠNG THÍCH với class .footer cũ ---
+   Nếu bạn dùng class .footer trong HTML → vẫn hoạt động */
+.footer {
+  margin-top: auto;
+}

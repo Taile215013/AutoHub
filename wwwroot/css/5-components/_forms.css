@@ -1,0 +1,83 @@
+/* ==========================================================================
+   LAYER 5 — COMPONENTS: FORMS (Ô nhập liệu phong cách Premium)
+   ==========================================================================
+   Style cho form nhập liệu với giao diện tối cao cấp.
+   Thường dùng trong: trang Tạo xe mới (Admin), trang Login/Register...
+
+   CẤU TRÚC HTML MẪU:
+   <div class="tech-panel">
+     <label class="label-tech">Tên Xe</label>
+     <input class="input-premium" type="text" placeholder="Nhập tên xe..." />
+   </div>
+   ========================================================================== */
+
+/* --- TECH PANEL (Hộp chứa form — nền tối, viền sáng) ---
+   Tạo cảm giác giao diện điều khiển kỹ thuật cao */
+.tech-panel {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+
+  /* Bóng đổ tinh tế — nổi lên khỏi nền */
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Biến thể tối: .tech-panel--dark
+   Dùng khi cần giao diện tối hơn */
+.tech-panel--dark {
+  background: linear-gradient(145deg, #1a1a20, #121218);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+/* --- INPUT PREMIUM (Ô nhập liệu nền tối) ---
+   Dùng cho: form tạo xe, form Admin với nền tối */
+.input-premium {
+  /* Layout */
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+
+  /* Màu — nền tối, chữ trắng */
+  background-color: #1a1a20;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+
+  /* Typography */
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+
+  /* Xoá outline mặc định xanh của browser */
+  outline: none;
+  transition: var(--transition-base);
+}
+
+/* Placeholder text mờ */
+.input-premium::placeholder {
+  color: rgba(255, 255, 255, 0.30);
+}
+
+/* Focus: viền vàng sáng lên */
+.input-premium:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+/* --- LABEL TECH (Nhãn nhỏ phía trên input) ---
+   Style: ALL CAPS, xám, nhỏ — như label trong dashboard kỹ thuật */
+.label-tech {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888888;
+  margin-bottom: var(--space-xs);
+}

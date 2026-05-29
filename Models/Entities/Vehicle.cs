@@ -35,4 +35,6 @@ public class Vehicle : BaseEntity
     public Brand Brand { get; set; } = null!;
 
     public ICollection<VehicleColor> Colors { get; set; } = new List<VehicleColor>();
+
+    public string? Description { get; set; }
 }

@@ -1,0 +1,79 @@
+/* ==========================================================================
+   LAYER 7 — UTILITIES: HELPERS (Class tiện ích một mục đích)
+   ==========================================================================
+   Mỗi class ở đây chỉ làm ĐỘC NHẤT 1 việc.
+   Đây là những "helper class" dùng thêm khi cần, không phải component.
+
+   CÁCH DÙNG: Thêm thẳng vào HTML element
+   Ví dụ: <h1 class="text-gradient-gold">AutoHub</h1>
+   ========================================================================== */
+
+/* --- TEXT GRADIENT GOLD (Chữ gradient vàng) ---
+   Dùng cho: Logo AutoHub, tiêu đề đặc biệt
+   HTML: <span class="text-gradient-gold">AutoHub</span> */
+.text-gradient-gold {
+  background: linear-gradient(to right, #D4AF37, #FFF5D1, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; /* Fallback */
+}
+
+/* --- TEXT GRADIENT FERRARI (Chữ gradient đỏ) ---
+   Dùng cho: badge, label nổi bật */
+.text-gradient-ferrari {
+  background: linear-gradient(to right, #FF2828, #FF8080);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* --- GLASS CARD (Hộp kính mờ dùng nhanh) ---
+   Khi cần glassmorphism mà không muốn tạo component riêng */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow);
+  padding: var(--space-md);
+}
+
+/* --- BADGE MINT (Badge trạng thái OK / Còn hàng) ---
+   HTML: <span class="badge-mint">Còn Hàng</span> */
+.badge-mint {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background-color: rgba(46, 229, 157, 0.15);
+  color: #1ab87a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- BADGE FERRARI (Badge nguy hiểm / Hết hàng) --- */
+.badge-ferrari {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background-color: rgba(255, 40, 40, 0.12);
+  color: var(--color-ferrari);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- SECTION DIVIDER (Đường kẻ ngăn section) --- */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-lg) 0;
+}
+
+/* --- GIỮ TƯƠNG THÍCH class cũ .label-tech (đã move vào _forms.css) --- */
+/* Nếu .label-tech được dùng ngoài form context thì giữ ở đây */

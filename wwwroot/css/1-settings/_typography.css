@@ -1,0 +1,21 @@
+/* ==========================================================================
+   LAYER 1 — SETTINGS: TYPOGRAPHY (Phông chữ & Kích thước chữ)
+   ==========================================================================
+   CHỈ CHỨA: @import font từ Google Fonts.
+   Đây là nơi DUY NHẤT import font — dễ thay đổi font toàn bộ app.
+
+   MUỐN ĐỔI FONT? → Thay đường link bên dưới, sau đó vào _elements.css
+   đổi tên font trong font-family.
+   ========================================================================== */
+
+/* Import font Outfit từ Google Fonts
+   - 300: Light (chữ mỏng, dùng cho mô tả, subtitle)
+   - 400: Regular (chữ bình thường)
+   - 500: Medium
+   - 600: SemiBold (chữ hơi đậm, dùng cho label)
+   - 700: Bold
+   - 900: Black (chữ cực đậm, dùng cho tiêu đề lớn)
+   
+   display=swap: Trình duyệt dùng font dự phòng trong lúc tải,
+   tránh trang bị "nhấp nháy trắng" (FOUT) */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap');

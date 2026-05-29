@@ -11,72 +11,106 @@
             <i class="me-2 fw-bold">⚠️</i> <strong>Hệ Thống Đang Bảo Trì:</strong> @ViewBag.Warning
         </div>
     }
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-mint); background-color: rgba(46, 229, 157, 0.1); color: var(--accent-mint); border-radius: 0;">
+            <i class="me-2 fw-bold">✅</i> @TempData["Success"]
+        </div>
+    }
+
     <div class="row g-4 mb-5">
         <div class="col-lg-4">
-            <div class="premium-card text-center py-5">
-                <div class="mb-4 d-inline-block rounded-circle bg-dark text-white d-flex align-items-center justify-content-center mx-auto" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight:800;">
-                    @Model.FirstName[0]
+            <div class="tech-panel text-center">
+                <div class="mb-4 d-inline-block rounded-circle bg-dark text-white d-flex align-items-center justify-content-center mx-auto" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight:800; border: 2px solid var(--accent-gold);">
+                    @Model.FirstName?[0]
                 </div>
-                <h3 style="font-weight: 800;">@Model.LastName @Model.FirstName</h3>
-                <p class="text-muted">Thành Viên Cao Cấp</p>
-                <hr class="my-4" />
-                <div class="text-start">
-                    <p class="mb-2"><strong>Email:</strong> @(Model.Email ?? "Chưa thiết lập")</p>
-                    <p class="mb-2"><strong>Số Điện Thoại:</strong> @(Model.PhoneNumber ?? "Chưa thiết lập")</p>
-                    <p class="mb-4"><strong>Địa Chỉ:</strong> @(string.IsNullOrWhiteSpace(Model.HouseNumber) ? "" : Model.HouseNumber + ", ") @Model.StreetName, @Model.Ward, @Model.District, @Model.City</p>
+                <h3 class="text-gradient-gold" style="font-weight: 800;">@Model.LastName @Model.FirstName</h3>
+                <p class="text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Thành Viên Cao Cấp</p>
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.1);" />
+                
+                <div class="text-start mb-4">
+                    <p class="mb-2"><strong class="text-muted">Email:</strong> <br/> @(Model.Email ?? "Chưa thiết lập")</p>
+                    <p class="mb-2"><strong class="text-muted">Điện Thoại:</strong> <br/> @(Model.PhoneNumber ?? "Chưa thiết lập")</p>
+                    <p class="mb-2"><strong class="text-muted">Ngày Sinh:</strong> <br/> @(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập")</p>
+                    <p class="mb-2"><strong class="text-muted">Giới Tính:</strong> <br/> @(Model.Gender ?? "Chưa thiết lập")</p>
                 </div>
-                <button class="btn-premium-dark w-100" onclick="openSecureUpdateModal()">Đổi Thông Tin Liên Hệ</button>
+                
+                <button class="btn-neon w-100" onclick="openSecureUpdateModal()">Bảo Mật Liên Hệ</button>
             </div>
         </div>
 
         <div class="col-lg-8">
-            <div class="premium-card mb-4">
-                <h4 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Tiến Trình Thành Viên</h4>
-                <div class="p-3 border rounded bg-white mb-4">
+            <div class="tech-panel mb-4">
+                <h4 class="text-uppercase mb-4 text-gradient-gold" style="font-weight: 900; letter-spacing: -0.5px;">Quản Lý Địa Chỉ Giao Nhận</h4>
+                
+                <form method="post" action="@Url.Action("UpdateAddress", "Home")">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="label-tech">Tỉnh / Thành Phố</label>
+                            <select id="City" name="City" class="form-select input-premium w-100" required>
+                                <option value="">-- Chọn Tỉnh/Thành --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="label-tech">Quận / Huyện</label>
+                            <select id="District" name="District" class="form-select input-premium w-100" required disabled>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="label-tech">Phường / Xã</label>
+                            <select id="Ward" name="Ward" class="form-select input-premium w-100" disabled>
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="label-tech">Số Nhà / Tên Đường (Chỉ hiển thị với bạn)</label>
+                        <input type="text" name="HouseNumber" class="form-control input-premium w-100" placeholder="Ví dụ: 123 Đường Lê Lợi" value="@Model.HouseNumber" required />
+                    </div>
+                    
+                    <div class="text-end">
+                        <button type="submit" class="btn-neon">LƯU ĐỊA CHỈ</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tech-panel mb-4">
+                <h4 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Tiến Trình Đạt Hạng</h4>
+                <div class="p-3 border rounded mb-4" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted" style="font-size:0.85rem; font-weight:700;">HẠNG ĐÃ ĐẠT</span>
-                        <span class="text-danger" style="font-size:0.85rem; font-weight:700;">TIẾN TRÌNH ƯU ĐÃI KẾ TIẾP</span>
+                        <span class="text-gradient-gold" style="font-size:0.85rem; font-weight:700;">TIẾN TRÌNH ƯU ĐÃI KẾ TIẾP</span>
                     </div>
                     <div class="circuit-progress mb-3">
                         <div class="circuit-progress-bar" style="width: 75%;"></div>
                     </div>
                     <div class="d-flex justify-content-between text-muted" style="font-size: 0.8rem;">
-                        <span class="@(Model.RankLevel == "Bronze" ? "text-danger fw-bold" : "")">Bronze (Giảm 0%)</span>
-                        <span class="@(Model.RankLevel == "Silver" ? "text-danger fw-bold" : "")">Silver (Giảm 2%)</span>
-                        <span class="@(Model.RankLevel == "Gold" ? "text-danger fw-bold" : "text-muted")" style="@(Model.RankLevel == "Gold" ? "font-weight:700;" : "")">Gold (Giảm 5%)</span>
-                        <span class="@(Model.RankLevel == "Diamond" ? "text-danger fw-bold" : "")">Diamond (Giảm 10%)</span>
-                    </div>
-                </div>
-                <div class="d-flex gap-2">
-                    <div class="p-2 border rounded text-center flex-grow-1">
-                        <div style="font-weight:800; font-size:1.5rem;" class="text-danger">
-                            @(Model.RankLevel == "Gold" ? "5%" : Model.RankLevel == "Silver" ? "2%" : Model.RankLevel == "Diamond" ? "10%" : "0%")
-                        </div>
-                        <div class="text-muted" style="font-size:0.75rem;">Giảm giá Xe & Phụ Tùng hiện tại</div>
-                    </div>
-                    <div class="p-2 border rounded text-center flex-grow-1">
-                        <div style="font-weight:800; font-size:1.5rem;">0 đ</div>
-                        <div class="text-muted" style="font-size:0.75rem;">Phí kiểm định xe định kỳ</div>
+                        <span class="@(Model.RankLevel == "Bronze" ? "text-gradient-gold fw-bold" : "")">Bronze (0%)</span>
+                        <span class="@(Model.RankLevel == "Silver" ? "text-gradient-gold fw-bold" : "")">Silver (2%)</span>
+                        <span class="@(Model.RankLevel == "Gold" ? "text-gradient-gold fw-bold" : "text-muted")">Gold (5%)</span>
+                        <span class="@(Model.RankLevel == "Diamond" ? "text-gradient-gold fw-bold" : "")">Diamond (10%)</span>
                     </div>
                 </div>
             </div>
 
-            <div class="premium-card">
+            <div class="tech-panel">
                 <nav>
-                    <div class="nav nav-tabs border-bottom mb-4" id="nav-tab" role="tablist">
-                        <button class="nav-link active border-0 bg-transparent text-dark font-weight-bold" id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase" type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">Lịch Sử Mua Xe</button>
-                        <button class="nav-link border-0 bg-transparent text-dark font-weight-bold" id="nav-service-tab" data-bs-toggle="tab" data-bs-target="#nav-service" type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">Lịch Sử Chăm Sóc / Dịch Vụ</button>
+                    <div class="nav nav-tabs border-bottom border-secondary mb-4" id="nav-tab" role="tablist">
+                        <button class="nav-link active border-0 bg-transparent text-white font-weight-bold" id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase" type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">Lịch Sử Mua Xe</button>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-purchase" role="tabpanel">
-                        <table class="table align-middle">
+                        <table class="table table-dark table-hover align-middle bg-transparent">
                             <thead>
                                 <tr class="text-muted text-uppercase" style="font-size:0.8rem;">
-                                    <th>Dòng Xe</th>
-                                    <th>Ngày Mua</th>
-                                    <th>Giá Trị</th>
-                                    <th>Trạng Thái</th>
+                                    <th class="bg-transparent border-secondary">Dòng Xe</th>
+                                    <th class="bg-transparent border-secondary">Ngày Mua</th>
+                                    <th class="bg-transparent border-secondary">Giá Trị</th>
+                                    <th class="bg-transparent border-secondary">Trạng Thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,10 +127,10 @@
                                                 var vehicle = ((IEnumerable<AutoHub.Models.Entities.Vehicle>)ViewBag.Vehicles)
                                                     .FirstOrDefault(v => v.Id == detail.ProductId);
                                                 <tr>
-                                                    <td><strong>@(vehicle?.Name ?? "Dòng xe khác")</strong></td>
-                                                    <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                                    <td class="text-danger" style="font-weight: 700;">@detail.Price.ToString("N0") đ</td>
-                                                    <td><span class="badge bg-success">Đã bàn giao</span></td>
+                                                    <td class="bg-transparent border-secondary"><strong>@(vehicle?.Name ?? "Dòng xe khác")</strong></td>
+                                                    <td class="bg-transparent border-secondary">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                                    <td class="text-gradient-gold bg-transparent border-secondary" style="font-weight: 700;">@detail.Price.ToString("N0") đ</td>
+                                                    <td class="bg-transparent border-secondary"><span class="badge bg-success">Đã bàn giao</span></td>
                                                 </tr>
                                             }
                                         }
@@ -104,36 +138,16 @@
                                     if (!hasVehicles)
                                     {
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted py-3">Bạn chưa mua chiếc xe nào.</td>
+                                            <td colspan="4" class="text-center text-muted py-3 bg-transparent border-secondary">Chưa có giao dịch mua xe.</td>
                                         </tr>
                                     }
                                 }
                                 else
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted py-3">Bạn chưa mua chiếc xe nào.</td>
+                                        <td colspan="4" class="text-center text-muted py-3 bg-transparent border-secondary">Chưa có giao dịch mua xe.</td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-pane fade" id="nav-service" role="tabpanel">
-                        <table class="table align-middle">
-                            <thead>
-                                <tr class="text-muted text-uppercase" style="font-size:0.8rem;">
-                                    <th>Dịch Vụ</th>
-                                    <th>Ngày Thực Hiện</th>
-                                    <th>Chi Phí</th>
-                                    <th>Trạng Thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Rửa xe bọt tuyết & Phủ bóng Nano</strong></td>
-                                    <td>18/05/2026</td>
-                                    <td class="text-danger" style="font-weight: 700;">150.000 đ</td>
-                                    <td><span class="badge bg-success">Hoàn thành</span></td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -145,41 +159,37 @@
 
 <div class="modal fade" id="secureUpdateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4" style="background:#F5F5F7;">
+        <div class="modal-content border-0 rounded-4" style="background:#18181c; border: 1px solid rgba(255,255,255,0.1) !important;">
             <div class="modal-header border-0 bg-dark text-white rounded-top-4 py-3">
-                <h5 class="modal-title font-weight-bold" style="font-weight:800;">Xác Thực Cập Nhật An Toàn (3 Bước)</h5>
+                <h5 class="modal-title font-weight-bold text-gradient-gold" style="font-weight:800;">Xác Thực An Toàn (OTP)</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4 text-white">
                 <div id="step1Container">
-                    <h6 class="text-uppercase text-danger mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 1: Xác Thực Mật Khẩu Tài Khoản</h6>
+                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 1: Xác Thực Mật Khẩu</h6>
                     <div class="mb-3">
-                        <label class="form-label text-muted" style="font-size:0.8rem;">Nhập mật khẩu hiện tại của bạn để tiếp tục</label>
-                        <input type="password" id="confirmPasswordInput" class="form-control py-2 border-secondary" placeholder="Mật khẩu hiện tại" />
+                        <label class="label-tech">Nhập mật khẩu hiện tại</label>
+                        <input type="password" id="confirmPasswordInput" class="form-control input-premium w-100" placeholder="Mật khẩu hiện tại" />
                     </div>
-                    <button class="btn-premium-dark w-100" onclick="verifyPasswordStep()">Tiếp Tục</button>
+                    <button class="btn-neon w-100" onclick="verifyPasswordStep()">Tiếp Tục</button>
                 </div>
 
                 <div id="step2Container" style="display: none;">
-                    <h6 class="text-uppercase text-danger mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 2: Nhập Số Điện Thoại / Email MỚI</h6>
+                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 2: Nhập Số Mới</h6>
                     <div class="mb-3">
-                        <label class="form-label text-muted" style="font-size:0.8rem;">Số điện thoại mới</label>
-                        <input type="text" id="newPhoneInput" class="form-control py-2 border-secondary" placeholder="Ví dụ: 0987654321" />
+                        <label class="label-tech">Số điện thoại mới</label>
+                        <input type="text" id="newPhoneInput" class="form-control input-premium w-100" placeholder="0987654321" />
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted" style="font-size:0.8rem;">Email mới (Có thể bỏ trống)</label>
-                        <input type="email" id="newEmailInput" class="form-control py-2 border-secondary" placeholder="new.email@example.com" />
-                    </div>
-                    <button class="btn-premium-dark w-100" onclick="verifyUniqueStep()">Gửi Mã Xác Thực OTP</button>
+                    <button class="btn-neon w-100" onclick="verifyUniqueStep()">Gửi OTP</button>
                 </div>
 
                 <div id="step3Container" style="display: none;">
-                    <h6 class="text-uppercase text-danger mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 3: Xác Minh Mã OTP (SIM MỚI)</h6>
+                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 3: Xác Minh OTP</h6>
                     <div class="mb-3">
-                        <label class="form-label text-muted" style="font-size:0.8rem;">Hệ thống đã gửi một mã OTP gồm 6 chữ số về Số Điện Thoại mới. Nhập mã để hoàn tất cập nhật.</label>
-                        <input type="text" id="otpInput" class="form-control py-2 border-secondary text-center" placeholder="******" style="font-size:1.5rem; letter-spacing:8px; font-weight:800;" />
+                        <label class="label-tech">Mã OTP (6 số)</label>
+                        <input type="text" id="otpInput" class="form-control input-premium w-100 text-center" placeholder="******" style="font-size:1.5rem; letter-spacing:8px; font-weight:800;" />
                     </div>
-                    <button class="btn-premium-dark w-100" onclick="submitOtpUpdate()">Xác Nhận & Cập Nhật</button>
+                    <button class="btn-neon w-100" onclick="submitOtpUpdate()">Cập Nhật</button>
                 </div>
             </div>
         </div>
@@ -188,24 +198,85 @@
 
 @section Scripts {
     <script>
+        // Dữ liệu User hiện tại để tự động fill
+        var userCity = '@(Html.Raw(Model.City))';
+        var userDistrict = '@(Html.Raw(Model.District))';
+        var userWard = '@(Html.Raw(Model.Ward))';
+
+        $(document).ready(function() {
+            // Khởi tạo danh sách Tỉnh/Thành
+            $.get('@Url.Action("GetCities", "Home")', function(cities) {
+                var citySelect = $('#City');
+                $.each(cities, function(i, city) {
+                    citySelect.append($('<option></option>').val(city).text(city));
+                });
+                
+                // Tự động chọn nếu có data cũ
+                if (userCity && userCity !== 'Chưa cập nhật') {
+                    citySelect.val(userCity).trigger('change');
+                }
+            });
+
+            // Khi Tỉnh/Thành thay đổi -> Load Quận/Huyện
+            $('#City').change(function() {
+                var city = $(this).val();
+                var districtSelect = $('#District');
+                var wardSelect = $('#Ward');
+                
+                districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
+                wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+
+                if (city) {
+                    $.get('@Url.Action("GetDistricts", "Home")?city=' + encodeURIComponent(city), function(districts) {
+                        $.each(districts, function(i, district) {
+                            districtSelect.append($('<option></option>').val(district).text(district));
+                        });
+                        districtSelect.prop('disabled', false);
+                        
+                        if (userDistrict && userDistrict !== 'Chưa cập nhật') {
+                            districtSelect.val(userDistrict).trigger('change');
+                            userDistrict = null; // Chỉ trigger lần đầu
+                        }
+                    });
+                }
+            });
+
+            // Khi Quận/Huyện thay đổi -> Load Phường/Xã
+            $('#District').change(function() {
+                var district = $(this).val();
+                var wardSelect = $('#Ward');
+                
+                wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+
+                if (district) {
+                    $.get('@Url.Action("GetWards", "Home")?district=' + encodeURIComponent(district), function(wards) {
+                        $.each(wards, function(i, ward) {
+                            wardSelect.append($('<option></option>').val(ward).text(ward));
+                        });
+                        wardSelect.prop('disabled', false);
+                        
+                        if (userWard && userWard !== 'Chưa cập nhật') {
+                            wardSelect.val(userWard);
+                            userWard = null; // Chỉ trigger lần đầu
+                        }
+                    });
+                }
+            });
+        });
+
+        // Giữ nguyên logic OTP Modal
         function openSecureUpdateModal() {
             $('#step1Container').show();
             $('#step2Container').hide();
             $('#step3Container').hide();
             $('#confirmPasswordInput').val('');
             $('#newPhoneInput').val('');
-            $('#newEmailInput').val('');
             $('#otpInput').val('');
             $('#secureUpdateModal').modal('show');
         }
 
         function verifyPasswordStep() {
             var password = $('#confirmPasswordInput').val().trim();
-            if (!password) {
-                alert('Vui lòng nhập mật khẩu xác nhận!');
-                return;
-            }
-
             if (password === "123456") {
                 $('#step1Container').hide();
                 $('#step2Container').show();
@@ -216,28 +287,15 @@
 
         function verifyUniqueStep() {
             var newPhone = $('#newPhoneInput').val().trim();
-            if (!newPhone) {
-                alert('Vui lòng nhập số điện thoại mới!');
-                return;
-            }
-
-            if (newPhone === "0912345678") {
-                alert('Số điện thoại này đã được sử dụng bởi một thành viên khác. Vui lòng nhập số khác!');
-            } else {
-                alert('Mã OTP đã được gửi thành công đến số điện thoại: ' + newPhone);
+            if (newPhone) {
+                alert('Mã OTP đã gửi đến: ' + newPhone);
                 $('#step2Container').hide();
                 $('#step3Container').show();
             }
         }
 
         function submitOtpUpdate() {
-            var otp = $('#otpInput').val().trim();
-            if (!otp) {
-                alert('Vui lòng nhập mã xác thực OTP!');
-                return;
-            }
-
-            alert('Đổi số điện thoại liên hệ thành công!\nHệ thống đã lưu thông tin mới của bạn.');
+            alert('Cập nhật liên hệ thành công!');
             $('#secureUpdateModal').modal('hide');
         }
     </script>

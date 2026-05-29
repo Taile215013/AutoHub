@@ -1,0 +1,90 @@
+/* ==========================================================================
+   LAYER 5 — COMPONENTS: FILTER BAR (Thanh bộ lọc / tìm kiếm)
+   ==========================================================================
+   DÙNG CHUNG cho cả Client và Admin.
+   
+   Lý do tách ra thành component riêng:
+   - Trang Client (Index.cshtml) CÓ dùng filter-bar để lọc xe
+   - Trang Admin (Index.cshtml, SpareParts.cshtml) CŨNG dùng filter-bar
+   → File này được import trong CẢ main.css lẫn admin.css
+
+   CẤU TRÚC HTML MẪU:
+   <div class="filter-bar">
+     <div class="filter-group">
+       <label>Phân Loại</label>
+       <select class="filter-select">...</select>
+     </div>
+     <div class="filter-group">
+       <label>Tìm kiếm</label>
+       <input class="filter-input" type="text" placeholder="..." />
+     </div>
+     <button class="btn-neon">Lọc</button>
+   </div>
+   ========================================================================== */
+
+/* --- FILTER BAR (Thanh chứa toàn bộ bộ lọc) ---
+   Glassmorphism: nền kính mờ, bo góc, bóng đổ nhẹ */
+.filter-bar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur)); /* Safari */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  /* Layout: các group xếp ngang, tự xuống dòng khi hết chỗ */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end; /* Căn đáy để button thẳng hàng với input */
+
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--glass-shadow);
+}
+
+/* --- FILTER GROUP (Nhóm: Label + Input hoặc Select) --- */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;           /* Tự co giãn */
+  min-width: 150px;
+  max-width: 280px;
+}
+
+/* --- LABEL CỦA FILTER --- */
+.filter-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* --- SELECT & INPUT TRONG FILTER --- */
+.filter-select,
+.filter-input {
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+/* Focus: viền đỏ Ferrari */
+.filter-select:focus,
+.filter-input:focus {
+  border-color: var(--color-ferrari);
+  box-shadow: 0 0 0 2px rgba(255, 40, 40, 0.10);
+}
+
+.filter-select:hover,
+.filter-input:hover {
+  border-color: rgba(17, 17, 17, 0.25);
+}

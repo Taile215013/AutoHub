@@ -1,278 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap');
+/* ==========================================================================
+   ⚠️  FILE NÀY ĐÃ ĐƯỢC TÁI CẤU TRÚC — KHÔNG CÒN SỬ DỤNG TRỰC TIẾP
+   ==========================================================================
+   
+   Toàn bộ CSS đã được tách ra thành các module trong:
+   wwwroot/css/ (theo chuẩn ITCSS)
 
-:root {
-  --bg-creamy: #F5F5F7;
-  --text-piano: #111111;
-  --text-muted: #666666;
-  --accent-ferrari: #FF2828;
-  --accent-gold: #D4AF37;
-  --accent-mint: #2EE59D;
-  --border-light: rgba(17, 17, 17, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-blur: 16px;
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
-}
+   CÁC FILE MỚI:
+   ┌─ main.css          ← Entry point Client (_Layout.cshtml dùng file này)
+   ├─ admin.css         ← Entry point Admin  (_AdminLayout.cshtml dùng file này)
+   │
+   ├─ 1-settings/
+   │   ├─ _variables.css   ← Màu sắc, spacing, transitions
+   │   └─ _typography.css  ← Import font Outfit
+   │
+   ├─ 2-base/
+   │   ├─ _reset.css       ← box-sizing, margin reset
+   │   └─ _elements.css    ← body, a, h1-h6
+   │
+   ├─ 3-overrides/
+   │   └─ _bootstrap.css   ← Ghi đè Bootstrap tập trung 1 chỗ
+   │
+   ├─ 4-layouts/
+   │   ├─ _navbar.css      ← Navbar Client
+   │   └─ _footer.css      ← Footer Client
+   │
+   ├─ 5-components/
+   │   ├─ _buttons.css     ← .btn-neon, .btn-ferrari
+   │   ├─ _hero.css        ← .hero, .hero__overlay, .hero__content
+   │   ├─ _forms.css       ← .tech-panel, .input-premium
+   │   └─ _progress.css    ← .circuit-progress
+   │
+   ├─ 6-admin/             ← CHỈ LOAD trong Admin, không bao giờ trong Client
+   │   ├─ _admin-layout.css
+   │   ├─ _admin-menu.css
+   │   └─ _admin-filters.css
+   │
+   └─ 7-utilities/
+       └─ _helpers.css     ← .text-gradient-gold, .badge-mint...
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Outfit', sans-serif;
-  background-color: var(--bg-creamy);
-  color: var(--text-piano);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.premium-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: var(--glass-shadow);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.premium-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  border-color: var(--accent-ferrari);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-}
-
-.btn-premium-dark {
-  background-color: var(--text-piano);
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-premium-dark:hover {
-  background-color: var(--accent-ferrari);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 40, 40, 0.3);
-  color: #ffffff;
-}
-
-.btn-premium-outline {
-  background-color: transparent;
-  color: var(--text-piano);
-  border: 2px solid var(--text-piano);
-  border-radius: 4px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-premium-outline:hover {
-  background-color: var(--text-piano);
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-.hero-banner {
-  position: relative;
-  height: 70vh;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-  box-shadow: var(--glass-shadow);
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
-  z-index: 1;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  color: #ffffff;
-  max-width: 800px;
-  padding: 2rem;
-}
-
-.hero-content h1 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  letter-spacing: -1px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-
-.hero-content p {
-  font-size: 1.25rem;
-  font-weight: 300;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.circuit-progress {
-  position: relative;
-  height: 24px;
-  background: rgba(17, 17, 17, 0.05);
-  border-radius: 12px;
-  border: 1px solid var(--border-light);
-  overflow: hidden;
-}
-
-.circuit-progress-bar {
-  height: 100%;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--accent-ferrari),
-    var(--accent-ferrari) 10px,
-    #cc2020 10px,
-    #cc2020 20px
-  );
-  border-radius: 12px;
-  position: relative;
-}
-
-.circuit-progress-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 80%);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-  100% { opacity: 0.4; }
-}
-
-
-
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.admin-sidebar {
-  width: 260px;
-  background-color: var(--text-piano);
-  color: #ffffff;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  transition: all 0.3s ease;
-  z-index: 100;
-}
-
-.admin-sidebar.collapsed {
-  width: 80px;
-}
-
-.admin-sidebar.collapsed .sidebar-text {
-  display: none;
-}
-
-.admin-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.admin-menu-item a {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.admin-menu-item a:hover,
-.admin-menu-item.active a {
-  background-color: var(--accent-ferrari);
-  color: #ffffff;
-}
-
-.admin-content {
-  flex-grow: 1;
-  padding: 2.5rem;
-  background-color: var(--bg-creamy);
-}
-
-.filter-bar {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 1.25rem;
-  box-shadow: var(--glass-shadow);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
-  margin-bottom: 2rem;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.filter-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.filter-select, .filter-input {
-  border: 1px solid var(--border-light);
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  background: #ffffff;
-  outline: none;
-  min-width: 160px;
-}
-
-.filter-select:focus, .filter-input:focus {
-  border-color: var(--accent-ferrari);
-}
-
-.sidebar-seed-btn:hover {
-  background-color: var(--accent-ferrari);
-  color: #ffffff !important;
-}
+   ========================================================================== */

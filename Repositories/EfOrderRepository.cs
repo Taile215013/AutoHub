@@ -27,4 +27,12 @@ public class EfOrderRepository : IOrderRepository
             .Include(o => o.OrderDetails)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
+
+    public async Task<System.Collections.Generic.List<Order>> GetOrdersByUserIdAsync(int userId)
+    {
+        return await _context.Orders
+            .Where(o => o.UserId == userId && !o.IsDeleted)
+            .Include(o => o.OrderDetails)
+            .ToListAsync();
+    }
 }

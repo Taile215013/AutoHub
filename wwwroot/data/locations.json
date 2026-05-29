@@ -1,0 +1,19 @@
+{
+  "Hồ Chí Minh": {
+    "Quận 1": [ "Phường Bến Nghé", "Phường Bến Thành", "Phường Đa Kao", "Phường Tân Định" ],
+    "Quận Gò Vấp": [
+      "Phường Hạnh Thông",
+      "Phường An Nhơn",
+      "Phường Gò Vấp",
+      "Phường An Hội Đông",
+      "Phường Thông Tây Hội",
+      "Phường An Hội Tây"
+    ],
+    "": [ "" ],
+    "Thành phố Thủ Đức": [ "Phường An Khánh", "Phường Thảo Điền", "Phường Bình Thọ", "Phường Thủ Thiêm" ]
+  },
+  "Hà Nội": {
+    "Quận Hoàn Kiếm": ["Phường Hàng Bạc", "Phường Hàng Đào", "Phường Tràng Tiền"],
+    "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Quan Hoa", "Phường Yên Hòa"]
+  }
+}

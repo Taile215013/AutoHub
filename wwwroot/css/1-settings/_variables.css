@@ -1,0 +1,100 @@
+/* ==========================================================================
+   LAYER 1 — SETTINGS: VARIABLES (Design Tokens)
+   ==========================================================================
+   ĐÂY LÀ "KHO MÀU SẮC" DUY NHẤT CỦA TOÀN DỰ ÁN.
+   Khi muốn đổi màu chủ đạo → chỉ cần sửa ở đây, tự động áp dụng toàn bộ.
+
+   CÁCH ĐỌC:
+   - var(--tên-biến) : cách gọi biến trong CSS khác
+   - Ví dụ: color: var(--accent-ferrari);
+   ========================================================================== */
+
+:root {
+
+  /* ------------------------------------------------------------------
+     MÀU SẮC THƯƠNG HIỆU (Brand Colors)
+     Mỗi màu có tên gợi nhớ theo phong cách xe hơi cao cấp.
+     ------------------------------------------------------------------ */
+  /* --color-bg-main:      #F5F5F7;     */
+  /* Nền trang chính — Trắng kem Apple */
+  --color-bg-main:      #e0eff4;    /* Nền trang chính — Trắng kem Apple */
+  --color-text-primary: #111111;    /* Chữ chính — Đen Piano (gần như đen tuyền) */
+  --color-text-muted:   #666666;    /* Chữ phụ, chú thích — Xám trung tính */
+
+
+  --color-ferrari:      #FF2828;    /* Màu nhấn đỏ Ferrari — dùng cho active, hover */
+  --color-gold:         #D4AF37;    /* Màu vàng Gold — dùng cho nút, highlight */
+  --color-mint:         #2EE59D;    /* Màu xanh Mint — dùng cho badge, trạng thái OK */
+
+  --color-border:       rgba(17, 17, 17, 0.08); /* Viền nhẹ, gần như vô hình */
+
+  /* ------------------------------------------------------------------
+     HIỆU ỨNG KÍNH MỜ (Glassmorphism)
+     Dùng cho: card, navbar, filter bar...
+     ------------------------------------------------------------------ */
+  --glass-bg:     rgba(255, 255, 255, 0.85); /* Nền kính mờ trắng */
+  --glass-blur:   16px;                      /* Độ mờ nền phía sau */
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04); /* Bóng đổ nhẹ */
+
+  /* ------------------------------------------------------------------
+     SPACING — Khoảng cách nhất quán
+     Dùng như: padding: var(--space-md);
+     ------------------------------------------------------------------ */
+  --space-xs: 0.35rem;   /*  ~5px */
+  --space-sm: 0.75rem;   /* ~12px */
+  --space-md: 1.25rem;   /* ~20px */
+  --space-lg: 2rem;      /* ~32px */
+  --space-xl: 2.5rem;    /* ~40px */
+
+  /* ------------------------------------------------------------------
+     BORDER RADIUS — Bo góc nhất quán
+     ------------------------------------------------------------------ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ------------------------------------------------------------------
+     TRANSITIONS — Tốc độ animation nhất quán
+     ------------------------------------------------------------------ */
+  --transition-fast: all 0.2s ease;
+  --transition-base: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+
+  /* ------------------------------------------------------------------
+     OVERRIDE BIẾN CỦA BOOTSTRAP (Ghi đè để khớp màu thương hiệu)
+     Bootstrap tự động dùng các biến --bs-* này
+     ------------------------------------------------------------------ */
+  --bs-primary:      #1b6ec2;
+  --bs-link-color:   var(--color-ferrari); /* Link mặc định màu Ferrari */
+  --bs-body-bg:      var(--color-bg-main);
+  --bs-body-color:   var(--color-text-primary);
+
+  /* ------------------------------------------------------------------
+     ALIASES — Tên cũ trỏ sang tên mới (BACKWARD COMPATIBILITY)
+     
+     Lý do tồn tại: Các file HTML (.cshtml) đang dùng tên biến cũ
+     trong inline style. Thay vì sửa tất cả HTML, ta giữ alias này.
+     
+     KHÔNG XOÁ các alias này cho đến khi toàn bộ HTML đã được cập nhật.
+     
+     TODO: Khi rảnh, tìm & thay trong HTML:
+       var(--accent-ferrari) → var(--color-ferrari)
+       var(--accent-gold)    → var(--color-gold)
+       var(--accent-mint)    → var(--color-mint)
+       var(--text-piano)     → var(--color-text-primary)
+       var(--text-muted)     → var(--color-text-muted)
+       var(--bg-creamy)      → var(--color-bg-main)
+       var(--border-light)   → var(--color-border)
+     ------------------------------------------------------------------ */
+  --accent-ferrari: var(--color-ferrari);
+  --accent-gold:    var(--color-gold);
+  --accent-mint:    var(--color-mint);
+  --text-piano:     var(--color-text-primary);
+  --text-muted:     var(--color-text-muted);
+  --bg-creamy:      var(--color-bg-main);
+
+   /* --bg-admin-main: #c3edf3;  */
+   
+  --border-light:   var(--color-border);
+
+}

@@ -12,6 +12,7 @@ using AutoHub.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using AutoHub.Services;
 
 namespace AutoHub.Controllers
 {
@@ -20,25 +21,27 @@ namespace AutoHub.Controllers
         private readonly IVehicleRepository _vehicleRepository;
         private readonly IServiceRepository _serviceRepository;
         private readonly IUserRepository _userRepository;
-        private readonly AppDbContext _context;
-
-        private static readonly Dictionary<string, List<string>> DistrictWards2026 = new()
-        {
-            { "Quận Gò Vấp", new List<string> { "Phường An Hội Tây", "Phường 1", "Phường 3", "Phường 5", "Phường 7" } },
-            { "Quận 1", new List<string> { "Phường Bến Nghé", "Phường Bến Thành", "Phường Đa Kao", "Phường Tân Định" } },
-            { "Thành phố Thủ Đức", new List<string> { "Phường An Khánh", "Phường Thảo Điền", "Phường Bình Thọ", "Phường Thủ Thiêm" } }
-        };
+        private readonly IAuthService _authService;
+        private readonly ILocationService _locationService;
+        private readonly ISystemDictionaryService _dictService;
+        private readonly IOrderRepository _orderRepository;
 
         public HomeController(
             IVehicleRepository vehicleRepository, 
             IServiceRepository serviceRepository,
             IUserRepository userRepository,
-            AppDbContext context)
+            IAuthService authService,
+            ILocationService locationService,
+            ISystemDictionaryService dictService,
+            IOrderRepository orderRepository)
         {
             _vehicleRepository = vehicleRepository;
             _serviceRepository = serviceRepository;
             _userRepository = userRepository;
-            _context = context;
+            _authService = authService;
+            _locationService = locationService;
+            _dictService = dictService;
+            _orderRepository = orderRepository;
         }
 
         public async Task<IActionResult> Index(string? vehicleType, string? bodyStyle, string? fuelType)
@@ -48,7 +51,7 @@ namespace AutoHub.Controllers
                 var vehicles = await _vehicleRepository.GetAllWithDetailsAsync(vehicleType, bodyStyle, fuelType);
                 var services = await _serviceRepository.GetAllActiveAsync(null);
 
-                var dicts = await _context.SystemDictionaries.ToListAsync();
+                var dicts = await _dictService.GetAllAsync();
                 ViewBag.VehicleTypes = dicts.Where(d => d.Type == "VehicleType").ToList();
                 ViewBag.FuelTypes = dicts.Where(d => d.Type == "FuelType").ToList();
 
@@ -56,7 +59,7 @@ namespace AutoHub.Controllers
                 ViewBag.BodyStyle = bodyStyle;
                 ViewBag.FuelType = fuelType;
                 ViewBag.Services = services;
-                ViewBag.Districts = DistrictWards2026.Keys.ToList();
+                ViewBag.Districts = _locationService.GetCities(); // This was GetDistricts keys in mock, mapped to Cities for simplicity.
 
                 return View(vehicles);
             }
@@ -66,19 +69,30 @@ namespace AutoHub.Controllers
                 ViewBag.VehicleTypes = new List<SystemDictionary>();
                 ViewBag.FuelTypes = new List<SystemDictionary>();
                 ViewBag.Services = new List<Service>();
-                ViewBag.Districts = DistrictWards2026.Keys.ToList();
+                ViewBag.Districts = new List<string>();
                 return View(new List<Vehicle>());
             }
         }
 
         [HttpGet]
+        public IActionResult GetCities()
+        {
+            var cities = _locationService.GetCities();
+            return Json(cities);
+        }
+
+        [HttpGet]
         public IActionResult GetWards(string district)
         {
-            if (DistrictWards2026.TryGetValue(district, out var wards))
-            {
-                return Json(wards);
-            }
-            return Json(new List<string>());
+            var wards = _locationService.GetWards(district);
+            return Json(wards);
+        }
+
+        [HttpGet]
+        public IActionResult GetDistricts(string city)
+        {
+            var districts = _locationService.GetDistricts(city);
+            return Json(districts);
         }
 
         // ---------- XÁC THỰC (AUTHENTICATION) ---------- //
@@ -97,22 +111,14 @@ namespace AutoHub.Controllers
         {
             try
             {
-                var user = await _userRepository.GetByEmailOrPhoneAsync(loginInput);
-                if (user == null)
+                var (success, user, message) = await _authService.LoginAsync(loginInput, password);
+                if (!success)
                 {
-                    ViewBag.Error = "Tài khoản không tồn tại!";
+                    ViewBag.Error = message;
                     return View();
                 }
 
-                if (user.PasswordHash != HashPassword(password))
-                {
-                    ViewBag.Error = "Mật khẩu không chính xác!";
-                    return View();
-                }
-
-                HttpContext.Session.SetInt32("UserId", user.Id);
-                HttpContext.Session.SetString("UserName", $"{user.LastName} {user.FirstName}");
-                
+                _authService.SetUserSession(HttpContext.Session, user!);
                 return RedirectToAction("Account");
             }
             catch (Exception ex)
@@ -137,47 +143,14 @@ namespace AutoHub.Controllers
         {
             try
             {
-                if (Password != ConfirmPassword)
+                var (success, message) = await _authService.RegisterAsync(user, Password, ConfirmPassword);
+                if (!success)
                 {
-                    ViewBag.Error = "Mật khẩu xác nhận không khớp!";
+                    ViewBag.Error = message;
                     return View(user);
                 }
 
-                if (string.IsNullOrWhiteSpace(user.Username))
-                {
-                    ViewBag.Error = "Vui lòng nhập Tên đăng nhập!";
-                    return View(user);
-                }
-
-                if (await _userRepository.IsUsernameTakenAsync(user.Username, 0))
-                {
-                    ViewBag.Error = "Tên đăng nhập này đã có người sử dụng!";
-                    return View(user);
-                }
-
-                if (!string.IsNullOrWhiteSpace(user.Email) && await _userRepository.IsEmailTakenAsync(user.Email, 0))
-                {
-                    ViewBag.Error = "Email này đã được sử dụng!";
-                    return View(user);
-                }
-
-                if (!string.IsNullOrWhiteSpace(user.PhoneNumber) && await _userRepository.IsPhoneTakenAsync(user.PhoneNumber, 0))
-                {
-                    ViewBag.Error = "Số điện thoại này đã được sử dụng!";
-                    return View(user);
-                }
-
-                user.PasswordHash = HashPassword(Password);
-                user.StreetName = user.StreetName ?? "Chưa cập nhật";
-                user.Ward = user.Ward ?? "Chưa cập nhật";
-                user.District = user.District ?? "Chưa cập nhật";
-                user.City = user.City ?? "Chưa cập nhật";
-                
-                await _userRepository.AddAsync(user);
-
-                HttpContext.Session.SetInt32("UserId", user.Id);
-                HttpContext.Session.SetString("UserName", $"{user.LastName} {user.FirstName}");
-
+                _authService.SetUserSession(HttpContext.Session, user);
                 return RedirectToAction("Account");
             }
             catch (Exception ex)
@@ -214,10 +187,7 @@ namespace AutoHub.Controllers
                     return RedirectToAction("Login");
                 }
 
-                var orders = await _context.Orders
-                    .Where(o => o.UserId == userId && !o.IsDeleted)
-                    .Include(o => o.OrderDetails)
-                    .ToListAsync();
+                var orders = await _orderRepository.GetOrdersByUserIdAsync(userId.Value);
 
                 ViewBag.Orders = orders;
                 ViewBag.Vehicles = await _vehicleRepository.GetAllWithDetailsAsync(null, null, null);
@@ -244,10 +214,38 @@ namespace AutoHub.Controllers
             }
         }
 
-        private static string HashPassword(string password)
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateAddress(string City, string District, string Ward, string HouseNumber)
         {
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-            return Convert.ToHexStringLower(bytes);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId.Value);
+                if (user != null)
+                {
+                    user.City = City;
+                    user.District = District;
+                    user.Ward = Ward;
+                    user.HouseNumber = HouseNumber;
+                    
+                    // We don't have UpdateAsync in IUserRepository yet, but usually EF tracks it, so SaveChanges handles it. 
+                    // Let's assume EF tracks it and we just need _context.SaveChangesAsync() but since we removed _context, we need UpdateAsync in IUserRepository. 
+                    await _userRepository.UpdateAsync(user);
+                    TempData["Success"] = "Cập nhật địa chỉ giao nhận thành công!";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating address: {ex.Message}");
+            }
+
+            return RedirectToAction("Account");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -1,0 +1,61 @@
+/* ==========================================================================
+   LAYER 5 — COMPONENTS: PROGRESS BAR (Thanh tiến trình)
+   ==========================================================================
+   Thanh tiến trình phong cách đua xe (Circuit Progress).
+   Dùng trong: Dashboard Admin (hiển thị % hoàn thành, KPI...)
+
+   CẤU TRÚC HTML MẪU:
+   <div class="circuit-progress">
+     <div class="circuit-progress-bar" style="width: 75%"></div>
+   </div>
+   ========================================================================== */
+
+/* --- CIRCUIT PROGRESS (Khung thanh tiến trình) --- */
+.circuit-progress {
+  position: relative;
+  height: 24px;
+  background: rgba(17, 17, 17, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden; /* Cắt phần bar tràn ra ngoài */
+}
+
+/* --- CIRCUIT PROGRESS BAR (Thanh fill bên trong) ---
+   Dùng sọc chéo 45 độ — phong cách đường đua */
+.circuit-progress-bar {
+  height: 100%;
+  border-radius: var(--radius-lg);
+
+  /* Sọc chéo đỏ Ferrari — pattern lặp lại */
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-ferrari),
+    var(--color-ferrari) 10px,
+    #cc2020 10px,    /* Đỏ đậm hơn → tạo hiệu ứng sọc */
+    #cc2020 20px
+  );
+
+  position: relative;
+  transition: width 0.6s ease; /* Animate khi width thay đổi bằng JS */
+}
+
+/* Lớp sáng phủ lên — tạo hiệu ứng glow chạy */
+.circuit-progress-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 80%
+  );
+  animation: progress-pulse 2s infinite;
+}
+
+/* --- KEYFRAME ANIMATION ---
+   Hiệu ứng nhấp nháy nhẹ trên thanh progress */
+@keyframes progress-pulse {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.4; }
+}

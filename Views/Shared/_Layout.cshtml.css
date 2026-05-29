@@ -1,48 +1,24 @@
-﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+/* ==========================================================================
+   _Layout.cshtml.css — CSS ISOLATION
+   ==========================================================================
+   File này áp dụng CSS Isolation của .NET Core.
+   
+   CSS Isolation hoạt động như thế nào?
+   → .NET tự thêm attribute b-xxxxxxxx vào HTML khi build
+   → Style ở đây CHỈ ảnh hưởng đến elements trong _Layout.cshtml
+   → Không "rò rỉ" ra các View khác (tự động scoped)
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
-}
+   KHI NÀO NÊN DÙNG FILE NÀY?
+   ✅ Style đặc biệt chỉ có ý nghĩa trong Layout này
+   ✅ Thí nghiệm style tạm thời chưa muốn đưa vào hệ thống chính
+   
+   ❌ KHÔNG dùng cho:
+   - Style dùng chung nhiều view → đưa vào wwwroot/css/5-components/
+   - Bootstrap overrides → đưa vào wwwroot/css/3-overrides/_bootstrap.css
+   - Biến màu → đưa vào wwwroot/css/1-settings/_variables.css
 
-a {
-  color: #0077cc;
-}
+   Toàn bộ CSS cũ của file này đã được chuyển vào hệ thống modular.
+   Xem: wwwroot/css/3-overrides/_bootstrap.css
+   ========================================================================== */
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
-}
+/* Thêm style riêng của Layout tại đây nếu cần */

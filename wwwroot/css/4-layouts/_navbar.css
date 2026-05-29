@@ -1,0 +1,49 @@
+/* ==========================================================================
+   LAYER 4 — LAYOUTS: NAVBAR (Thanh điều hướng Client)
+   ==========================================================================
+   Chứa style cho thanh navbar của giao diện NGƯỜI DÙNG (Client).
+   
+   Navbar Admin nằm ở: 6-admin/_admin-layout.css
+   ========================================================================== */
+
+/* --- NAVBAR WRAPPER ---
+   Bootstrap đã xử lý layout chính, ta chỉ tinh chỉnh */
+.navbar {
+  /* Đảm bảo navbar luôn nằm trên mọi nội dung (z-index cao) */
+  position: relative;
+  z-index: 1000;
+}
+
+/* --- BRAND / LOGO ---
+   "AutoHub" text ở góc trái navbar */
+.navbar-brand {
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+}
+
+/* --- NAV LINKS ---
+   Các link menu trong navbar client */
+.navbar-nav .nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: var(--transition-fast);
+}
+
+.navbar-nav .nav-link:hover {
+  opacity: 0.8;
+}
+
+/* --- USER INFO AREA (Hiển thị tên user đang đăng nhập) --- */
+.navbar-user-greeting {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.navbar-user-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+}

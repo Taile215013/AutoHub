@@ -1,0 +1,142 @@
+/* ==========================================================================
+   LAYER 5 — COMPONENTS: HERO BANNER (Banner đầu trang)
+   ==========================================================================
+   Hero banner là phần ảnh lớn có chữ overlay ở trang chủ.
+   
+   CẤU TRÚC HTML:
+   <div class="hero" style="background-image: url('...')">
+     <div class="hero__overlay"></div>
+     <div class="hero__content">
+       <h1 class="hero__title">Tiêu đề</h1>
+       <p class="hero__subtitle">Mô tả</p>
+     </div>
+   </div>
+   ========================================================================== */
+
+/* --- HERO (Block chính — khung chứa toàn bộ banner) ---
+   Dùng BEM: .hero là Block */
+.hero {
+  position: relative;
+  height: 70vh;         /* Chiếm 70% chiều cao màn hình */
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Căn giữa nội dung */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); /* Bo góc dưới */
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+}
+
+/* --- HERO__OVERLAY (Lớp phủ tối phía trên ảnh) ---
+   Tác dụng: Làm tối ảnh nền để chữ trắng bên trên dễ đọc hơn */
+.hero__overlay {
+  position: absolute;
+  inset: 0; /* = top:0; right:0; bottom:0; left:0; — cú pháp ngắn gọn */
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.08) 0%,   /* Phía trên: gần như trong suốt */
+    rgba(0, 0, 0, 0.72) 100%  /* Phía dưới: tối hơn (nơi có chữ) */
+  );
+  z-index: 1;
+}
+
+/* --- HERO__CONTENT (Hộp chứa chữ nằm trên overlay) --- */
+.hero__content {
+  position: relative;
+  z-index: 2; /* Phải cao hơn z-index của overlay (1) */
+  color: #ffffff;
+  max-width: 800px;
+  padding: var(--space-lg);
+}
+
+/* --- HERO__TITLE (Tiêu đề lớn) --- */
+.hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem); /* Tự co giãn theo màn hình */
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+/* --- HERO__SUBTITLE (Dòng mô tả ngắn) --- */
+.hero__subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 300;
+  margin-bottom: var(--space-lg);
+  opacity: 0.9;
+}
+
+/* --- BACKWARD COMPATIBILITY — Giữ tương thích với class cũ trong HTML ---
+   
+   HTML hiện tại đang dùng: .hero-banner / .hero-overlay / .hero-content
+   
+   QUAN TRỌNG: Không được xoá các class này cho đến khi HTML được cập nhật sang BEM.
+   Lý do: _hero.css đã có .hero (BEM mới), nhưng HTML vẫn đang dùng tên cũ.
+   
+   TODO (khi có thời gian): Đổi trong HTML:
+     .hero-banner  →  .hero
+     .hero-overlay →  .hero__overlay
+     .hero-content →  .hero__content
+*/
+
+.hero-banner {
+  /* Giống hệt .hero phía trên — copy để đảm bảo class cũ vẫn hoạt động */
+  position: relative;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  /* height: 70vh — không set ở đây vì HTML đang override bằng inline style */
+  min-height: 60vh; /* Fallback khi không có height inline */
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.08) 0%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  max-width: 800px;
+  padding: var(--space-lg);
+}
+
+.hero-content h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  font-weight: 300;
+  margin-bottom: var(--space-lg);
+  opacity: 0.9;
+}
+

@@ -8,4 +8,5 @@ public interface IOrderRepository
     Task AddAsync(Order order);
 
     Task<Order?> GetByIdWithDetailsAsync(int id);
+    Task<System.Collections.Generic.List<Order>> GetOrdersByUserIdAsync(int userId);
 }

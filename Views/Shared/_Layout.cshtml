@@ -1,18 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AutoHub</title>
+
+    <!--
+        THỨ TỰ NHÚNG CSS - QUAN TRỌNG, không đổi thứ tự:
+        1. Bootstrap  - Framework base (phải đứng đầu)
+        2. main.css   - Toàn bộ CSS Client của AutoHub (ghi đè Bootstrap bên dưới)
+        3. AutoHub.styles.css - CSS Isolation (.cshtml.css) do .NET Core tự tổng hợp
+        4. RenderSection Styles - View con tự chèn CSS riêng nếu cần
+    -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AutoHub.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom border-secondary py-3">
             <div class="container-fluid px-4">
-                <a class="navbar-brand font-weight-bold tracking-wider text-uppercase" asp-area="" asp-controller="Home" asp-action="Index" style="font-weight:900; letter-spacing:1.5px;">AutoHub</a>
+                <a class="navbar-brand text-uppercase text-gradient-gold" asp-area="" asp-controller="Home" asp-action="Index">AutoHub</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -38,17 +47,17 @@
                         @if (userId != null)
                         {
                             <li class="nav-item d-flex align-items-center">
-                                <span class="text-muted me-2" style="font-size: 0.85rem; margin-top:2px;">Cơ trưởng,</span>
-                                <span class="text-white" style="font-weight: 700; font-size: 0.9rem;">@userName</span>
+                                <span class="navbar-user-greeting me-2">Cơ trưởng,</span>
+                                <span class="navbar-user-name">@userName</span>
                             </li>
-                            <li class="nav-item">
-                                <a class="btn-premium-outline py-1 px-3 d-inline-block" style="font-size: 0.75rem; border-color: var(--accent-ferrari); color: var(--accent-ferrari);" href="@Url.Action("Logout", "Home")">TẮT ĐỘNG CƠ (Thoát)</a>
+                            <li class="nav-item ms-3">
+                                <a class="btn-neon" href="@Url.Action("Logout", "Home")">TẮT ĐỘNG CƠ</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="btn-premium-dark py-1 px-4 d-inline-block" style="font-size: 0.8rem;" href="@Url.Action("Login", "Home")">KHỞI ĐỘNG (Đăng nhập)</a>
+                                <a class="btn-neon" href="@Url.Action("Login", "Home")">KHỞI ĐỘNG HỆ THỐNG</a>
                             </li>
                         }
                     </ul>
@@ -56,7 +65,7 @@
             </div>
         </nav>
     </header>
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0 flex-grow-1">
         <main role="main" class="pb-5">
             @RenderBody()
         </main>

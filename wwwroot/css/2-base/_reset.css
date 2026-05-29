@@ -1,0 +1,37 @@
+/* ==========================================================================
+   LAYER 2 — BASE: RESET (Xóa style mặc định của trình duyệt)
+   ==========================================================================
+   VẤN ĐỀ: Mỗi trình duyệt (Chrome, Firefox, Safari) có margin/padding
+   mặc định khác nhau → layout bị lệch trên từng trình duyệt.
+
+   GIẢI PHÁP: Đặt tất cả về 0 → ta tự kiểm soát hoàn toàn.
+
+   LƯU Ý: File này chỉ xử lý "dọn sạch" — không thêm style mới.
+   Style thực sự được định nghĩa trong _elements.css
+   ========================================================================== */
+
+/* Đặt box-sizing cho TẤT CẢ elements (kể cả ::before và ::after)
+   
+   GIẢI THÍCH box-sizing: border-box:
+   - MẶC ĐỊNH (content-box): width=100px → thực ra chiếm 100px + padding + border
+   - border-box: width=100px → THỰC SỰ chiếm đúng 100px, padding tính vào trong
+   → Dễ tính toán layout hơn rất nhiều */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Xoá margin mặc định của trình duyệt */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Ảnh responsive theo mặc định
+   → Ảnh không bao giờ tràn ra ngoài container cha của nó */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
