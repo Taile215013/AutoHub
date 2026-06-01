@@ -32,48 +32,48 @@
                 </button>
             </div>
 
-            <!-- Xác định xem chúng ta đang ở Action (Trang) nào để bôi màu mục đó (Menu Active) -->
+            <!-- Xác định xem chúng ta đang ở Controller nào để bôi màu mục đó (Menu Active) -->
             @{
-                var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
             }
 
             <!-- DANH SÁCH MENU BÊN TRÁI SIDE BOARD--> 
             <ul class="admin-menu">
                 <!-- Mục Dashboard -->
-                <li class="admin-menu-item @(currentAction == "Dashboard" ? "active" : "")">
-                    <a href="@Url.Action("Dashboard", "Admin")">
+                <li class="admin-menu-item @(currentController == "Dashboard" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">
                         <span>📊</span>
                         <span class="sidebar-text">Tổng Quan Dashboard</span>
                     </a>
                 </li>
                 
-                <!-- Mục Quản Lý Xe Ô tô (Chứa Index, Create) -->
-                <li class="admin-menu-item @(currentAction == "Index" || currentAction == "Create" ? "active" : "")">
-                    <a href="@Url.Action("Index", "Admin")">
+                <!-- Mục Quản Lý Xe Ô tô -->
+                <li class="admin-menu-item @(currentController == "Vehicle" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Vehicle", new { area = "Admin" })">
                         <span>🚗</span>
                         <span class="sidebar-text">Quản Lý Xe</span>
                     </a>
                 </li>
                 
-                <!-- Mục Quản Lý Phụ Tùng (Chứa SpareParts, CreateSparePart) -->
-                <li class="admin-menu-item @(currentAction == "SpareParts" || currentAction == "CreateSparePart" ? "active" : "")">
-                    <a href="@Url.Action("SpareParts", "Admin")">
+                <!-- Mục Quản Lý Phụ Tùng -->
+                <li class="admin-menu-item @(currentController == "SparePart" ? "active" : "")">
+                    <a href="@Url.Action("Index", "SparePart", new { area = "Admin" })">
                         <span>🛠️</span>
                         <span class="sidebar-text">Quản Lý Phụ Tùng</span>
                     </a>
                 </li>
                 
-                <!-- Mục Quản Lý Thương Hiệu (Chứa Brands, CreateBrand) -->
-                <li class="admin-menu-item @(currentAction == "Brands" || currentAction == "CreateBrand" ? "active" : "")">
-                    <a href="@Url.Action("Brands", "Admin")">
+                <!-- Mục Quản Lý Thương Hiệu -->
+                <li class="admin-menu-item @(currentController == "Brand" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Brand", new { area = "Admin" })">
                         <span>🏷️</span>
                         <span class="sidebar-text">Quản Lý Thương Hiệu</span>
                     </a>
                 </li>
 
                  <!-- Mục Quản Lý Dịch Vụ -->
-                <li class="admin-menu-item @(currentAction == "Services" ? "active" : "")">
-                    <a href="@Url.Action("Services", "Admin")">
+                <li class="admin-menu-item @(currentController == "Service" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Service", new { area = "Admin" })">
                         <span>⚙️</span>
                         <span class="sidebar-text">Quản Lý Dịch Vụ</span>
                     </a>
@@ -81,7 +81,7 @@
                 
                 <!-- Mục quay về giao diện Cửa hàng -->
                 <li class="admin-menu-item">
-                    <a href="@Url.Action("Index", "Home")">
+                    <a href="@Url.Action("Index", "Home", new { area = "" })">
                         <span>🏪</span>
                         <span class="sidebar-text">Xem Cửa Hàng</span>
                     </a>
