@@ -1,10 +1,20 @@
 @model AutoHub.Models.Entities.User
+<main b-7vnz5sug0f="" role="main" class="">
+  <ul class="nav">
+    <li class="nav-item ms-3">
+            <a class="btn-neon" href="@Url.Action("Logout", "Home")">Đăng Xuất</a>
+        </li>
+  </ul>
+</main>
+
 
 @{
     ViewData["Title"] = "Không Gian Thành Viên - AutoHub";
 }
 
 <div class="container px-4 py-5">
+        
+
     @if (!string.IsNullOrEmpty(ViewBag.Warning))
     {
         <div class="alert alert-warning py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-gold); background-color: rgba(212, 175, 55, 0.1); color: #856404; border-radius: 0;">
@@ -20,6 +30,8 @@
     }
 
     <!-- Alert AJAX -->
+
+    
     <div id="profileAlert" style="display:none;" class="mb-4"></div>
 
     <div class="row g-4 mb-5">
@@ -62,7 +74,7 @@
 
                 <!-- Nút chỉnh sửa thông tin -->
                 <button class="btn-neon w-100 mb-2" onclick="openProfileModal()">
-                    ✏️ Chỉnh Sửa Thông Tin Liên Hệ
+                    ✏️ Chỉnh Sửa Thông Tin 
                 </button>
 
             </div>

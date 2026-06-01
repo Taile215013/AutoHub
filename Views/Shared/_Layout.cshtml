@@ -31,7 +31,7 @@
                             <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Index">Bộ Sưu Tập</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Account">Thành Viên</a>
+
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-uppercase font-weight-medium text-danger" asp-area="" asp-controller="Admin" asp-action="Index">Quản Trị Admin</a>
@@ -63,7 +63,10 @@
                             </button>
                         </li>
 
-                        @if (userId != null)
+
+                        <span class="navbar-user-name">@userName</span>
+                        <a class="nav-link text-uppercase font-weight-medium" asp-area="" asp-controller="Home" asp-action="Account">Thành Viên</a>
+                        <!-- @if (userId != null)
                         {
                             <li class="nav-item d-flex align-items-center">
                                 <span class="navbar-user-name">@userName</span>
@@ -76,8 +79,9 @@
                         {
                             <li class="nav-item">
                                 <a class="btn-neon" href="@Url.Action("Login", "Home")">KHỞI ĐỘNG HỆ THỐNG</a>
+                                
                             </li>
-                        }
+                        } -->
                     </ul>
                 </div>
             </div>

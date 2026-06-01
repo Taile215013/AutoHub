@@ -31,3 +31,6 @@
 # Đảm bảo các file tài liệu thiết kế hệ thống luôn được đưa lên Git
 !*.md
 !*.txt
+
+## Walkthrough AI
+walkthrough/
