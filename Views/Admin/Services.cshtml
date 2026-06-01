@@ -1,0 +1,423 @@
+@model IEnumerable<AutoHub.Models.Entities.Service>
+
+@{
+    ViewData["Title"] = "Quản Lý Dịch Vụ - Admin AutoHub";
+    Layout = "_AdminLayout";
+    var vehicleTypes = ViewBag.VehicleTypes as IEnumerable<AutoHub.Models.Entities.SystemDictionary>
+                       ?? new List<AutoHub.Models.Entities.SystemDictionary>();
+}
+
+@section Styles {
+<style>
+    .badge-active   { background: rgba(46, 229, 157, 0.15); color: #2ee59d; border: 1px solid #2ee59d; }
+    .badge-inactive { background: rgba(255, 80, 80, 0.15);  color: #ff5050; border: 1px solid #ff5050; }
+    .badge-quote    { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid #d4af37; }
+
+    .service-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; }
+    .service-table td { vertical-align: middle; }
+
+    .action-btn {
+        padding: 4px 12px;
+        font-size: 0.78rem;
+        border-radius: 4px;
+        border: 1px solid;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: transparent;
+        font-weight: 700;
+    }
+    .btn-edit   { color: #d4af37; border-color: #d4af37; }
+    .btn-edit:hover { background: rgba(212,175,55,0.15); }
+    .btn-del    { color: #ff5050; border-color: #ff5050; }
+    .btn-del:hover  { background: rgba(255,80,80,0.15); }
+
+    .modal-admin { background: #18181c; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+    .form-check-input:checked { background-color: var(--accent-gold); border-color: var(--accent-gold); }
+</style>
+}
+
+<div class="container px-4 py-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="text-gradient-gold mb-1" style="font-weight:900; letter-spacing:-0.5px;">
+                ⚙️ Quản Lý Dịch Vụ
+            </h2>
+            <p class="text-muted mb-0" style="font-size:0.9rem;">
+                Toàn bộ @Model.Count() dịch vụ trong hệ thống
+            </p>
+        </div>
+        <button class="btn-neon px-4 py-2" onclick="openServiceModal(0)">
+            + Thêm Dịch Vụ Mới
+        </button>
+    </div>
+
+    <!-- Alert khu vực thông báo -->
+    <div id="alertBox" style="display:none;" class="mb-4"></div>
+
+    <!-- Bảng danh sách dịch vụ -->
+    <div class="tech-panel p-0" style="overflow:hidden;">
+        <table class="table table-dark table-hover mb-0 service-table" id="serviceTable">
+            <thead style="background: rgba(255,255,255,0.04);">
+                <tr class="text-muted">
+                    <th class="px-4 py-3">#</th>
+                    <th class="py-3">Tên Dịch Vụ</th>
+                    <th class="py-3">Loại Xe</th>
+                    <th class="py-3">Đơn Giá</th>
+                    <th class="py-3">Loại GIá</th>
+                    <th class="py-3">Trạng Thái</th>
+                    <th class="py-3 text-end px-4">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody id="serviceTbody">
+                @if (Model != null && Model.Any())
+                {
+                    int stt = 1;
+                    foreach (var s in Model)
+                    {
+                        <tr id="row-@s.Id">
+                            <td class="px-4 text-muted" style="font-size:0.85rem;">@(stt++)</td>
+                            <td style="font-weight:700;">@s.ServiceName</td>
+                            <td>
+                                <span class="badge bg-secondary text-uppercase" style="font-size:0.75rem; letter-spacing:0.5px;">
+                                    @s.VehicleType
+                                </span>
+                            </td>
+                            <td>
+                                @if (s.RequiresQuote)
+                                {
+                                    <span class="text-muted" style="font-size:0.85rem;">Báo giá theo yêu cầu</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gradient-gold" style="font-weight:800;">@string.Format("{0:N0}", s.BasePrice) đ</span>
+                                }
+                            </td>
+                            <td>
+                                @if (s.RequiresQuote)
+                                {
+                                    <span class="badge badge-quote rounded-pill px-3 py-1" style="font-size:0.75rem;">Báo Giá</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-dark text-white rounded-pill px-3 py-1" style="font-size:0.75rem; border:1px solid #444;">Cố Định</span>
+                                }
+                            </td>
+                            <td>
+                                @if (s.IsActive)
+                                {
+                                    <span class="badge badge-active rounded-pill px-3 py-1" style="font-size:0.75rem;">● Đang Hoạt Động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactive rounded-pill px-3 py-1" style="font-size:0.75rem;">○ Tạm Dừng</span>
+                                }
+                            </td>
+                            <td class="text-end px-4">
+                                <button class="action-btn btn-edit me-1" onclick="openServiceModal(@s.Id)">Sửa</button>
+                                <button class="action-btn btn-del" onclick="deleteService(@s.Id, '@Html.Raw(s.ServiceName)')">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="emptyRow">
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <div style="font-size:2rem; opacity:0.3;">⚙️</div>
+                            <p class="mt-2">Chưa có dịch vụ nào. Hãy thêm dịch vụ đầu tiên!</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===================== MODAL THÊM / SỬA DỊCH VỤ ===================== -->
+<div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 modal-admin">
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <h5 class="modal-title text-gradient-gold" style="font-weight:900;" id="serviceModalTitle">
+                    Thêm Dịch Vụ Mới
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <input type="hidden" id="serviceId" value="0" />
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="label-tech">Tên Dịch Vụ <span class="text-danger">*</span></label>
+                        <input type="text" id="svcName" class="form-control input-premium w-100"
+                               placeholder="Ví dụ: Thay nhớt động cơ, Rửa xe cao cấp..." />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label-tech">Áp Dụng Cho Loại Xe</label>
+                        <select id="svcVehicleType" class="form-select input-premium w-100">
+                            <option value="">-- Tất cả loại xe --</option>
+                            @foreach (var vt in vehicleTypes)
+                            {
+                                <option value="@vt.Code">@vt.Value</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label-tech">Loại Giá</label>
+                        <div class="d-flex gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="priceType" id="priceFixed" value="fixed" checked onchange="togglePriceInput(false)" />
+                                <label class="form-check-label text-white" for="priceFixed">Giá Cố Định</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="priceType" id="priceQuote" value="quote" onchange="togglePriceInput(true)" />
+                                <label class="form-check-label text-white" for="priceQuote">Báo Giá Theo YC</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6" id="basePriceWrapper">
+                        <label class="label-tech">Đơn Giá (VNĐ)</label>
+                        <input type="number" id="svcBasePrice" class="form-control input-premium w-100"
+                               placeholder="Ví dụ: 150000" min="0" step="1000" />
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check form-switch ms-2">
+                            <input class="form-check-input" type="checkbox" id="svcIsActive" checked />
+                            <label class="form-check-label text-white fw-bold" for="svcIsActive">Đang Hoạt Động</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="modalError" class="mt-3 text-danger" style="font-size:0.85rem; display:none;"></div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <button class="btn-neon px-5 py-2 flex-grow-1" onclick="saveService()" id="saveServiceBtn">
+                        Lưu Dịch Vụ
+                    </button>
+                    <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // =====================================================================
+    // HELPERS
+    // =====================================================================
+
+    function showAlert(msg, type = 'success') {
+        const box = document.getElementById('alertBox');
+        box.innerHTML = `
+            <div class="alert py-3" style="border-left:4px solid ${type === 'success' ? 'var(--accent-mint)' : '#ff5050'};
+                 background:rgba(${type === 'success' ? '46,229,157' : '255,80,80'},0.1);
+                 color:${type === 'success' ? 'var(--accent-mint)' : '#ff5050'}; border-radius:0;">
+                ${type === 'success' ? '✅' : '❌'} ${msg}
+            </div>`;
+        box.style.display = 'block';
+        setTimeout(() => { box.style.display = 'none'; }, 4000);
+    }
+
+    function togglePriceInput(isQuote) {
+        document.getElementById('basePriceWrapper').style.display = isQuote ? 'none' : 'block';
+    }
+
+    function renderBadgeStatus(isActive) {
+        return isActive
+            ? `<span class="badge badge-active rounded-pill px-3 py-1" style="font-size:0.75rem;">● Đang Hoạt Động</span>`
+            : `<span class="badge badge-inactive rounded-pill px-3 py-1" style="font-size:0.75rem;">○ Tạm Dừng</span>`;
+    }
+
+    function renderBadgeQuote(requiresQuote) {
+        return requiresQuote
+            ? `<span class="badge badge-quote rounded-pill px-3 py-1" style="font-size:0.75rem;">Báo Giá</span>`
+            : `<span class="badge bg-dark text-white rounded-pill px-3 py-1" style="font-size:0.75rem; border:1px solid #444;">Cố Định</span>`;
+    }
+
+    function renderPrice(requiresQuote, basePrice) {
+        return requiresQuote
+            ? `<span class="text-muted" style="font-size:0.85rem;">Báo giá theo yêu cầu</span>`
+            : `<span class="text-gradient-gold" style="font-weight:800;">${Number(basePrice).toLocaleString('vi-VN')} đ</span>`;
+    }
+
+    // =====================================================================
+    // MỞ MODAL THÊM (id=0) HOẶC SỬA (id>0)
+    // =====================================================================
+
+    function openServiceModal(id) {
+        // Reset form
+        document.getElementById('serviceId').value = 0;
+        document.getElementById('svcName').value = '';
+        document.getElementById('svcVehicleType').value = '';
+        document.getElementById('svcBasePrice').value = '';
+        document.getElementById('svcIsActive').checked = true;
+        document.getElementById('priceFixed').checked = true;
+        document.getElementById('modalError').style.display = 'none';
+        togglePriceInput(false);
+
+        if (id === 0) {
+            document.getElementById('serviceModalTitle').textContent = '+ Thêm Dịch Vụ Mới';
+            document.getElementById('saveServiceBtn').textContent = 'Thêm Dịch Vụ';
+            $('#serviceModal').modal('show');
+            return;
+        }
+
+        // Nếu là edit -> lấy data từ server
+        document.getElementById('serviceModalTitle').textContent = '✏️ Chỉnh Sửa Dịch Vụ';
+        document.getElementById('saveServiceBtn').textContent = 'Lưu Thay Đổi';
+
+        $.get('@Url.Action("GetService", "Admin")/' + id, function (res) {
+            if (!res.success) { alert(res.message); return; }
+            const d = res.data;
+            document.getElementById('serviceId').value = d.id;
+            document.getElementById('svcName').value = d.serviceName;
+            document.getElementById('svcVehicleType').value = d.vehicleType || '';
+            document.getElementById('svcBasePrice').value = d.basePrice || '';
+            document.getElementById('svcIsActive').checked = d.isActive;
+
+            if (d.requiresQuote) {
+                document.getElementById('priceQuote').checked = true;
+                togglePriceInput(true);
+            } else {
+                document.getElementById('priceFixed').checked = true;
+                togglePriceInput(false);
+            }
+
+            $('#serviceModal').modal('show');
+        });
+    }
+
+    // =====================================================================
+    // LƯU DỊCH VỤ (THÊM / SỬA)
+    // =====================================================================
+
+    function saveService() {
+        const id = parseInt(document.getElementById('serviceId').value);
+        const name = document.getElementById('svcName').value.trim();
+        const vehicleType = document.getElementById('svcVehicleType').value;
+        const requiresQuote = document.getElementById('priceQuote').checked;
+        const basePrice = requiresQuote ? null : parseFloat(document.getElementById('svcBasePrice').value) || null;
+        const isActive = document.getElementById('svcIsActive').checked;
+        const errEl = document.getElementById('modalError');
+
+        // Validate
+        if (!name) {
+            errEl.textContent = 'Vui lòng nhập tên dịch vụ!';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (!requiresQuote && !basePrice) {
+            errEl.textContent = 'Vui lòng nhập đơn giá hoặc chọn Báo Giá Theo YC!';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+
+        const btn = document.getElementById('saveServiceBtn');
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+
+        $.ajax({
+            url: '@Url.Action("SaveService", "Admin")',
+            method: 'POST',
+            data: {
+                Id: id,
+                ServiceName: name,
+                VehicleType: vehicleType,
+                BasePrice: basePrice,
+                RequiresQuote: requiresQuote,
+                IsActive: isActive
+            },
+            success: function (res) {
+                btn.disabled = false;
+                btn.textContent = id === 0 ? 'Thêm Dịch Vụ' : 'Lưu Thay Đổi';
+
+                if (!res.success) {
+                    errEl.textContent = res.message;
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                $('#serviceModal').modal('hide');
+                showAlert(res.message, 'success');
+
+                const d = res.data;
+                const tbody = document.getElementById('serviceTbody');
+
+                // Xóa empty row nếu có
+                const emptyRow = document.getElementById('emptyRow');
+                if (emptyRow) emptyRow.remove();
+
+                if (id === 0) {
+                    // Thêm row mới vào đầu bảng
+                    const rowCount = tbody.querySelectorAll('tr').length + 1;
+                    const newRow = `
+                        <tr id="row-${d.id}">
+                            <td class="px-4 text-muted" style="font-size:0.85rem;">${rowCount}</td>
+                            <td style="font-weight:700;">${d.serviceName}</td>
+                            <td><span class="badge bg-secondary text-uppercase" style="font-size:0.75rem;">${d.vehicleType || 'Tất cả'}</span></td>
+                            <td>${renderPrice(d.requiresQuote, d.basePrice)}</td>
+                            <td>${renderBadgeQuote(d.requiresQuote)}</td>
+                            <td>${renderBadgeStatus(d.isActive)}</td>
+                            <td class="text-end px-4">
+                                <button class="action-btn btn-edit me-1" onclick="openServiceModal(${d.id})">Sửa</button>
+                                <button class="action-btn btn-del" onclick="deleteService(${d.id}, '${d.serviceName}')">Xóa</button>
+                            </td>
+                        </tr>`;
+                    tbody.insertAdjacentHTML('afterbegin', newRow);
+                } else {
+                    // Cập nhật row hiện tại
+                    const row = document.getElementById('row-' + d.id);
+                    if (row) {
+                        row.cells[1].innerHTML = `<span style="font-weight:700;">${d.serviceName}</span>`;
+                        row.cells[2].innerHTML = `<span class="badge bg-secondary text-uppercase" style="font-size:0.75rem;">${d.vehicleType || 'Tất cả'}</span>`;
+                        row.cells[3].innerHTML = renderPrice(d.requiresQuote, d.basePrice);
+                        row.cells[4].innerHTML = renderBadgeQuote(d.requiresQuote);
+                        row.cells[5].innerHTML = renderBadgeStatus(d.isActive);
+                    }
+                }
+            },
+            error: function () {
+                btn.disabled = false;
+                btn.textContent = id === 0 ? 'Thêm Dịch Vụ' : 'Lưu Thay Đổi';
+                showAlert('Lỗi kết nối server. Vui lòng thử lại!', 'error');
+            }
+        });
+    }
+
+    // =====================================================================
+    // XÓA DỊCH VỤ
+    // =====================================================================
+
+    function deleteService(id, name) {
+        if (!confirm(`Bạn chắc chắn muốn xóa dịch vụ:\n"${name}"?\n\nDịch vụ sẽ bị ẩn khỏi danh sách khách hàng.`)) return;
+
+        $.ajax({
+            url: '@Url.Action("DeleteServiceAjax", "Admin")',
+            method: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (!res.success) { showAlert(res.message, 'error'); return; }
+
+                showAlert(res.message, 'success');
+                const row = document.getElementById('row-' + id);
+                if (row) {
+                    row.style.opacity = '0';
+                    row.style.transition = 'opacity 0.3s';
+                    setTimeout(() => row.remove(), 300);
+                }
+            },
+            error: function () {
+                showAlert('Lỗi kết nối server. Vui lòng thử lại!', 'error');
+            }
+        });
+    }
+</script>
+}

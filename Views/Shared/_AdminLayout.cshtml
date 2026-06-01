@@ -37,7 +37,7 @@
                 var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
             }
 
-            <!-- DANH SÁCH MENU BÊN TRÁI -->
+            <!-- DANH SÁCH MENU BÊN TRÁI SIDE BOARD--> 
             <ul class="admin-menu">
                 <!-- Mục Dashboard -->
                 <li class="admin-menu-item @(currentAction == "Dashboard" ? "active" : "")">
@@ -68,6 +68,14 @@
                     <a href="@Url.Action("Brands", "Admin")">
                         <span>🏷️</span>
                         <span class="sidebar-text">Quản Lý Thương Hiệu</span>
+                    </a>
+                </li>
+
+                 <!-- Mục Quản Lý Dịch Vụ -->
+                <li class="admin-menu-item @(currentAction == "Services" ? "active" : "")">
+                    <a href="@Url.Action("Services", "Admin")">
+                        <span>⚙️</span>
+                        <span class="sidebar-text">Quản Lý Dịch Vụ</span>
                     </a>
                 </li>
                 

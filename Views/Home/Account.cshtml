@@ -11,7 +11,7 @@
             <i class="me-2 fw-bold">⚠️</i> <strong>Hệ Thống Đang Bảo Trì:</strong> @ViewBag.Warning
         </div>
     }
-    
+
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-mint); background-color: rgba(46, 229, 157, 0.1); color: var(--accent-mint); border-radius: 0;">
@@ -19,31 +19,64 @@
         </div>
     }
 
+    <!-- Alert AJAX -->
+    <div id="profileAlert" style="display:none;" class="mb-4"></div>
+
     <div class="row g-4 mb-5">
+        <!-- ============ SIDEBAR: Avatar + Thông Tin + Nút ============ -->
         <div class="col-lg-4">
             <div class="tech-panel text-center">
-                <div class="mb-4 d-inline-block rounded-circle bg-dark text-white d-flex align-items-center justify-content-center mx-auto" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight:800; border: 2px solid var(--accent-gold);">
+
+                <!-- Avatar -->
+                <div class="mb-4 d-inline-flex rounded-circle bg-dark text-white align-items-center justify-content-center mx-auto"
+                     id="avatarCircle"
+                     style="width:90px; height:90px; font-size:2.5rem; font-weight:800; border:2px solid var(--accent-gold);">
                     @Model.FirstName?[0]
                 </div>
-                <h3 class="text-gradient-gold" style="font-weight: 800;">@Model.LastName @Model.FirstName</h3>
-                <p class="text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Thành Viên Cao Cấp</p>
+
+                <h3 class="text-gradient-gold" style="font-weight:800;" id="displayFullName">
+                    @Model.LastName @Model.FirstName
+                </h3>
+
                 <hr class="my-4" style="border-color: rgba(255,255,255,0.1);" />
-                
+
+                <!-- Thông tin tóm tắt -->
                 <div class="text-start mb-4">
-                    <p class="mb-2"><strong class="text-muted">Email:</strong> <br/> @(Model.Email ?? "Chưa thiết lập")</p>
-                    <p class="mb-2"><strong class="text-muted">Điện Thoại:</strong> <br/> @(Model.PhoneNumber ?? "Chưa thiết lập")</p>
-                    <p class="mb-2"><strong class="text-muted">Ngày Sinh:</strong> <br/> @(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập")</p>
-                    <p class="mb-2"><strong class="text-muted">Giới Tính:</strong> <br/> @(Model.Gender ?? "Chưa thiết lập")</p>
+                    <p class="mb-2">
+                        <strong class="text-muted">Email:</strong> <br />
+                        <span id="displayEmail">@(Model.Email ?? "Chưa thiết lập")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong class="text-muted">Điện Thoại:</strong> <br />
+                        <span id="displayPhone">@(Model.PhoneNumber ?? "Chưa thiết lập")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong class="text-muted">Ngày Sinh:</strong> <br />
+                        <span id="displayDob">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập")</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong class="text-muted">Giới Tính:</strong> <br />
+                        <span id="displayGender">@(Model.Gender ?? "Chưa thiết lập")</span>
+                    </p>
                 </div>
-                
-                <button class="btn-neon w-100" onclick="openSecureUpdateModal()">Bảo Mật Liên Hệ</button>
+
+                <!-- Nút chỉnh sửa thông tin -->
+                <button class="btn-neon w-100 mb-2" onclick="openProfileModal()">
+                    ✏️ Chỉnh Sửa Thông Tin Liên Hệ
+                </button>
+
             </div>
         </div>
 
+        <!-- ============ CONTENT: Địa Chỉ + Hạng + Lịch Sử ============ -->
         <div class="col-lg-8">
+
+            <!-- Quản lý địa chỉ -->
             <div class="tech-panel mb-4">
-                <h4 class="text-uppercase mb-4 text-gradient-gold" style="font-weight: 900; letter-spacing: -0.5px;">Quản Lý Địa Chỉ Giao Nhận</h4>
-                
+                <h4 class="text-uppercase mb-4 text-gradient-gold" style="font-weight: 900; letter-spacing: -0.5px;">
+                    Quản Lý Địa Chỉ Giao Nhận
+                </h4>
+
                 <form method="post" action="@Url.Action("UpdateAddress", "Home")">
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
@@ -65,18 +98,20 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
-                        <label class="label-tech">Số Nhà / Tên Đường (Chỉ hiển thị với bạn)</label>
-                        <input type="text" name="HouseNumber" class="form-control input-premium w-100" placeholder="Ví dụ: 123 Đường Lê Lợi" value="@Model.HouseNumber" required />
+                        <label class="label-tech">Số Nhà / Tên Đường</label>
+                        <input type="text" name="HouseNumber" class="form-control input-premium w-100"
+                               placeholder="Ví dụ: 123 Đường Lê Lợi" value="@Model.HouseNumber" required />
                     </div>
-                    
+
                     <div class="text-end">
                         <button type="submit" class="btn-neon">LƯU ĐỊA CHỈ</button>
                     </div>
                 </form>
             </div>
 
+            <!-- Tiến trình hạng thành viên // chưa cần làm đến
             <div class="tech-panel mb-4">
                 <h4 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Tiến Trình Đạt Hạng</h4>
                 <div class="p-3 border rounded mb-4" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
@@ -94,12 +129,17 @@
                         <span class="@(Model.RankLevel == "Diamond" ? "text-gradient-gold fw-bold" : "")">Diamond (10%)</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
+            <!-- Lịch sử mua xe -->
             <div class="tech-panel">
                 <nav>
                     <div class="nav nav-tabs border-bottom border-secondary mb-4" id="nav-tab" role="tablist">
-                        <button class="nav-link active border-0 bg-transparent text-white font-weight-bold" id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase" type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">Lịch Sử Mua Xe</button>
+                        <button class="nav-link active border-0 bg-transparent text-white font-weight-bold"
+                                id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase"
+                                type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">
+                            Lịch Sử Mua Xe
+                        </button>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
@@ -153,43 +193,94 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="secureUpdateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- ===================== MODAL CHỈNH SỬA THÔNG TIN CÁ NHÂN ===================== -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4" style="background:#18181c; border: 1px solid rgba(255,255,255,0.1) !important;">
-            <div class="modal-header border-0 bg-dark text-white rounded-top-4 py-3">
-                <h5 class="modal-title font-weight-bold text-gradient-gold" style="font-weight:800;">Xác Thực An Toàn (OTP)</h5>
+            <div class="modal-header border-0 bg-dark rounded-top-4 py-3 px-4">
+                <h5 class="modal-title text-gradient-gold" style="font-weight:900;">✏️ Chỉnh Sửa Thông Tin Liên Hệ</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 text-white">
-                <div id="step1Container">
-                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 1: Xác Thực Mật Khẩu</h6>
-                    <div class="mb-3">
-                        <label class="label-tech">Nhập mật khẩu hiện tại</label>
-                        <input type="password" id="confirmPasswordInput" class="form-control input-premium w-100" placeholder="Mật khẩu hiện tại" />
+                <div class="row g-3">
+                    <!-- Họ và Tên -->
+                    <div class="col-md-6">
+                        <label class="label-tech">Họ <span class="text-danger">*</span></label>
+                        <input type="text" id="profileLastName" class="form-control input-premium w-100"
+                               value="@Model.LastName" placeholder="Nguyễn" />
                     </div>
-                    <button class="btn-neon w-100" onclick="verifyPasswordStep()">Tiếp Tục</button>
+                    <div class="col-md-6">
+                        <label class="label-tech">Tên <span class="text-danger">*</span></label>
+                        <input type="text" id="profileFirstName" class="form-control input-premium w-100"
+                               value="@Model.FirstName" placeholder="Văn A" />
+                    </div>
+
+                    <!-- Giới tính + Ngày sinh -->
+                    <div class="col-md-6">
+                        <label class="label-tech">Giới Tính</label>
+                        <select id="profileGender" class="form-select input-premium w-100">
+                            <option value="">-- Chọn --</option>
+                            @{
+                                var genderVal = Model.Gender ?? "";
+                            }
+                            @if (genderVal == "Nam")
+                            {
+                                <option value="Nam" selected>Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            }
+                            else if (genderVal == "Nữ")
+                            {
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ" selected>Nữ</option>
+                                <option value="Khác">Khác</option>
+                            }
+                            else if (genderVal == "Khác")
+                            {
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác" selected>Khác</option>
+                            }
+                            else
+                            {
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="label-tech">Ngày Sinh</label>
+                        <input type="date" id="profileDob" class="form-control input-premium w-100"
+                               value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+
+                    <!-- Email + SĐT -->
+                    <div class="col-md-6">
+                        <label class="label-tech">Email</label>
+                        <input type="email" id="profileEmail" class="form-control input-premium w-100"
+                               value="@(Model.Email ?? "")" placeholder="example@gmail.com" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="label-tech">Số Điện Thoại</label>
+                        <input type="tel" id="profilePhone" class="form-control input-premium w-100"
+                               value="@(Model.PhoneNumber ?? "")" placeholder="0987654321" />
+                    </div>
                 </div>
 
-                <div id="step2Container" style="display: none;">
-                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 2: Nhập Số Mới</h6>
-                    <div class="mb-3">
-                        <label class="label-tech">Số điện thoại mới</label>
-                        <input type="text" id="newPhoneInput" class="form-control input-premium w-100" placeholder="0987654321" />
-                    </div>
-                    <button class="btn-neon w-100" onclick="verifyUniqueStep()">Gửi OTP</button>
-                </div>
+                <!-- Thông báo lỗi trong modal -->
+                <div id="profileModalError" class="mt-3 p-3 rounded" style="display:none; background:rgba(255,80,80,0.1); border:1px solid #ff5050; color:#ff5050; font-size:0.85rem;"></div>
 
-                <div id="step3Container" style="display: none;">
-                    <h6 class="text-uppercase text-gradient-gold mb-3" style="font-weight:700; font-size:0.8rem;">BƯỚC 3: Xác Minh OTP</h6>
-                    <div class="mb-3">
-                        <label class="label-tech">Mã OTP (6 số)</label>
-                        <input type="text" id="otpInput" class="form-control input-premium w-100 text-center" placeholder="******" style="font-size:1.5rem; letter-spacing:8px; font-weight:800;" />
-                    </div>
-                    <button class="btn-neon w-100" onclick="submitOtpUpdate()">Cập Nhật</button>
+                <div class="d-flex gap-3 mt-4">
+                    <button class="btn-neon px-5 py-2 flex-grow-1" onclick="submitProfileUpdate()" id="profileSaveBtn">
+                        💾 Lưu Thông Tin
+                    </button>
+                    <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
                 </div>
             </div>
         </div>
@@ -198,105 +289,158 @@
 
 @section Scripts {
     <script>
-        // Dữ liệu User hiện tại để tự động fill
+        // =====================================================================
+        // KHỞI TẠO DROPDOWN ĐỊA CHỈ
+        // =====================================================================
         var userCity = '@(Html.Raw(Model.City))';
         var userDistrict = '@(Html.Raw(Model.District))';
         var userWard = '@(Html.Raw(Model.Ward))';
 
-        $(document).ready(function() {
-            // Khởi tạo danh sách Tỉnh/Thành
-            $.get('@Url.Action("GetCities", "Home")', function(cities) {
+        $(document).ready(function () {
+            $.get('@Url.Action("GetCities", "Home")', function (cities) {
                 var citySelect = $('#City');
-                $.each(cities, function(i, city) {
+                $.each(cities, function (i, city) {
                     citySelect.append($('<option></option>').val(city).text(city));
                 });
-                
-                // Tự động chọn nếu có data cũ
                 if (userCity && userCity !== 'Chưa cập nhật') {
                     citySelect.val(userCity).trigger('change');
                 }
             });
 
-            // Khi Tỉnh/Thành thay đổi -> Load Quận/Huyện
-            $('#City').change(function() {
+            $('#City').change(function () {
                 var city = $(this).val();
                 var districtSelect = $('#District');
                 var wardSelect = $('#Ward');
-                
                 districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
                 wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
 
                 if (city) {
-                    $.get('@Url.Action("GetDistricts", "Home")?city=' + encodeURIComponent(city), function(districts) {
-                        $.each(districts, function(i, district) {
+                    $.get('@Url.Action("GetDistricts", "Home")?city=' + encodeURIComponent(city), function (districts) {
+                        $.each(districts, function (i, district) {
                             districtSelect.append($('<option></option>').val(district).text(district));
                         });
                         districtSelect.prop('disabled', false);
-                        
                         if (userDistrict && userDistrict !== 'Chưa cập nhật') {
                             districtSelect.val(userDistrict).trigger('change');
-                            userDistrict = null; // Chỉ trigger lần đầu
+                            userDistrict = null;
                         }
                     });
                 }
             });
 
-            // Khi Quận/Huyện thay đổi -> Load Phường/Xã
-            $('#District').change(function() {
+            $('#District').change(function () {
                 var district = $(this).val();
                 var wardSelect = $('#Ward');
-                
                 wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
-
                 if (district) {
-                    $.get('@Url.Action("GetWards", "Home")?district=' + encodeURIComponent(district), function(wards) {
-                        $.each(wards, function(i, ward) {
+                    $.get('@Url.Action("GetWards", "Home")?district=' + encodeURIComponent(district), function (wards) {
+                        $.each(wards, function (i, ward) {
                             wardSelect.append($('<option></option>').val(ward).text(ward));
                         });
                         wardSelect.prop('disabled', false);
-                        
                         if (userWard && userWard !== 'Chưa cập nhật') {
                             wardSelect.val(userWard);
-                            userWard = null; // Chỉ trigger lần đầu
+                            userWard = null;
                         }
                     });
                 }
             });
         });
 
-        // Giữ nguyên logic OTP Modal
-        function openSecureUpdateModal() {
-            $('#step1Container').show();
-            $('#step2Container').hide();
-            $('#step3Container').hide();
-            $('#confirmPasswordInput').val('');
-            $('#newPhoneInput').val('');
-            $('#otpInput').val('');
-            $('#secureUpdateModal').modal('show');
+        // =====================================================================
+        // MODAL CHỈNH SỬA THÔNG TIN CÁ NHÂN
+        // =====================================================================
+
+        function openProfileModal() {
+            document.getElementById('profileModalError').style.display = 'none';
+            document.getElementById('profileSaveBtn').disabled = false;
+            document.getElementById('profileSaveBtn').textContent = '💾 Lưu Thông Tin';
+            $('#profileModal').modal('show');
         }
 
-        function verifyPasswordStep() {
-            var password = $('#confirmPasswordInput').val().trim();
-            if (password === "123456") {
-                $('#step1Container').hide();
-                $('#step2Container').show();
-            } else {
-                alert('Mật khẩu không chính xác! Vui lòng thử lại.');
+        function submitProfileUpdate() {
+            const firstName = document.getElementById('profileFirstName').value.trim();
+            const lastName = document.getElementById('profileLastName').value.trim();
+            const gender = document.getElementById('profileGender').value;
+            const dob = document.getElementById('profileDob').value;
+            const email = document.getElementById('profileEmail').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            const errEl = document.getElementById('profileModalError');
+
+            // Validate cơ bản
+            if (!firstName || !lastName) {
+                errEl.textContent = '⚠️ Vui lòng nhập đầy đủ Họ và Tên!';
+                errEl.style.display = 'block';
+                return;
             }
-        }
-
-        function verifyUniqueStep() {
-            var newPhone = $('#newPhoneInput').val().trim();
-            if (newPhone) {
-                alert('Mã OTP đã gửi đến: ' + newPhone);
-                $('#step2Container').hide();
-                $('#step3Container').show();
+            if (email) {
+                var emailRegex = new RegExp('^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$');
+                if (!emailRegex.test(email)) {
+                    errEl.textContent = '⚠️ Địa chỉ email không hợp lệ!';
+                    errEl.style.display = 'block';
+                    return;
+                }
             }
-        }
+            if (phone) {
+                var phoneRegex = new RegExp('^(0|\\+84)[0-9]{8,10}$');
+                if (!phoneRegex.test(phone)) {
+                    errEl.textContent = '⚠️ Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)!';
+                    errEl.style.display = 'block';
+                    return;
+                }
+            }
+            errEl.style.display = 'none';
 
-        function submitOtpUpdate() {
-            alert('Cập nhật liên hệ thành công!');
-            $('#secureUpdateModal').modal('hide');
+            const btn = document.getElementById('profileSaveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+            $.ajax({
+                url: '@Url.Action("UpdateProfile", "Home")',
+                method: 'POST',
+                data: {
+                    FirstName: firstName,
+                    LastName: lastName,
+                    Gender: gender,
+                    DateOfBirth: dob || null,
+                    Email: email || null,
+                    PhoneNumber: phone || null
+                },
+                success: function (res) {
+                    btn.disabled = false;
+                    btn.textContent = '💾 Lưu Thông Tin';
+
+                    if (!res.success) {
+                        errEl.textContent = '⚠️ ' + res.message;
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    // Đóng modal
+                    $('#profileModal').modal('hide');
+
+                    // Cập nhật UI không reload trang
+                    const d = res.data;
+                    document.getElementById('displayFullName').textContent = d.fullName;
+                    document.getElementById('avatarCircle').textContent = d.avatarChar;
+                    document.getElementById('displayEmail').textContent = d.email || 'Chưa thiết lập';
+                    document.getElementById('displayPhone').textContent = d.phoneNumber || 'Chưa thiết lập';
+                    document.getElementById('displayGender').textContent = d.gender || 'Chưa thiết lập';
+                    document.getElementById('displayDob').textContent = d.dateOfBirth || 'Chưa thiết lập';
+
+                    // Hiển thị thông báo thành công
+                    const alertBox = document.getElementById('profileAlert');
+                    alertBox.innerHTML = `<div class="alert py-3" style="border-left:4px solid var(--accent-mint); background:rgba(46,229,157,0.1); color:var(--accent-mint); border-radius:0;">✅ ${res.message}</div>`;
+                    alertBox.style.display = 'block';
+                    setTimeout(() => alertBox.style.display = 'none', 4000);
+                },
+                error: function () {
+                    btn.disabled = false;
+                    btn.textContent = '💾 Lưu Thông Tin';
+                    errEl.textContent = '❌ Lỗi kết nối server. Vui lòng thử lại!';
+                    errEl.style.display = 'block';
+                }
+            });
         }
     </script>
 }

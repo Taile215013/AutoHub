@@ -16,6 +16,13 @@ public class EfServiceRepository : IServiceRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Service>> GetAllAsync()
+    {
+        return await _context.Services
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Service>> GetAllActiveAsync(string? vehicleType)
     {
         var query = _context.Services
@@ -39,5 +46,23 @@ public class EfServiceRepository : IServiceRepository
     {
         await _context.Services.AddAsync(service);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Service service)
+    {
+        _context.Services.Update(service);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var service = await _context.Services.FindAsync(id);
+        if (service != null)
+        {
+            // Soft delete: chỉ đánh dấu IsDeleted thay vì xóa hẳn khỏi DB
+            service.IsDeleted = true;
+            service.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
     }
 }

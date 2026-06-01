@@ -19,6 +19,8 @@ namespace AutoHub.Data
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public DbSet<SystemDictionary> SystemDictionaries { get; set; } = null!;
+        public DbSet<Cart> Carts { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +36,8 @@ namespace AutoHub.Data
             modelBuilder.Entity<Order>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<OrderDetail>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<SystemDictionary>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Cart>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CartItem>().HasQueryFilter(e => !e.IsDeleted);
 
             modelBuilder.Entity<Brand>()
                 .HasOne(b => b.Country)
@@ -93,6 +97,10 @@ namespace AutoHub.Data
 
             modelBuilder.Entity<OrderDetail>()
                 .Property(od => od.Price)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CartItem>()
+                .Property(ci => ci.Price)
                 .HasPrecision(18, 2);
         }
     }

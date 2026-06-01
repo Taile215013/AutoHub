@@ -1,0 +1,24 @@
+<div id="cartOverlay" onclick="closeCart()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1040; backdrop-filter:blur(4px);"></div>
+
+<div id="cartDrawer"
+     style="display:none; position:fixed; top:0; right:0; width:380px; max-width:95vw; height:100vh;
+            background:#18181c; border-left:1px solid rgba(255,255,255,0.1); z-index:1050;
+            padding:0; overflow-y:auto; transform:translateX(100%); transition:transform 0.3s ease;">
+    <div style="background:rgba(255,255,255,0.04); padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 style="font-weight:900; color:#fff; margin:0;">🛒 Giỏ Hàng</h5>
+            <button onclick="closeCart()" style="background:transparent; border:none; color:#888; font-size:1.4rem; cursor:pointer; line-height:1;">✕</button>
+        </div>
+    </div>
+    <div id="cartItems" style="padding:16px 24px; min-height:200px;"></div>
+    <div id="cartFooter" style="display:none; padding:16px 24px; border-top:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02);">
+        <div class="d-flex justify-content-between mb-3">
+            <span style="color:#aaa; font-size:0.9rem; font-weight:600;">Tổng cộng:</span>
+            <span id="cartTotal" style="color:#d4af37; font-weight:900; font-size:1.1rem;">0 đ</span>
+        </div>
+        <button class="btn-neon w-100 py-2" onclick="checkoutCart()">Đặt Lịch Ngay ➜</button>
+        <button onclick="clearCart()" style="background:transparent; border:1px solid #555; border-radius:6px; color:#888;
+                width:100%; padding:8px; margin-top:8px; cursor:pointer; font-size:0.85rem;">Xóa Giỏ Hàng</button>
+    </div>
+</div>

@@ -37,6 +37,7 @@
                             <a class="nav-link text-uppercase font-weight-medium text-danger" asp-area="" asp-controller="Admin" asp-action="Index">Quản Trị Admin</a>
                         </li>
                     </ul>
+
                     <ul class="navbar-nav ms-auto align-items-center gap-3">
                         @using Microsoft.AspNetCore.Http
                         @inject IHttpContextAccessor HttpContextAccessor
@@ -44,10 +45,27 @@
                             var userId = HttpContextAccessor.HttpContext?.Session.GetInt32("UserId");
                             var userName = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
                         }
+
+                        <!-- Nút Giỏ Hàng -->
+                        <li class="nav-item">
+                            <button class="cart-btn position-relative" id="cartNavBtn" onclick="openCart()"
+                                    title="Giỏ hàng của bạn"
+                                    style="background:transparent; border:1px solid rgba(255,255,255,0.2); border-radius:8px;
+                                           padding:6px 14px; cursor:pointer; color:#fff; transition:all 0.2s; display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:1.1rem;">🛒</span>
+                                <span style="font-size:0.85rem; font-weight:600;">Giỏ Hàng</span>
+                                <span id="cartBadge"
+                                      style="display:none; background:var(--accent-ferrari,#e8041d); color:#fff;
+                                             border-radius:50%; width:18px; height:18px; font-size:0.7rem; font-weight:800;
+                                             align-items:center; justify-content:center; position:absolute; top:-6px; right:-6px;">
+                                    0
+                                </span>
+                            </button>
+                        </li>
+
                         @if (userId != null)
                         {
                             <li class="nav-item d-flex align-items-center">
-                                <span class="navbar-user-greeting me-2">Cơ trưởng,</span>
                                 <span class="navbar-user-name">@userName</span>
                             </li>
                             <li class="nav-item ms-3">
@@ -65,6 +83,7 @@
             </div>
         </nav>
     </header>
+
     <div class="container-fluid p-0 flex-grow-1">
         <main role="main" class="pb-5">
             @RenderBody()
@@ -73,12 +92,21 @@
 
     <footer class="border-top border-secondary bg-dark text-muted py-4 mt-auto">
         <div class="container px-4 text-center">
-            &copy; 2026 - AutoHub - Hệ Thống Vận Hành & Dịch Vụ Ô Tô Hạng Sang
+            &copy; 2026 - AutoHub - Hệ Thống Vận Hành &amp; Dịch Vụ Ô Tô Hạng Sang
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- CART DRAWER -->
+    <partial name="_CartDrawer" />
+    <script>
+        window.isLoggedIn = @(userId != null ? "true" : "false");
+    </script>
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

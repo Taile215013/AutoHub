@@ -9,7 +9,7 @@
 <div class="hero-banner" style="background: linear-gradient(135deg, #0f0f11 0%, #1c1c22 100%); border-bottom: 3px solid var(--accent-ferrari);">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1 style="text-shadow: 0 4px 15px rgba(0,0,0,0.5);">AutoHub Luxury</h1>
+        <h1 style="text-shadow: 0 4px 15px rgba(0,0,0,0.5);">Auto Luxury</h1>
         <p>Khám phá bộ sưu tập siêu xe và dịch vụ chăm sóc đỉnh cao dành riêng cho giới tinh hoa</p>
         <a href="#collection-section" class="btn-neon text-decoration-none">Trải Nghiệm Ngay</a>
     </div>
@@ -96,7 +96,7 @@
                                         <div class="text-muted" style="font-size:0.85rem;">Giá Bán Lẻ</div>
                                         <div class="text-danger" style="font-weight: 800; font-size: 1.25rem;">@string.Format("{0:N0}", vehicle.CurrentPrice) đ</div>
                                     </div>
-                                    <button class="btn-neon px-3 py-2" onclick="orderProduct('Xe: @vehicle.Name', '@vehicle.CurrentPrice')">Đặt lịch mua</button>
+                                    <button class="btn-neon px-3 py-2" onclick="orderProduct('@Html.Raw(vehicle.Name)', '@vehicle.CurrentPrice', 'vehicle')">🛒 Đặt Lịch Mua</button>
                                 }
                                 else
                                 {
@@ -140,7 +140,7 @@
                             else
                             {
                                 <div class="text-gradient-gold mb-2" style="font-weight: 800; font-size: 1.15rem;">@string.Format("{0:N0}", service.BasePrice) đ</div>
-                                <button class="btn-neon py-2 px-3" onclick="orderProduct('Dịch vụ: @service.ServiceName', '@service.BasePrice')">Đặt lịch</button>
+                                <button class="btn-neon py-2 px-3" onclick="orderProduct('@Html.Raw(service.ServiceName)', '@service.BasePrice', 'service')">🛒 Đặt Lịch</button>
                             }
                         </div>
                     </div>
@@ -205,10 +205,14 @@
             });
         });
 
-
-
-        function orderProduct(name, price) {
-            alert('Quý khách đã đăng ký thành công đặt lịch hẹn cho: ' + name + '\nNhân viên sẽ gọi điện xác nhận lịch hẹn trong vòng 10 phút.');
+        // Thêm xe/dịch vụ vào giỏ hàng (addToCart được định nghĩa trong _Layout.cshtml)
+        function orderProduct(name, price, type) {
+            if (typeof addToCart === 'function') {
+                addToCart(name, price, type || 'vehicle');
+            } else {
+                alert('Đã đăng ký đặt lịch hẹn cho: ' + name + '\nNhân viên sẽ liên hệ xác nhận sớm!');
+            }
         }
     </script>
 }
+

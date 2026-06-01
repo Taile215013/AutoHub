@@ -220,9 +220,7 @@ namespace AutoHub.Controllers
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
-            {
                 return RedirectToAction("Login");
-            }
 
             try
             {
@@ -233,9 +231,6 @@ namespace AutoHub.Controllers
                     user.District = District;
                     user.Ward = Ward;
                     user.HouseNumber = HouseNumber;
-                    
-                    // We don't have UpdateAsync in IUserRepository yet, but usually EF tracks it, so SaveChanges handles it. 
-                    // Let's assume EF tracks it and we just need _context.SaveChangesAsync() but since we removed _context, we need UpdateAsync in IUserRepository. 
                     await _userRepository.UpdateAsync(user);
                     TempData["Success"] = "Cập nhật địa chỉ giao nhận thành công!";
                 }
@@ -246,6 +241,75 @@ namespace AutoHub.Controllers
             }
 
             return RedirectToAction("Account");
+        }
+
+        /// <summary>
+        /// Cập nhật thông tin cá nhân của người dùng (họ tên, giới tính, ngày sinh, email, SĐT)
+        /// URL: /Home/UpdateProfile (POST - AJAX)
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(
+            string FirstName, string LastName, string Gender,
+            DateTime? DateOfBirth, string? Email, string? PhoneNumber)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!" });
+
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId.Value);
+                if (user == null)
+                    return Json(new { success = false, message = "Tài khoản không tồn tại!" });
+
+                // Kiểm tra email đã được dùng bởi tài khoản khác chưa
+                if (!string.IsNullOrWhiteSpace(Email) && Email != user.Email)
+                {
+                    if (await _userRepository.IsEmailTakenAsync(Email, user.Id))
+                        return Json(new { success = false, message = "Email này đã được sử dụng bởi tài khoản khác!" });
+                }
+
+                // Kiểm tra SĐT đã được dùng bởi tài khoản khác chưa
+                if (!string.IsNullOrWhiteSpace(PhoneNumber) && PhoneNumber != user.PhoneNumber)
+                {
+                    if (await _userRepository.IsPhoneTakenAsync(PhoneNumber, user.Id))
+                        return Json(new { success = false, message = "Số điện thoại này đã được sử dụng bởi tài khoản khác!" });
+                }
+
+                // Cập nhật thông tin
+                user.FirstName = FirstName?.Trim() ?? user.FirstName;
+                user.LastName = LastName?.Trim() ?? user.LastName;
+                user.Gender = Gender ?? user.Gender;
+                user.DateOfBirth = DateOfBirth;
+                user.Email = string.IsNullOrWhiteSpace(Email) ? user.Email : Email.Trim();
+                user.PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber) ? user.PhoneNumber : PhoneNumber.Trim();
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _userRepository.UpdateAsync(user);
+
+                // Cập nhật lại Session tên hiển thị
+                HttpContext.Session.SetString("UserName", user.FirstName);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Cập nhật thông tin thành công!",
+                    data = new
+                    {
+                        fullName = $"{user.LastName} {user.FirstName}",
+                        email = user.Email,
+                        phoneNumber = user.PhoneNumber,
+                        gender = user.Gender,
+                        dateOfBirth = user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập",
+                        avatarChar = user.FirstName?[0].ToString().ToUpper() ?? "U"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating profile: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại!" });
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
