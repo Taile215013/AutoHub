@@ -1,0 +1,116 @@
+@model IEnumerable<AutoHub.Models.Entities.Vehicle>
+@using AutoHub.Helpers
+@{
+    ViewData["Title"] = "Ô Tô - AutoHub";
+    var fuelTypes = ViewBag.FuelTypes as IEnumerable<AutoHub.Models.Entities.SystemDictionary> ?? new List<AutoHub.Models.Entities.SystemDictionary>();
+    var brands = ViewBag.Brands as IEnumerable<string> ?? new List<string>();
+}
+
+<div class="hero-banner" style="background: linear-gradient(135deg, #0f0f11 0%, #1a1a24 100%); border-bottom: 3px solid var(--accent-ferrari); padding: 60px 0;">
+    <div class="hero-content">
+        <h1 style="text-shadow: 0 4px 15px rgba(0,0,0,0.5);">🚗 Ô Tô</h1>
+        <p>Khám phá bộ sưu tập ô tô đa dạng — sedan, SUV, MPV và nhiều hơn nữa</p>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+
+    <form method="get" action="/cars" class="filter-bar mb-5">
+        <div class="filter-group">
+            <label>Hãng Xe</label>
+            <select name="brand" class="filter-select">
+                <option value="">Tất cả hãng</option>
+                @foreach (var b in brands)
+                {
+                    <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
+                }
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Dáng Xe</label>
+            <input type="text" name="bodyStyle" value="@ViewBag.BodyStyle" placeholder="Sedan, SUV, MPV..." class="filter-input" />
+        </div>
+        <div class="filter-group">
+            <label>Nhiên Liệu</label>
+            <select name="fuelType" class="filter-select">
+                <option value="">Tất cả</option>
+                @foreach (var fuel in fuelTypes)
+                {
+                    <option value="@fuel.Code" selected="@(ViewBag.FuelType == fuel.Code ? "selected" : null)">@fuel.Value</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn-neon py-2">Tìm Kiếm</button>
+        <a href="/cars" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
+    </form>
+
+    @if (Model != null && Model.Any())
+    {
+        <p class="text-muted mb-4">Tìm thấy <strong>@Model.Count()</strong> xe</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var vehicle in Model)
+            {
+                <div class="col">
+                    <div class="tech-panel h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="vehicle-image-wrapper mb-3 text-center" style="overflow:hidden; border-radius:8px; background:#f8f9fa;">
+                                <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })">
+                                    @if (!string.IsNullOrEmpty(vehicle.ThumbnailImageUrl))
+                                    {
+                                        <img src="@vehicle.ThumbnailImageUrl" alt="@vehicle.Name" class="img-fluid"
+                                             style="max-height:200px; object-fit:contain; width:100%; transition:transform 0.3s;"
+                                             onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/no-image.png" alt="Chưa có ảnh" class="img-fluid"
+                                             style="max-height:200px; object-fit:contain;" />
+                                    }
+                                </a>
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-dark text-uppercase" style="font-size:0.72rem;">@vehicle.VehicleType</span>
+                                @if (!string.IsNullOrEmpty(vehicle.BodyStyle))
+                                {
+                                    <span class="badge bg-secondary" style="font-size:0.72rem;">@vehicle.BodyStyle</span>
+                                }
+                            </div>
+                            <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })"
+                               style="text-decoration:none; color:inherit;">
+                                <h3 style="font-weight:800; font-size:1.4rem; margin-bottom:0.4rem;">@vehicle.Name</h3>
+                            </a>
+                            <p class="text-muted mb-1" style="font-size:0.88rem;">Hãng: <strong>@(vehicle.Brand?.Name ?? "N/A")</strong></p>
+                            <p class="text-muted mb-1" style="font-size:0.88rem;">Động cơ: @vehicle.EngineType @(vehicle.EngineCapacity.HasValue ? $"({vehicle.EngineCapacity}L)" : "")</p>
+                            <p class="text-muted mb-3" style="font-size:0.88rem;">Nhiên liệu: @vehicle.FuelType</p>
+                        </div>
+                        <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                            @if (vehicle.Quantity.HasValue && vehicle.Quantity.Value > 0)
+                            {
+                                <div>
+                                    <div class="text-muted" style="font-size:0.82rem;">Giá Bán Lẻ</div>
+                                    <div class="text-danger fw-bold" style="font-size:1.2rem;">@string.Format("{0:N0}", vehicle.CurrentPrice) đ</div>
+                                </div>
+                                <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })"
+                                   class="btn-neon px-3 py-2 text-decoration-none">Xem Chi Tiết</a>
+                            }
+                            else
+                            {
+                                <div class="text-muted fw-semibold" style="font-size:0.95rem;">Hết hàng / Sắp về</div>
+                                <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })"
+                                   class="btn-neon px-3 py-2 text-decoration-none" style="border-color:#888; color:#888;">Xem Chi Tiết</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div style="font-size:3rem; opacity:0.3;">🚗</div>
+            <p class="text-muted mt-3">Không tìm thấy xe nào phù hợp với bộ lọc.</p>
+            <a href="/cars" class="btn-neon text-decoration-none mt-2 d-inline-block">Xóa Lọc</a>
+        </div>
+    }
+</div>

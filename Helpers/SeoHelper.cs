@@ -45,16 +45,17 @@ namespace AutoHub.Helpers
             if (string.IsNullOrWhiteSpace(vehicleType))
                 return "khac";
 
-            // Map Vietnamese category names to URL friendly categories
             var normalizedType = vehicleType.Trim().ToLowerInvariant();
             
-            if (normalizedType.Contains("auto") || normalizedType.Contains("ô tô") || normalizedType.Contains("xe hơi") || normalizedType.Contains("4 bánh"))
+            // "Auto" là giá trị DB cho ô tô 4 bánh
+            if (normalizedType == "auto" || normalizedType.Contains("ô tô") || normalizedType.Contains("xe hơi") || normalizedType.Contains("car"))
             {
-                return "auto";
+                return "cars";
             }
-            if (normalizedType.Contains("motorcycle") || normalizedType.Contains("xe máy") || normalizedType.Contains("mô tô"))
+            // "Motorbike" là giá trị DB cho xe máy
+            if (normalizedType == "motorbike" || normalizedType == "motorcycle" || normalizedType.Contains("xe máy") || normalizedType.Contains("mô tô"))
             {
-                return "motorcycle";
+                return "moto";
             }
             if (normalizedType.Contains("electric") || normalizedType.Contains("xe điện"))
             {

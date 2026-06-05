@@ -1,0 +1,106 @@
+@model IEnumerable<AutoHub.Models.Entities.SparePart>
+@{
+    ViewData["Title"] = "Phụ Tùng - AutoHub";
+    var brands = ViewBag.Brands as IEnumerable<string> ?? new List<string>();
+    var categories = ViewBag.Categories as IEnumerable<string> ?? new List<string>();
+}
+
+<div class="hero-banner" style="background: linear-gradient(135deg, #0f0f11 0%, #141c1a 100%); border-bottom: 3px solid var(--accent-mint); padding: 60px 0;">
+    <div class="hero-content">
+        <h1 style="text-shadow: 0 4px 15px rgba(0,0,0,0.5);">🛠️ Phụ Tùng</h1>
+        <p>Phụ tùng chính hãng — đúng xe, đúng đời, đúng giá</p>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+
+    <form method="get" action="/parts" class="filter-bar mb-5">
+        <div class="filter-group">
+            <label>Hãng Sản Xuất</label>
+            <select name="brand" class="filter-select">
+                <option value="">Tất cả hãng</option>
+                @foreach (var b in brands)
+                {
+                    <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
+                }
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Danh Mục</label>
+            <select name="category" class="filter-select">
+                <option value="">Tất cả danh mục</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat" selected="@(ViewBag.Category == cat ? "selected" : null)">@cat</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn-neon py-2">Tìm Kiếm</button>
+        <a href="/parts" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
+    </form>
+
+    @if (Model != null && Model.Any())
+    {
+        <p class="text-muted mb-4">Tìm thấy <strong>@Model.Count()</strong> phụ tùng</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            @foreach (var part in Model)
+            {
+                <div class="col">
+                    <div class="tech-panel h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="mb-3 text-center" style="overflow:hidden; border-radius:8px; background:#f8f9fa; height:160px; display:flex; align-items:center; justify-content:center;">
+                                @if (!string.IsNullOrEmpty(part.ThumbnailImageUrl))
+                                {
+                                    <img src="@part.ThumbnailImageUrl" alt="@part.Name" class="img-fluid"
+                                         style="max-height:155px; object-fit:contain; transition:transform 0.3s;"
+                                         onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                                }
+                                else
+                                {
+                                    <img src="/images/no-image.png" alt="Chưa có ảnh" class="img-fluid"
+                                         style="max-height:155px; object-fit:contain; opacity:0.4;" />
+                                }
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span class="badge bg-secondary" style="font-size:0.72rem;">@(part.CategoryMaster?.Name ?? part.Category)</span>
+                                @if (part.Status == "InStock")
+                                {
+                                    <span class="badge bg-success" style="font-size:0.72rem;">Còn hàng</span>
+                                }
+                                else if (part.Status == "Incoming")
+                                {
+                                    <span class="badge bg-warning text-dark" style="font-size:0.72rem;">Đang về</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger" style="font-size:0.72rem;">Hết hàng</span>
+                                }
+                            </div>
+                            <h5 style="font-weight:700; font-size:1rem; margin-bottom:0.3rem;">@part.Name</h5>
+                            <p class="text-muted mb-1" style="font-size:0.82rem;">Hãng: <strong>@(part.Brand?.Name ?? "N/A")</strong></p>
+                            @if (part.ManufactureYear.HasValue)
+                            {
+                                <p class="text-muted mb-0" style="font-size:0.82rem;">Năm SX: @part.ManufactureYear</p>
+                            }
+                        </div>
+                        <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center">
+                            <div class="text-danger fw-bold" style="font-size:1.1rem;">@string.Format("{0:N0}", part.Price) đ</div>
+                            <button class="btn-neon px-3 py-1" style="font-size:0.85rem;"
+                                    onclick="alert('Chức năng đặt hàng đang được phát triển!')">
+                                🛒 Đặt Mua
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div style="font-size:3rem; opacity:0.3;">🛠️</div>
+            <p class="text-muted mt-3">Không tìm thấy phụ tùng nào phù hợp.</p>
+            <a href="/parts" class="btn-neon text-decoration-none mt-2 d-inline-block">Xóa Lọc</a>
+        </div>
+    }
+</div>

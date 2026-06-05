@@ -1,7 +1,7 @@
 @model IEnumerable<AutoHub.Models.Entities.SparePart>
 
 @{
-    ViewData["Title"] = "Quan ly phu tung - AutoHub";
+    ViewData["Title"] = "Quản Lý Phụ Tùng - AutoHub Admin";
     Layout = "_AdminLayout";
 }
 
@@ -14,7 +14,7 @@
     <table class="table table-hover align-middle">
         <thead>
             <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
-                <th>Ten phu tung</th>
+                <th>Ảnh / Tên Phụ Tùng</th>
                 <th>Hang</th>
                 <th>Danh muc</th>
                 <th>Tuong thich xe</th>
@@ -30,11 +30,26 @@
             {
                 <tr>
                     <td>
-                        <div class="fw-bold">@part.Name</div>
-                        @if (part.ManufactureYear.HasValue)
-                        {
-                            <div class="text-muted" style="font-size:0.8rem;">Nam SX: @part.ManufactureYear</div>
+                        <div class="d-flex align-items-center gap-3">
+                            @if (!string.IsNullOrEmpty(part.ThumbnailImageUrl))
+                            {
+                                <img src="@part.ThumbnailImageUrl" alt="@part.Name"
+                                     style="width:56px; height:42px; object-fit:cover; border-radius:6px; border:1px solid #dee2e6; flex-shrink:0;" />
+                            }
+                            else
+                            {
+                                <div style="width:56px; height:42px; background:#f0f0f0; border-radius:6px; border:1px solid #dee2e6; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span style="font-size:1.2rem; opacity:0.4;">🛠️</span>
+                                </div>
                         }
+                            <div>
+                                <div class="fw-bold">@part.Name</div>
+                                @if (part.ManufactureYear.HasValue)
+                                {
+                                    <div class="text-muted" style="font-size:0.8rem;">Năm SX: @part.ManufactureYear</div>
+                                }
+                            </div>
+                        </div>
                     </td>
                     <td><span class="badge bg-secondary py-2 px-3">@(part.Brand?.Name ?? "N/A")</span></td>
                     <td><span class="badge bg-dark">@(part.CategoryMaster?.Name ?? part.Category)</span></td>

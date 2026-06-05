@@ -14,5 +14,7 @@ public class Service : BaseEntity
 
     public bool RequiresQuote { get; set; } = false;
 
+    public string? ThumbnailImageUrl { get; set; }
+
     public ProductCategory? Category { get; set; }
 }

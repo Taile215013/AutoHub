@@ -64,10 +64,10 @@
             <thead style="background: rgba(255,255,255,0.04);">
                 <tr class="text-muted">
                     <th class="px-4 py-3">#</th>
-                    <th class="py-3">Tên Dịch Vụ</th>
+                    <th class="py-3">Ảnh / Tên Dịch Vụ</th>
                     <th class="py-3">Loại Xe</th>
                     <th class="py-3">Đơn Giá</th>
-                    <th class="py-3">Loại GIá</th>
+                    <th class="py-3">Loại Giá</th>
                     <th class="py-3">Trạng Thái</th>
                     <th class="py-3 text-end px-4">Hành Động</th>
                 </tr>
@@ -80,7 +80,22 @@
                     {
                         <tr id="row-@s.Id">
                             <td class="px-4 text-muted" style="font-size:0.85rem;">@(stt++)</td>
-                            <td style="font-weight:700;">@s.ServiceName</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(s.ThumbnailImageUrl))
+                                    {
+                                        <img src="@s.ThumbnailImageUrl" alt="@s.ServiceName"
+                                             style="width:52px; height:40px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.15); flex-shrink:0;" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width:52px; height:40px; background:rgba(255,255,255,0.05); border-radius:6px; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                            <span style="font-size:1.1rem; opacity:0.3;">⚙️</span>
+                                        </div>
+                                    }
+                                    <span style="font-weight:700;">@s.ServiceName</span>
+                                </div>
+                            </td>
                             <td>
                                 <span class="badge bg-secondary text-uppercase" style="font-size:0.75rem; letter-spacing:0.5px;">
                                     @s.VehicleType
@@ -194,6 +209,18 @@
                             <label class="form-check-label text-white fw-bold" for="svcIsActive">Đang Hoạt Động</label>
                         </div>
                     </div>
+
+                    <!-- Ảnh thumbnail -->
+                    <div class="col-md-6">
+                        <label class="label-tech" style="color:#d4af37;">📷 Ảnh Thumbnail Dịch Vụ</label>
+                        <input type="file" id="svcThumbnail" accept="image/*"
+                               class="form-control input-premium w-100" style="border-color:#d4af37;" />
+                        <div class="mt-2 d-none text-center" id="svcThumbnailPreview">
+                            <img id="svcThumbnailImg" src="#" alt="Preview"
+                                 style="max-height:80px; max-width:160px; object-fit:cover; border-radius:6px; border:1px solid #d4af37;" />
+                        </div>
+                        <div class="mt-1" id="svcCurrentThumb"></div>
+                    </div>
                 </div>
 
                 <div id="modalError" class="mt-3 text-danger" style="font-size:0.85rem; display:none;"></div>
@@ -262,6 +289,9 @@
         document.getElementById('svcIsActive').checked = true;
         document.getElementById('priceFixed').checked = true;
         document.getElementById('modalError').style.display = 'none';
+        document.getElementById('svcThumbnail').value = '';
+        document.getElementById('svcThumbnailPreview').classList.add('d-none');
+        document.getElementById('svcCurrentThumb').innerHTML = '';
         togglePriceInput(false);
 
         if (id === 0) {
@@ -275,7 +305,7 @@
         document.getElementById('serviceModalTitle').textContent = '✏️ Chỉnh Sửa Dịch Vụ';
         document.getElementById('saveServiceBtn').textContent = 'Lưu Thay Đổi';
 
-        $.get('@Url.Action("GetService", "Admin")/' + id, function (res) {
+        $.get('@Url.Action("GetService", "Service")?id=' + id, function (res) {
             if (!res.success) { alert(res.message); return; }
             const d = res.data;
             document.getElementById('serviceId').value = d.id;
@@ -290,6 +320,14 @@
             } else {
                 document.getElementById('priceFixed').checked = true;
                 togglePriceInput(false);
+            }
+
+            // Hiển thị ảnh thumbnail hiện tại nếu có
+            if (d.thumbnailImageUrl) {
+                document.getElementById('svcCurrentThumb').innerHTML =
+                    `<div class="mt-1"><img src="${d.thumbnailImageUrl}" alt="Thumbnail hiện tại"
+                        style="max-height:60px; border-radius:5px; border:1px solid rgba(212,175,55,0.4);" />
+                    <small class="text-muted ms-2">Ảnh hiện tại</small></div>`;
             }
 
             $('#serviceModal').modal('show');
@@ -326,17 +364,23 @@
         btn.disabled = true;
         btn.textContent = 'Đang lưu...';
 
+        var formData = new FormData();
+        formData.append('Id', id);
+        formData.append('ServiceName', name);
+        formData.append('VehicleType', vehicleType);
+        formData.append('RequiresQuote', requiresQuote);
+        formData.append('IsActive', isActive);
+        if (!requiresQuote && basePrice) formData.append('BasePrice', basePrice);
+
+        var thumbFile = document.getElementById('svcThumbnail').files[0];
+        if (thumbFile) formData.append('thumbnailFile', thumbFile);
+
         $.ajax({
             url: '@Url.Action("SaveService", "Service")',
             method: 'POST',
-            data: {
-                Id: id,
-                ServiceName: name,
-                VehicleType: vehicleType,
-                BasePrice: basePrice,
-                RequiresQuote: requiresQuote,
-                IsActive: isActive
-            },
+            contentType: false,
+            processData: false,
+            data: formData,
             success: function (res) {
                 btn.disabled = false;
                 btn.textContent = id === 0 ? 'Thêm Dịch Vụ' : 'Lưu Thay Đổi';
@@ -357,13 +401,22 @@
                 const emptyRow = document.getElementById('emptyRow');
                 if (emptyRow) emptyRow.remove();
 
+                var thumbHtml = d.thumbnailImageUrl
+                    ? `<img src="${d.thumbnailImageUrl}" alt="${d.serviceName}" style="width:52px;height:40px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;" />`
+                    : `<div style="width:52px;height:40px;background:rgba(255,255,255,0.05);border-radius:6px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:1.1rem;opacity:0.3;">⚙️</span></div>`;
+
                 if (id === 0) {
                     // Thêm row mới vào đầu bảng
                     const rowCount = tbody.querySelectorAll('tr').length + 1;
                     const newRow = `
                         <tr id="row-${d.id}">
                             <td class="px-4 text-muted" style="font-size:0.85rem;">${rowCount}</td>
-                            <td style="font-weight:700;">${d.serviceName}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    ${thumbHtml}
+                                    <span style="font-weight:700;">${d.serviceName}</span>
+                                </div>
+                            </td>
                             <td><span class="badge bg-secondary text-uppercase" style="font-size:0.75rem;">${d.vehicleType || 'Tất cả'}</span></td>
                             <td>${renderPrice(d.requiresQuote, d.basePrice)}</td>
                             <td>${renderBadgeQuote(d.requiresQuote)}</td>
@@ -378,7 +431,7 @@
                     // Cập nhật row hiện tại
                     const row = document.getElementById('row-' + d.id);
                     if (row) {
-                        row.cells[1].innerHTML = `<span style="font-weight:700;">${d.serviceName}</span>`;
+                        row.cells[1].innerHTML = `<div class="d-flex align-items-center gap-3">${thumbHtml}<span style="font-weight:700;">${d.serviceName}</span></div>`;
                         row.cells[2].innerHTML = `<span class="badge bg-secondary text-uppercase" style="font-size:0.75rem;">${d.vehicleType || 'Tất cả'}</span>`;
                         row.cells[3].innerHTML = renderPrice(d.requiresQuote, d.basePrice);
                         row.cells[4].innerHTML = renderBadgeQuote(d.requiresQuote);
@@ -395,14 +448,43 @@
     }
 
     // =====================================================================
+    // PREVIEW ẢNH
+    // =====================================================================
+    $(document).ready(function () {
+        $('#svcThumbnail').on('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) { $('#svcThumbnailPreview').addClass('d-none'); return; }
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                $('#svcThumbnailImg').attr('src', ev.target.result);
+                $('#svcThumbnailPreview').removeClass('d-none');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        $('#svcAdditional').on('change', function (e) {
+            var container = $('#svcAdditionalPreview');
+            container.empty();
+            if (e.target.files.length === 0) { container.addClass('d-none'); return; }
+            container.removeClass('d-none');
+            Array.from(e.target.files).forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (ev) {
+                    container.append('<img src="' + ev.target.result + '" style="height:60px;width:80px;object-fit:cover;border-radius:5px;border:1px solid rgba(46,229,157,0.4);" />');
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    });
+
+    // =====================================================================
     // XÓA DỊCH VỤ
     // =====================================================================
-
     function deleteService(id, name) {
         if (!confirm(`Bạn chắc chắn muốn xóa dịch vụ:\n"${name}"?\n\nDịch vụ sẽ bị ẩn khỏi danh sách khách hàng.`)) return;
 
         $.ajax({
-            url: '@Url.Action("DeleteServiceAjax", "Admin")',
+            url: '@Url.Action("DeleteServiceAjax", "Service")',
             method: 'POST',
             data: { id: id },
             success: function (res) {

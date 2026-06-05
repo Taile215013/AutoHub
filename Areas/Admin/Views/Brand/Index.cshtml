@@ -51,9 +51,24 @@
                                 data-country="@brand.CountryId" 
                                 data-vehicle="@brand.IsVehicleBrand.ToString().ToLower()" 
                                 data-part="@brand.IsPartBrand.ToString().ToLower()" 
-                                data-toy="@brand.IsToyBrand.ToString().ToLower()">
+                                data-toy="@brand.IsToyBrand.ToString().ToLower()"
+                                data-image="@brand.ImageUrl">
                                 <td>
-                                    <div class="fw-bold fs-5 brand-name-cell">@brand.Name</div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(brand.ImageUrl))
+                                        {
+                                            <img src="@brand.ImageUrl" alt="@brand.Name"
+                                                 class="brand-logo-cell"
+                                                 style="width:42px; height:42px; object-fit:contain; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:#fff; flex-shrink:0; padding:3px;" />
+                                        }
+                                        else
+                                        {
+                                            <div style="width:42px; height:42px; background:rgba(255,255,255,0.06); border-radius:6px; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                                <span style="font-size:1.1rem; opacity:0.4;">🏷️</span>
+                                            </div>
+                                        }
+                                        <div class="fw-bold fs-5 brand-name-cell">@brand.Name</div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="badge bg-secondary py-2 px-3 brand-country-cell">@(brand.Country != null ? brand.Country.Name : "N/A")</span>
@@ -214,9 +229,15 @@
                                         data-vehicle="${brand.isVehicleBrand}" 
                                         data-part="${brand.isPartBrand}" 
                                         data-toy="${brand.isToyBrand}"
+                                        data-image="${brand.imageUrl || ''}"
                                         class="row-highlight-add">
                                         <td>
-                                            <div class="fw-bold fs-5 brand-name-cell">${brand.name}</div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                ${brand.imageUrl
+                                                    ? `<img src="${brand.imageUrl}" alt="${brand.name}" class="brand-logo-cell" style="width:42px;height:42px;object-fit:contain;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:#fff;flex-shrink:0;padding:3px;" />`
+                                                    : `<div style="width:42px;height:42px;background:rgba(255,255,255,0.06);border-radius:6px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:1.1rem;opacity:0.4;">🏷️</span></div>`}
+                                                <div class="fw-bold fs-5 brand-name-cell">${brand.name}</div>
+                                            </div>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary py-2 px-3 brand-country-cell">${brand.countryName}</span>
@@ -244,8 +265,15 @@
                                 $row.attr('data-vehicle', brand.isVehicleBrand);
                                 $row.attr('data-part', brand.isPartBrand);
                                 $row.attr('data-toy', brand.isToyBrand);
+                                if (brand.imageUrl) $row.attr('data-image', brand.imageUrl);
                                 
-                                $row.find('.brand-name-cell').text(brand.name);
+                                var logoHtml = brand.imageUrl
+                                    ? `<img src="${brand.imageUrl}" alt="${brand.name}" class="brand-logo-cell" style="width:42px;height:42px;object-fit:contain;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:#fff;flex-shrink:0;padding:3px;" />`
+                                    : ($row.attr('data-image')
+                                        ? `<img src="${$row.attr('data-image')}" alt="${brand.name}" class="brand-logo-cell" style="width:42px;height:42px;object-fit:contain;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:#fff;flex-shrink:0;padding:3px;" />`
+                                        : `<div style="width:42px;height:42px;background:rgba(255,255,255,0.06);border-radius:6px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:1.1rem;opacity:0.4;">🏷️</span></div>`);
+                                
+                                $row.find('td:first').html(`<div class="d-flex align-items-center gap-3">${logoHtml}<div class="fw-bold fs-5 brand-name-cell">${brand.name}</div></div>`);
                                 $row.find('.brand-country-cell').text(brand.countryName);
                                 $row.find('.brand-scopes-cell').html(scopesHtml);
                                 

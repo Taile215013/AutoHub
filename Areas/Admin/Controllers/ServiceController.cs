@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using AutoHub.Models.Entities;
 using AutoHub.Repositories;
 using AutoHub.Services;
@@ -14,15 +15,18 @@ namespace AutoHub.Areas.Admin.Controllers
         private readonly IServiceRepository _serviceRepository;
         private readonly ISystemDictionaryService _dictService;
         private readonly IMasterDataRepository _masterDataRepository;
+        private readonly IFileService _fileService;
 
         public ServiceController(
             IServiceRepository serviceRepository,
             ISystemDictionaryService dictService,
-            IMasterDataRepository masterDataRepository)
+            IMasterDataRepository masterDataRepository,
+            IFileService fileService)
         {
             _serviceRepository = serviceRepository;
             _dictService = dictService;
             _masterDataRepository = masterDataRepository;
+            _fileService = fileService;
         }
 
         public async Task<IActionResult> Index()
@@ -55,13 +59,17 @@ namespace AutoHub.Areas.Admin.Controllers
                     categoryName = service.Category?.Name,
                     basePrice = service.BasePrice,
                     requiresQuote = service.RequiresQuote,
-                    isActive = service.IsActive
+                    isActive = service.IsActive,
+                    thumbnailImageUrl = service.ThumbnailImageUrl
                 }
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveService(Service service, string? newCategory)
+        public async Task<IActionResult> SaveService(
+            Service service,
+            string? newCategory,
+            IFormFile? thumbnailFile)
         {
             if (string.IsNullOrWhiteSpace(service.ServiceName))
             {
@@ -79,6 +87,11 @@ namespace AutoHub.Areas.Admin.Controllers
                     {
                         var category = await _masterDataRepository.FindOrCreateCategoryAsync("Service", newCategory);
                         service.CategoryId = category?.Id;
+                    }
+
+                    if (thumbnailFile != null && thumbnailFile.Length > 0)
+                    {
+                        service.ThumbnailImageUrl = await _fileService.UploadThumbnailAsync(thumbnailFile, "services");
                     }
 
                     service.CreatedAt = DateTime.UtcNow;
@@ -106,6 +119,11 @@ namespace AutoHub.Areas.Admin.Controllers
                     existing.IsActive = service.IsActive;
                     existing.UpdatedAt = DateTime.UtcNow;
 
+                    if (thumbnailFile != null && thumbnailFile.Length > 0)
+                    {
+                        existing.ThumbnailImageUrl = await _fileService.UploadThumbnailAsync(thumbnailFile, "services");
+                    }
+
                     await _serviceRepository.UpdateAsync(existing);
                 }
 
@@ -126,7 +144,8 @@ namespace AutoHub.Areas.Admin.Controllers
                         categoryName = saved.Category?.Name,
                         basePrice = saved.BasePrice,
                         requiresQuote = saved.RequiresQuote,
-                        isActive = saved.IsActive
+                        isActive = saved.IsActive,
+                        thumbnailImageUrl = saved.ThumbnailImageUrl
                     }
                 });
             }

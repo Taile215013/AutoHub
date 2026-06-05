@@ -1,7 +1,7 @@
 @model IEnumerable<AutoHub.Models.Entities.Vehicle>
 
 @{
-    ViewData["Title"] = "Quan ly xe - AutoHub";
+    ViewData["Title"] = "Quản Lý Xe - AutoHub Admin";
     Layout = "_AdminLayout";
 }
 
@@ -14,7 +14,7 @@
     <table class="table table-hover align-middle">
         <thead>
             <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
-                <th>Ten xe</th>
+                <th>Ảnh / Tên Xe</th>
                 <th>Master data</th>
                 <th>Phan loai</th>
                 <th>Nhien lieu</th>
@@ -30,8 +30,23 @@
             {
                 <tr>
                     <td>
-                        <div class="fw-bold">@vehicle.Name</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Dong co: @vehicle.EngineType</div>
+                        <div class="d-flex align-items-center gap-3">
+                            @if (!string.IsNullOrEmpty(vehicle.ThumbnailImageUrl))
+                            {
+                                <img src="@vehicle.ThumbnailImageUrl" alt="@vehicle.Name"
+                                     style="width:56px; height:42px; object-fit:cover; border-radius:6px; border:1px solid #dee2e6; flex-shrink:0;" />
+                            }
+                            else
+                            {
+                                <div style="width:56px; height:42px; background:#f0f0f0; border-radius:6px; border:1px solid #dee2e6; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span style="font-size:1.2rem; opacity:0.4;">🚗</span>
+                                </div>
+                            }
+                            <div>
+                                <div class="fw-bold">@vehicle.Name</div>
+                                <div class="text-muted" style="font-size:0.8rem;">Động cơ: @vehicle.EngineType</div>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <div style="font-size:0.85rem;">
