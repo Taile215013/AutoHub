@@ -1,0 +1,21 @@
+@model AutoHub.Models.Entities.Employee
+@{
+    ViewData["Title"] = "Sửa Nhân Viên - AutoHub Admin";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">✏️ Sửa Nhân Viên</h1>
+    <a href="@Url.Action("Index", "Employee", new { area = "Admin" })" class="btn-neon text-decoration-none" style="border-color:#888;color:#888;">← Quay Lại</a>
+</div>
+
+<form method="post" action="@Url.Action("Edit", "Employee", new { area = "Admin", id = Model.Id })" enctype="multipart/form-data">
+    @await Html.PartialAsync("_EmployeeForm", Model)
+    <div class="tech-panel mt-4">
+        <button type="submit" class="btn-neon w-100 py-3" style="font-size:1rem;">💾 Lưu Thay Đổi</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_EmployeeFormScripts" />
+}

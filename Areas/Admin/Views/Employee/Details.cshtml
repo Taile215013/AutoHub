@@ -1,0 +1,144 @@
+@model AutoHub.Models.Entities.Employee
+@using System.Text.Json
+@{
+    ViewData["Title"] = $"{Model.LastName} {Model.FirstName} - AutoHub Admin";
+    Layout = "_AdminLayout";
+
+    var age = DateTime.Today.Year - Model.DateOfBirth.Year
+        - (DateTime.Today < Model.DateOfBirth.AddYears(DateTime.Today.Year - Model.DateOfBirth.Year) ? 1 : 0);
+
+    List<string> extraImages = new();
+    if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        try { extraImages = JsonSerializer.Deserialize<List<string>>(Model.ImageUrl) ?? new(); }
+        catch { }
+    }
+
+    double? bmi = null;
+    if (Model.HeightCm.HasValue && Model.WeightKg.HasValue && Model.HeightCm > 0)
+    {
+        double h = Model.HeightCm.Value / 100.0;
+        bmi = Math.Round((double)Model.WeightKg.Value / (h * h), 1);
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">📋 Hồ Sơ Nhân Viên</h1>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Edit", "Employee", new { area = "Admin", id = Model.Id })" class="btn-neon text-decoration-none">✏️ Sửa</a>
+        <a href="@Url.Action("Index", "Employee", new { area = "Admin" })" class="btn-neon text-decoration-none" style="border-color:#888;color:#888;">← Danh Sách</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {{!-- Cột trái: Avatar + thể trạng --}}
+    <div class="col-md-3">
+        <div class="tech-panel text-center p-4">
+            @if (!string.IsNullOrEmpty(Model.ThumbnailImageUrl))
+            {
+                <img src="@Model.ThumbnailImageUrl" alt="@Model.FirstName"
+                     style="width:140px;height:140px;object-fit:cover;border-radius:50%;border:3px solid rgba(212,175,55,0.5);" />
+            }
+            else
+            {
+                <div style="width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);border:3px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                    <span style="font-size:3rem;">👤</span>
+                </div>
+            }
+            <h4 class="mt-3 fw-bold">@Model.LastName @Model.FirstName</h4>
+            <p class="text-muted mb-2">@Model.Gender • @age tuổi</p>
+            @if (Model.IsActive)
+            {
+                <span class="badge rounded-pill px-3 py-1" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;">● Đang Làm Việc</span>
+            }
+            else
+            {
+                <span class="badge rounded-pill px-3 py-1" style="background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;">○ Nghỉ Việc</span>
+            }
+
+            @if (Model.HeightCm.HasValue || Model.WeightKg.HasValue)
+            {
+                <hr class="my-3 border-secondary" />
+                <div class="d-flex justify-content-around">
+                    @if (Model.HeightCm.HasValue)
+                    {
+                        <div>
+                            <div class="text-muted" style="font-size:0.75rem;">Chiều Cao</div>
+                            <div class="text-gradient-gold fw-bold">@Model.HeightCm cm</div>
+                        </div>
+                    }
+                    @if (Model.WeightKg.HasValue)
+                    {
+                        <div>
+                            <div class="text-muted" style="font-size:0.75rem;">Cân Nặng</div>
+                            <div class="text-success fw-bold">@Model.WeightKg kg</div>
+                        </div>
+                    }
+                    @if (bmi.HasValue)
+                    {
+                        <div>
+                            <div class="text-muted" style="font-size:0.75rem;">BMI</div>
+                            <div class="fw-bold">@bmi</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    {{!-- Cột phải: Thông tin chi tiết --}}
+    <div class="col-md-9">
+        <div class="tech-panel mb-4">
+            <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">📌 Thông Tin Cá Nhân</h5>
+            <div class="row g-3">
+                @{
+                    void InfoRow(string label, string? value)
+                    {
+                        <div class="col-md-6">
+                            <div class="text-muted" style="font-size:0.78rem;">@label</div>
+                            <div class="fw-semibold">@(string.IsNullOrEmpty(value) ? "—" : value)</div>
+                        </div>
+                    }
+                }
+                @{ InfoRow("Họ và Tên", $"{Model.LastName} {Model.FirstName}"); }
+                @{ InfoRow("Ngày Sinh", Model.DateOfBirth.ToString("dd/MM/yyyy")); }
+                @{ InfoRow("Giới Tính", Model.Gender); }
+                @{ InfoRow("Số Điện Thoại", Model.PhoneNumber); }
+                @{ InfoRow("Email", Model.Email); }
+                @{ InfoRow("CCCD", Model.NationalId); }
+                @{ InfoRow("Địa Chỉ", $"{Model.HouseNumber} {Model.StreetName}, {Model.Ward}, {Model.District}, {Model.City}".Trim()); }
+            </div>
+        </div>
+
+        <div class="tech-panel mb-4">
+            <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">💼 Công Việc</h5>
+            <div class="row g-3">
+                @{ InfoRow("Chức Vụ", Model.Position); }
+                @{ InfoRow("Lương Cứng", string.Format("{0:N0} đ/tháng", Model.BaseSalary)); }
+                @{ InfoRow("Ngày Tạo Hồ Sơ", Model.CreatedAt.ToString("dd/MM/yyyy")); }
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="col-12">
+                        <div class="text-muted" style="font-size:0.78rem;">Ghi Chú</div>
+                        <div class="fw-semibold" style="white-space:pre-line;">@Model.Notes</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (extraImages.Any())
+        {
+            <div class="tech-panel">
+                <h5 class="text-muted text-uppercase mb-3" style="font-size:0.8rem;letter-spacing:1px;">🖼️ Ảnh Kèm Theo</h5>
+                <div class="d-flex flex-wrap gap-3">
+                    @foreach (var img in extraImages)
+                    {
+                        <a href="@img" target="_blank">
+                            <img src="@img" style="width:110px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.15);" />
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

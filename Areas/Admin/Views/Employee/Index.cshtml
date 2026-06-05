@@ -1,0 +1,102 @@
+@model IEnumerable<AutoHub.Models.Entities.Employee>
+@{
+    ViewData["Title"] = "Quản Lý Nhân Viên - AutoHub Admin";
+    Layout = "_AdminLayout";
+    var positions = ViewBag.Positions as IEnumerable<AutoHub.Models.Entities.SystemDictionary>
+                    ?? new List<AutoHub.Models.Entities.SystemDictionary>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">👥 Nhân Viên</h1>
+        <p class="text-muted mb-0">@Model.Count() nhân viên trong hệ thống</p>
+    </div>
+    <a href="@Url.Action("Create", "Employee", new { area = "Admin" })" class="btn-neon text-decoration-none">+ Thêm Nhân Viên</a>
+</div>
+
+<div class="tech-panel p-0" style="overflow:hidden;">
+    <table class="table table-hover align-middle mb-0">
+        <thead style="background:rgba(255,255,255,0.04);">
+            <tr class="text-uppercase text-muted" style="font-size:0.78rem; letter-spacing:0.5px;">
+                <th class="px-4 py-3">Nhân Viên</th>
+                <th class="py-3">Liên Hệ</th>
+                <th class="py-3">Chức Vụ</th>
+                <th class="py-3">Lương Cứng</th>
+                <th class="py-3">Tuổi</th>
+                <th class="py-3">Trạng Thái</th>
+                <th class="py-3 text-end px-4">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var emp in Model)
+                {
+                    var age = DateTime.Today.Year - emp.DateOfBirth.Year
+                        - (DateTime.Today < emp.DateOfBirth.AddYears(DateTime.Today.Year - emp.DateOfBirth.Year) ? 1 : 0);
+                    var posLabel = positions.FirstOrDefault(p => p.Code == emp.Position)?.Value ?? emp.Position;
+
+                    <tr id="emp-row-@emp.Id">
+                        <td class="px-4">
+                            <div class="d-flex align-items-center gap-3">
+                                @if (!string.IsNullOrEmpty(emp.ThumbnailImageUrl))
+                                {
+                                    <img src="@emp.ThumbnailImageUrl" alt="@emp.FirstName"
+                                         style="width:44px;height:44px;object-fit:cover;border-radius:50%;border:2px solid rgba(212,175,55,0.4);flex-shrink:0;" />
+                                }
+                                else
+                                {
+                                    <div style="width:44px;height:44px;background:rgba(255,255,255,0.08);border-radius:50%;border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <span style="font-size:1.2rem;">👤</span>
+                                    </div>
+                                }
+                                <div>
+                                    <div class="fw-bold">@emp.LastName @emp.FirstName</div>
+                                    <div class="text-muted" style="font-size:0.8rem;">@emp.Gender</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.88rem;">@(emp.PhoneNumber ?? "—")</div>
+                            <div class="text-muted" style="font-size:0.78rem;">@(emp.Email ?? "")</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark text-uppercase" style="font-size:0.72rem;">@posLabel</span>
+                        </td>
+                        <td class="text-gradient-gold fw-bold">@string.Format("{0:N0}", emp.BaseSalary) đ</td>
+                        <td class="text-muted">@age tuổi</td>
+                        <td>
+                            @if (emp.IsActive)
+                            {
+                                <span class="badge rounded-pill px-3 py-1" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;font-size:0.72rem;">● Đang Làm</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill px-3 py-1" style="background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;font-size:0.72rem;">○ Nghỉ Việc</span>
+                            }
+                        </td>
+                        <td class="text-end px-4">
+                            <a href="@Url.Action("Details", "Employee", new { area = "Admin", id = emp.Id })"
+                               class="btn btn-sm btn-outline-info border-0 me-1" title="Xem chi tiết">📋</a>
+                            <a href="@Url.Action("Edit", "Employee", new { area = "Admin", id = emp.Id })"
+                               class="btn btn-sm btn-outline-warning border-0 me-1 fw-bold">Sửa</a>
+                            <form method="post" action="@Url.Action("Delete", "Employee", new { area = "Admin", id = emp.Id })"
+                                  style="display:inline;" onsubmit="return confirm('Xóa nhân viên @(emp.LastName) @(emp.FirstName)?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <div style="font-size:2.5rem;opacity:0.25;">👥</div>
+                        <p class="mt-2">Chưa có nhân viên nào. Thêm người đầu tiên!</p>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

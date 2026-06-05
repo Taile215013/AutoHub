@@ -71,14 +71,30 @@
                     </a>
                 </li>
 
-                 <!-- Mục Quản Lý Dịch Vụ -->
+                <!-- Mục Quản Lý Dịch Vụ -->
                 <li class="admin-menu-item @(currentController == "Service" ? "active" : "")">
                     <a href="@Url.Action("Index", "Service", new { area = "Admin" })">
                         <span>⚙️</span>
                         <span class="sidebar-text">Quản Lý Dịch Vụ</span>
                     </a>
                 </li>
-                
+
+                <!-- Mục Quản Lý Nhân Viên -->
+                <li class="admin-menu-item @(currentController == "Employee" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Employee", new { area = "Admin" })">
+                        <span>👥</span>
+                        <span class="sidebar-text">Quản Lý Nhân Viên</span>
+                    </a>
+                </li>
+
+                <!-- Mục Quản Lý Khách Hàng -->
+                <li class="admin-menu-item @(currentController == "Customer" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Customer", new { area = "Admin" })">
+                        <span>🧑‍💼</span>
+                        <span class="sidebar-text">Quản Lý Khách Hàng</span>
+                    </a>
+                </li>
+
                 <!-- Mục quay về giao diện Cửa hàng -->
                 <li class="admin-menu-item">
                     <a href="@Url.Action("Index", "Home", new { area = "" })">

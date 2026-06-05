@@ -97,7 +97,19 @@ IF OBJECT_ID('ProductCategories', 'U') IS NOT NULL DBCC CHECKIDENT ('ProductCate
         (N'BodyStyle', N'Underbone', N'Underbone (Xe số phổ thông - Xe máy)'),
         (N'BodyStyle', N'Sportbike', N'Sportbike (Mô tô thể thao - Xe máy)'),
         (N'BodyStyle', N'Nakedbike', N'Nakedbike (Mô tô đường phố - Xe máy)'),
-        (N'BodyStyle', N'Cruiser', N'Cruiser (Mô tô hành trình - Xe máy)')
+        (N'BodyStyle', N'Cruiser', N'Cruiser (Mô tô hành trình - Xe máy)'),
+        (N'EmployeePosition', N'GiamDoc',        N'Giám Đốc'),
+        (N'EmployeePosition', N'TruongPhongKD',  N'Trưởng Phòng Kinh Doanh'),
+        (N'EmployeePosition', N'NhanVienKD',     N'Nhân Viên Kinh Doanh'),
+        (N'EmployeePosition', N'KyThuatVien',    N'Kỹ Thuật Viên'),
+        (N'EmployeePosition', N'LeTan',          N'Lễ Tân'),
+        (N'EmployeePosition', N'KeToan',         N'Kế Toán'),
+        (N'EmployeePosition', N'BaoVe',          N'Bảo Vệ'),
+        (N'EmployeePosition', N'Marketing',      N'Marketing'),
+        (N'EmployeePosition', N'Media',          N'Media / Content'),
+        (N'EmployeePosition', N'Sales',          N'Sales'),
+        (N'EmployeePosition', N'TruongPhongKT',  N'Trưởng Phòng Kỹ Thuật'),
+        (N'EmployeePosition', N'NhanVienKho',    N'Nhân Viên Kho')
     ) AS TempTable(Type, Code, Value)
 )
 MERGE SystemDictionaries AS Target

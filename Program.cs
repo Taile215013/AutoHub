@@ -172,6 +172,7 @@ builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
 builder.Services.AddScoped<IBrandRepository, EfBrandRepository>();
 builder.Services.AddScoped<ISparePartRepository, EfSparePartRepository>();
 builder.Services.AddScoped<IMasterDataRepository, EfMasterDataRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
 
 // Đăng ký các Services (DI)
 builder.Services.AddScoped<ILocationService, LocationService>();

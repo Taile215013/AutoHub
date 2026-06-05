@@ -1,0 +1,110 @@
+@model IEnumerable<AutoHub.Models.Entities.User>
+@{
+    ViewData["Title"] = "Quản Lý Khách Hàng - AutoHub Admin";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">🧑‍💼 Khách Hàng</h1>
+        <p class="text-muted mb-0">@Model.Count() tài khoản đã đăng ký</p>
+    </div>
+</div>
+
+<div class="tech-panel p-0" style="overflow:hidden;">
+    <table class="table table-hover align-middle mb-0">
+        <thead style="background:rgba(255,255,255,0.04);">
+            <tr class="text-uppercase text-muted" style="font-size:0.78rem;letter-spacing:0.5px;">
+                <th class="px-4 py-3">Khách Hàng</th>
+                <th class="py-3">Liên Hệ</th>
+                <th class="py-3">Hạng</th>
+                <th class="py-3">Địa Chỉ</th>
+                <th class="py-3">Ngày Đăng Ký</th>
+                <th class="py-3">Trạng Thái</th>
+                <th class="py-3 text-end px-4">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var u in Model)
+                {
+                    <tr id="user-row-@u.Id">
+                        <td class="px-4">
+                            <div class="fw-bold">@u.LastName @u.FirstName</div>
+                            <div class="text-muted" style="font-size:0.8rem;">@@u.Username</div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.88rem;">@(u.PhoneNumber ?? "—")</div>
+                            <div class="text-muted" style="font-size:0.78rem;">@(u.Email ?? "")</div>
+                        </td>
+                        <td>
+                            @{
+                                var rankColor = u.RankLevel switch {
+                                    "Gold"   => "#d4af37",
+                                    "Silver" => "#aaa",
+                                    _        => "#cd7f32"
+                                };
+                            }
+                            <span class="badge rounded-pill px-3 py-1"
+                                  style="background:rgba(0,0,0,0.3);color:@rankColor;border:1px solid @rankColor;font-size:0.72rem;">
+                                @u.RankLevel
+                            </span>
+                        </td>
+                        <td style="font-size:0.82rem;">@u.District, @u.City</td>
+                        <td class="text-muted" style="font-size:0.82rem;">@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (!u.IsDeleted)
+                            {
+                                <span class="badge rounded-pill px-3 py-1" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;font-size:0.72rem;" id="status-@u.Id">● Hoạt Động</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill px-3 py-1" style="background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;font-size:0.72rem;" id="status-@u.Id">○ Đã Khóa</span>
+                            }
+                        </td>
+                        <td class="text-end px-4">
+                            <a href="@Url.Action("Details", "Customer", new { area = "Admin", id = u.Id })"
+                               class="btn btn-sm btn-outline-info border-0 me-1" title="Chi tiết">📋</a>
+                            <a href="@Url.Action("Edit", "Customer", new { area = "Admin", id = u.Id })"
+                               class="btn btn-sm btn-outline-warning border-0 me-1 fw-bold">Sửa</a>
+                            <button type="button" class="btn btn-sm border-0 fw-bold @(u.IsDeleted ? "btn-outline-success" : "btn-outline-secondary")"
+                                    onclick="toggleUser(@u.Id, this)" title="@(u.IsDeleted ? "Mở khóa" : "Khóa tài khoản")">
+                                @(u.IsDeleted ? "🔓" : "🔒")
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">Chưa có khách hàng nào đăng ký.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+function toggleUser(id, btn) {
+    var label = $(btn).closest('tr').find('[id^="status-"]');
+    $.ajax({
+        url: '@Url.Action("ToggleDisable", "Customer", new { area = "Admin" })',
+        method: 'POST',
+        data: { id: id },
+        success: function(res) {
+            if (!res.success) { alert('Lỗi!'); return; }
+            if (res.isDisabled) {
+                label.attr('style', 'background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;font-size:0.72rem;').text('○ Đã Khóa');
+                $(btn).removeClass('btn-outline-secondary').addClass('btn-outline-success').text('🔓');
+            } else {
+                label.attr('style', 'background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;font-size:0.72rem;').text('● Hoạt Động');
+                $(btn).removeClass('btn-outline-success').addClass('btn-outline-secondary').text('🔒');
+            }
+        }
+    });
+}
+</script>
+}

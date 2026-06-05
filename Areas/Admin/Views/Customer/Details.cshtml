@@ -1,0 +1,70 @@
+@model AutoHub.Models.Entities.User
+@{
+    ViewData["Title"] = $"{Model.LastName} {Model.FirstName} - Khách Hàng";
+    Layout = "_AdminLayout";
+    var age = Model.DateOfBirth.HasValue
+        ? DateTime.Today.Year - Model.DateOfBirth.Value.Year
+          - (DateTime.Today < Model.DateOfBirth.Value.AddYears(DateTime.Today.Year - Model.DateOfBirth.Value.Year) ? 1 : 0)
+        : (int?)null;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">👤 Chi Tiết Khách Hàng</h1>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Edit", "Customer", new { area = "Admin", id = Model.Id })" class="btn-neon text-decoration-none">✏️ Sửa</a>
+        <a href="@Url.Action("Index", "Customer", new { area = "Admin" })" class="btn-neon text-decoration-none" style="border-color:#888;color:#888;">← Danh Sách</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="tech-panel text-center p-4">
+            <div style="width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);border:3px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <span style="font-size:3rem;">🧑‍💼</span>
+            </div>
+            <h4 class="fw-bold">@Model.LastName @Model.FirstName</h4>
+            <p class="text-muted">@@Model.Username</p>
+            @{
+                var rankColor = Model.RankLevel switch { "Gold" => "#d4af37", "Silver" => "#aaa", _ => "#cd7f32" };
+            }
+            <span class="badge rounded-pill px-3 py-2 mb-2"
+                  style="background:rgba(0,0,0,0.3);color:@rankColor;border:1px solid @rankColor;">
+                🏅 @Model.RankLevel
+            </span>
+            <br />
+            @if (!Model.IsDeleted)
+            {
+                <span class="badge rounded-pill px-3 py-1 mt-1" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;">● Hoạt Động</span>
+            }
+            else
+            {
+                <span class="badge rounded-pill px-3 py-1 mt-1" style="background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;">○ Đã Khóa</span>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="tech-panel">
+            <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">📌 Thông Tin</h5>
+            <div class="row g-3">
+                @{
+                    void InfoRow(string label, string? value)
+                    {
+                        <div class="col-md-6">
+                            <div class="text-muted" style="font-size:0.78rem;">@label</div>
+                            <div class="fw-semibold">@(string.IsNullOrEmpty(value) ? "—" : value)</div>
+                        </div>
+                    }
+                }
+                @{ InfoRow("Họ và Tên", $"{Model.LastName} {Model.FirstName}"); }
+                @{ InfoRow("Giới Tính", Model.Gender); }
+                @{ InfoRow("Ngày Sinh", Model.DateOfBirth?.ToString("dd/MM/yyyy")); }
+                @{ InfoRow("Tuổi", age?.ToString()); }
+                @{ InfoRow("Số Điện Thoại", Model.PhoneNumber); }
+                @{ InfoRow("Email", Model.Email); }
+                @{ InfoRow("Địa Chỉ", $"{Model.HouseNumber} {Model.StreetName}, {Model.Ward}, {Model.District}, {Model.City}".Trim()); }
+                @{ InfoRow("Ngày Đăng Ký", Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")); }
+            </div>
+        </div>
+    </div>
+</div>

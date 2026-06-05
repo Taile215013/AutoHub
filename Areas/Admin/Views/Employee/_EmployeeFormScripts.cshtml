@@ -1,0 +1,113 @@
+<script>
+(function () {
+    // ── Tính tuổi ──────────────────────────────────────────────────────
+    function calcAge() {
+        var d = parseInt($('#dobDay').val()),
+            m = parseInt($('#dobMonth').val()),
+            y = parseInt($('#dobYear').val());
+        if (!d || !m || !y) return;
+        var today = new Date(), dob = new Date(y, m - 1, d);
+        var age = today.getFullYear() - dob.getFullYear();
+        if (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate())) age--;
+        $('#ageDisplay').text(age > 0 ? age : '—');
+    }
+    $('#dobDay, #dobMonth, #dobYear').on('change', calcAge);
+    calcAge();
+
+    // ── Chiều cao slider ↔ input ───────────────────────────────────────
+    $('#heightSlider').on('input', function () {
+        $('#heightInput').val(this.value);
+        $('#heightLabel').text(this.value + ' cm');
+        calcBmi();
+    });
+    $('#heightInput').on('input', function () {
+        $('#heightSlider').val(this.value);
+        $('#heightLabel').text(this.value + ' cm');
+        calcBmi();
+    });
+
+    // ── Cân nặng slider ↔ input ───────────────────────────────────────
+    $('#weightSlider').on('input', function () {
+        $('#weightInput').val(this.value);
+        $('#weightLabel').text(this.value + ' kg');
+        calcBmi();
+    });
+    $('#weightInput').on('input', function () {
+        $('#weightSlider').val(this.value);
+        $('#weightLabel').text(this.value + ' kg');
+        calcBmi();
+    });
+
+    // ── Tính BMI ──────────────────────────────────────────────────────
+    function calcBmi() {
+        var h = parseFloat($('#heightInput').val()) / 100;
+        var w = parseFloat($('#weightInput').val());
+        if (!h || !w || h <= 0) { $('#bmiDisplay').text('—'); return; }
+        var bmi = (w / (h * h)).toFixed(1);
+        var color = bmi < 18.5 ? '#60a5fa' : bmi < 25 ? '#2ee59d' : bmi < 30 ? '#fbbf24' : '#ff5050';
+        $('#bmiDisplay').css('color', color).text(bmi);
+    }
+    calcBmi();
+
+    // ── Mousewheel trên số input (height/weight) ──────────────────────
+    $('#heightInput, #weightInput').on('wheel', function (e) {
+        e.preventDefault();
+        var step  = parseFloat($(this).attr('step') || 1);
+        var val   = parseFloat($(this).val()) || 0;
+        var delta = e.originalEvent.deltaY < 0 ? step : -step;
+        var min   = parseFloat($(this).attr('min') || 0);
+        var max   = parseFloat($(this).attr('max') || 9999);
+        var newVal = Math.min(max, Math.max(min, val + delta));
+        $(this).val(newVal).trigger('input');
+    });
+
+    // ── Location AJAX ─────────────────────────────────────────────────
+    $('#citySelect').on('change', function () {
+        var city = $(this).val();
+        $('#districtSelect').html('<option value="">-- Đang tải... --</option>').prop('disabled', true);
+        $('#wardSelect').html('<option value="">-- Chọn phường --</option>').prop('disabled', true);
+        if (!city) return;
+        $.getJSON('@Url.Action("GetDistricts", "Home", new { area = "" })', { city: city }, function (data) {
+            var opts = '<option value="">-- Chọn quận/huyện --</option>';
+            $.each(data, function (_, v) { opts += '<option value="' + v + '">' + v + '</option>'; });
+            $('#districtSelect').html(opts).prop('disabled', false);
+        });
+    });
+
+    $('#districtSelect').on('change', function () {
+        var district = $(this).val();
+        $('#wardSelect').html('<option value="">-- Đang tải... --</option>').prop('disabled', true);
+        if (!district) return;
+        $.getJSON('@Url.Action("GetWards", "Home", new { area = "" })', { district: district }, function (data) {
+            var opts = '<option value="">-- Chọn phường/xã --</option>';
+            $.each(data, function (_, v) { opts += '<option value="' + v + '">' + v + '</option>'; });
+            $('#wardSelect').html(opts).prop('disabled', false);
+        });
+    });
+
+    // ── Preview ảnh đại diện ──────────────────────────────────────────
+    $('#thumbnailInput').on('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            $('#avatarPreview').attr('src', ev.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ── Preview nhiều ảnh kèm theo ────────────────────────────────────
+    $('#imageFilesInput').on('change', function (e) {
+        var container = $('#imageFilesPreview').empty();
+        Array.from(e.target.files).forEach(function (file) {
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                container.append(
+                    '<img src="' + ev.target.result + '" style="width:90px;height:70px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.15);" />'
+                );
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+})();
+</script>

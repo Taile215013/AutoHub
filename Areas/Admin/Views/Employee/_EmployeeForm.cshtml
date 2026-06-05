@@ -1,0 +1,258 @@
+@model AutoHub.Models.Entities.Employee
+@{
+    var positions = ViewBag.Positions as IEnumerable<AutoHub.Models.Entities.SystemDictionary> ?? new List<AutoHub.Models.Entities.SystemDictionary>();
+    var cities    = ViewBag.Cities    as List<string> ?? new List<string>();
+    var districts = ViewBag.Districts as List<string> ?? new List<string>();
+    var wards     = ViewBag.Wards     as List<string> ?? new List<string>();
+    var existingImages = ViewBag.ExistingImages as List<string> ?? new List<string>();
+
+    var dob     = Model?.DateOfBirth == default ? DateTime.Today.AddYears(-25) : Model!.DateOfBirth;
+    var isEdit  = (Model?.Id ?? 0) > 0;
+}
+
+@* ══════════════════════════════════════════════════════════════
+   SECTION 1 — ẢNH & THÔNG TIN CÁ NHÂN
+══════════════════════════════════════════════════════════════ *@
+<div class="tech-panel mb-4">
+    <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">📷 Ảnh & Thông Tin Cá Nhân</h5>
+    <div class="row g-4">
+
+        {{!-- Avatar --}}
+        <div class="col-md-3 text-center">
+            <div id="avatarPreviewWrap" style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:3px solid rgba(212,175,55,0.4);background:rgba(255,255,255,0.05);margin:0 auto 12px;">
+                @if (!string.IsNullOrEmpty(Model?.ThumbnailImageUrl))
+                {
+                    <img id="avatarPreview" src="@Model.ThumbnailImageUrl" style="width:100%;height:100%;object-fit:cover;" />
+                }
+                else
+                {
+                    <img id="avatarPreview" src="/images/avatar-placeholder.png" style="width:100%;height:100%;object-fit:cover;"
+                         onerror="this.src='https://ui-avatars.com/api/?name=NV&background=2a2a35&color=d4af37&size=120'" />
+                }
+            </div>
+            <label class="label-tech mb-1" style="color:#d4af37;font-size:0.75rem;">Ảnh Đại Diện</label>
+            <input type="file" name="thumbnailFile" id="thumbnailInput" accept="image/*"
+                   class="form-control input-premium" style="border-color:#d4af37;font-size:0.8rem;" />
+        </div>
+
+        <div class="col-md-9">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="label-tech">Họ <span class="text-danger">*</span></label>
+                    <input type="text" name="LastName" value="@Model?.LastName" class="form-control input-premium" required placeholder="Nguyễn" />
+                </div>
+                <div class="col-md-4">
+                    <label class="label-tech">Tên <span class="text-danger">*</span></label>
+                    <input type="text" name="FirstName" value="@Model?.FirstName" class="form-control input-premium" required placeholder="Văn A" />
+                </div>
+                <div class="col-md-4">
+                    <label class="label-tech">Giới Tính <span class="text-danger">*</span></label>
+                    <select name="Gender" class="form-select input-premium" required>
+                        <option value="">-- Chọn --</option>
+                        <option value="Nam"    selected="@(Model?.Gender == "Nam"    ? "selected" : null)">Nam</option>
+                        <option value="Nữ"     selected="@(Model?.Gender == "Nữ"     ? "selected" : null)">Nữ</option>
+                        <option value="Khác"   selected="@(Model?.Gender == "Khác"   ? "selected" : null)">Khác</option>
+                    </select>
+                </div>
+
+                {{!-- Ngày sinh --}}
+                <div class="col-md-6">
+                    <label class="label-tech">Ngày Sinh <span class="text-danger">*</span></label>
+                    <div class="d-flex gap-2">
+                        <select name="dobDay" id="dobDay" class="form-select input-premium" style="width:80px;flex-shrink:0;">
+                            @for (int d = 1; d <= 31; d++)
+                            {
+                                <option value="@d" selected="@(dob.Day == d ? "selected" : null)">@d</option>
+                            }
+                        </select>
+                        <select name="dobMonth" id="dobMonth" class="form-select input-premium" style="width:90px;flex-shrink:0;">
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <option value="@m" selected="@(dob.Month == m ? "selected" : null)">Tháng @m</option>
+                            }
+                        </select>
+                        <select name="dobYear" id="dobYear" class="form-select input-premium">
+                            @for (int y = DateTime.Today.Year - 65; y <= DateTime.Today.Year - 16; y++)
+                            {
+                                <option value="@y" selected="@(dob.Year == y ? "selected" : null)">@y</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="p-3 rounded w-100 text-center" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);">
+                        <div class="text-muted" style="font-size:0.75rem;">Tuổi</div>
+                        <div class="text-gradient-gold fw-bold fs-4" id="ageDisplay">—</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label-tech">Số Điện Thoại</label>
+                    <input type="tel" name="PhoneNumber" value="@Model?.PhoneNumber" class="form-control input-premium" placeholder="0912 345 678" />
+                </div>
+                <div class="col-md-6">
+                    <label class="label-tech">Email</label>
+                    <input type="email" name="Email" value="@Model?.Email" class="form-control input-premium" placeholder="nhanvien@autohub.vn" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label-tech">CCCD / ID Person</label>
+                    <input type="text" name="NationalId" value="@Model?.NationalId" class="form-control input-premium" placeholder="012345678901" maxlength="12" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* ══════════════════════════════════════════════════════════════
+   SECTION 2 — THỂ TRẠNG
+══════════════════════════════════════════════════════════════ *@
+<div class="tech-panel mb-4">
+    <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">📏 Thể Trạng</h5>
+    <div class="row g-4 align-items-center">
+
+        <div class="col-md-5">
+            <label class="label-tech">Chiều Cao (cm)</label>
+            <div class="d-flex align-items-center gap-3">
+                <input type="number" name="HeightCm" id="heightInput"
+                       value="@(Model?.HeightCm ?? 170)"
+                       min="100" max="250" step="1"
+                       class="form-control input-premium text-center fw-bold"
+                       style="font-size:1.4rem;max-width:120px;" />
+                <input type="range" id="heightSlider" min="100" max="250"
+                       value="@(Model?.HeightCm ?? 170)"
+                       class="form-range flex-grow-1" style="accent-color:#d4af37;" />
+                <span class="text-gradient-gold fw-bold" style="min-width:40px;" id="heightLabel">@(Model?.HeightCm ?? 170) cm</span>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <label class="label-tech">Cân Nặng (kg)</label>
+            <div class="d-flex align-items-center gap-3">
+                <input type="number" name="WeightKg" id="weightInput"
+                       value="@(Model?.WeightKg ?? 60)"
+                       min="30" max="200" step="0.5"
+                       class="form-control input-premium text-center fw-bold"
+                       style="font-size:1.4rem;max-width:120px;" />
+                <input type="range" id="weightSlider" min="30" max="200" step="0.5"
+                       value="@(Model?.WeightKg ?? 60)"
+                       class="form-range flex-grow-1" style="accent-color:#2ee59d;" />
+                <span class="text-success fw-bold" style="min-width:40px;" id="weightLabel">@(Model?.WeightKg ?? 60) kg</span>
+            </div>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <div class="p-3 rounded w-100 text-center" style="background:rgba(46,229,157,0.08);border:1px solid rgba(46,229,157,0.25);">
+                <div class="text-muted" style="font-size:0.72rem;">BMI</div>
+                <div class="text-success fw-bold fs-5" id="bmiDisplay">—</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* ══════════════════════════════════════════════════════════════
+   SECTION 3 — ĐỊA CHỈ
+══════════════════════════════════════════════════════════════ *@
+<div class="tech-panel mb-4">
+    <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">📍 Địa Chỉ Thường Trú</h5>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label class="label-tech">Số Nhà</label>
+            <input type="text" name="HouseNumber" value="@Model?.HouseNumber" class="form-control input-premium" placeholder="123" />
+        </div>
+        <div class="col-md-9">
+            <label class="label-tech">Tên Đường</label>
+            <input type="text" name="StreetName" value="@Model?.StreetName" class="form-control input-premium" placeholder="Đường Quang Trung" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="label-tech">Tỉnh / Thành Phố</label>
+            <select name="City" id="citySelect" class="form-select input-premium">
+                <option value="">-- Chọn --</option>
+                @foreach (var c in cities)
+                {
+                    <option value="@c" selected="@(Model?.City == c ? "selected" : null)">@c</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="label-tech">Quận / Huyện</label>
+            <select name="District" id="districtSelect" class="form-select input-premium">
+                <option value="">-- Chọn --</option>
+                @foreach (var d in districts)
+                {
+                    <option value="@d" selected="@(Model?.District == d ? "selected" : null)">@d</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="label-tech">Phường / Xã</label>
+            <select name="Ward" id="wardSelect" class="form-select input-premium">
+                <option value="">-- Chọn --</option>
+                @foreach (var w in wards)
+                {
+                    <option value="@w" selected="@(Model?.Ward == w ? "selected" : null)">@w</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+@* ══════════════════════════════════════════════════════════════
+   SECTION 4 — CÔNG VIỆC & LƯƠNG
+══════════════════════════════════════════════════════════════ *@
+<div class="tech-panel mb-4">
+    <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">💼 Công Việc & Lương</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="label-tech">Chức Vụ <span class="text-danger">*</span></label>
+            <select name="Position" class="form-select input-premium" required>
+                <option value="">-- Chọn chức vụ --</option>
+                @foreach (var pos in positions)
+                {
+                    <option value="@pos.Code" selected="@(Model?.Position == pos.Code ? "selected" : null)">@pos.Value</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="label-tech">Lương Cứng (VNĐ/tháng) <span class="text-danger">*</span></label>
+            <input type="number" name="BaseSalary" value="@(Model?.BaseSalary ?? 0)"
+                   min="0" step="500000" class="form-control input-premium" required />
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check form-switch ms-2 mb-2">
+                <input class="form-check-input" type="checkbox" name="IsActive" id="isActiveCheck" value="true"
+                       @(Model == null || Model.IsActive ? "checked" : "") />
+                <label class="form-check-label fw-bold" for="isActiveCheck">Đang Làm Việc</label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label class="label-tech">Ghi Chú</label>
+            <textarea name="Notes" rows="3" class="form-control input-premium" placeholder="Ghi chú thêm về nhân viên...">@Model?.Notes</textarea>
+        </div>
+    </div>
+</div>
+
+@* ══════════════════════════════════════════════════════════════
+   SECTION 5 — ẢNH KÈM THEO
+══════════════════════════════════════════════════════════════ *@
+<div class="tech-panel mb-4">
+    <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">🖼️ Ảnh Kèm Theo (Nhiều Ảnh)</h5>
+
+    @if (existingImages.Any())
+    {
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            @foreach (var img in existingImages)
+            {
+                <img src="@img" style="width:90px;height:70px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.15);" />
+            }
+        </div>
+    }
+
+    <input type="file" name="imageFiles" id="imageFilesInput" accept="image/*" multiple
+           class="form-control input-premium" style="border-color:rgba(46,229,157,0.5);" />
+    <div class="mt-3 d-flex flex-wrap gap-2" id="imageFilesPreview"></div>
+</div>

@@ -1,0 +1,80 @@
+@model AutoHub.Models.Entities.User
+@{
+    ViewData["Title"] = "Sửa Khách Hàng - AutoHub Admin";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">✏️ Sửa Tài Khoản Khách Hàng</h1>
+    <a href="@Url.Action("Index", "Customer", new { area = "Admin" })" class="btn-neon text-decoration-none" style="border-color:#888;color:#888;">← Quay Lại</a>
+</div>
+
+<form method="post" action="@Url.Action("Edit", "Customer", new { area = "Admin", id = Model.Id })">
+    <div class="tech-panel mb-4">
+        <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">📌 Thông Tin Cá Nhân</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="label-tech">Họ</label>
+                <input type="text" name="LastName" value="@Model.LastName" class="form-control input-premium" required />
+            </div>
+            <div class="col-md-3">
+                <label class="label-tech">Tên</label>
+                <input type="text" name="FirstName" value="@Model.FirstName" class="form-control input-premium" required />
+            </div>
+            <div class="col-md-3">
+                <label class="label-tech">Giới Tính</label>
+                <select name="Gender" class="form-select input-premium">
+                    <option value="Nam"  selected="@(Model.Gender == "Nam"  ? "selected" : null)">Nam</option>
+                    <option value="Nữ"   selected="@(Model.Gender == "Nữ"   ? "selected" : null)">Nữ</option>
+                    <option value="Khác" selected="@(Model.Gender == "Khác" ? "selected" : null)">Khác</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="label-tech">Hạng Thành Viên</label>
+                <select name="RankLevel" class="form-select input-premium">
+                    <option value="Bronze" selected="@(Model.RankLevel == "Bronze" ? "selected" : null)">Bronze</option>
+                    <option value="Silver" selected="@(Model.RankLevel == "Silver" ? "selected" : null)">Silver</option>
+                    <option value="Gold"   selected="@(Model.RankLevel == "Gold"   ? "selected" : null)">Gold</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="label-tech">Số Điện Thoại</label>
+                <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control input-premium" />
+            </div>
+            <div class="col-md-6">
+                <label class="label-tech">Email</label>
+                <input type="email" name="Email" value="@Model.Email" class="form-control input-premium" />
+            </div>
+        </div>
+    </div>
+
+    <div class="tech-panel mb-4">
+        <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">📍 Địa Chỉ</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="label-tech">Số Nhà</label>
+                <input type="text" name="HouseNumber" value="@Model.HouseNumber" class="form-control input-premium" />
+            </div>
+            <div class="col-md-9">
+                <label class="label-tech">Tên Đường</label>
+                <input type="text" name="StreetName" value="@Model.StreetName" class="form-control input-premium" />
+            </div>
+            <div class="col-md-4">
+                <label class="label-tech">Phường / Xã</label>
+                <input type="text" name="Ward" value="@Model.Ward" class="form-control input-premium" />
+            </div>
+            <div class="col-md-4">
+                <label class="label-tech">Quận / Huyện</label>
+                <input type="text" name="District" value="@Model.District" class="form-control input-premium" />
+            </div>
+            <div class="col-md-4">
+                <label class="label-tech">Tỉnh / Thành Phố</label>
+                <input type="text" name="City" value="@Model.City" class="form-control input-premium" />
+            </div>
+        </div>
+    </div>
+
+    <div class="tech-panel">
+        <button type="submit" class="btn-neon w-100 py-3">💾 Lưu Thay Đổi</button>
+    </div>
+</form>
