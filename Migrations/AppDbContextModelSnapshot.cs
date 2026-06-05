@@ -36,6 +36,9 @@ namespace AutoHub.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -236,6 +239,48 @@ namespace AutoHub.Migrations
                     b.ToTable("OrderDetails");
                 });
 
+            modelBuilder.Entity("AutoHub.Models.Entities.ProductCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CategoryType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentCategoryId");
+
+                    b.HasIndex("CategoryType", "Code")
+                        .IsUnique();
+
+                    b.ToTable("ProductCategories");
+                });
+
             modelBuilder.Entity("AutoHub.Models.Entities.Service", b =>
                 {
                     b.Property<int>("Id")
@@ -247,6 +292,9 @@ namespace AutoHub.Migrations
                     b.Property<decimal?>("BasePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -273,6 +321,8 @@ namespace AutoHub.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Services");
                 });
 
@@ -284,12 +334,18 @@ namespace AutoHub.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdditionalImages")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("CostPrice")
                         .HasPrecision(18, 2)
@@ -304,6 +360,9 @@ namespace AutoHub.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -312,8 +371,15 @@ namespace AutoHub.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ThumbnailImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -322,7 +388,51 @@ namespace AutoHub.Migrations
 
                     b.HasIndex("BrandId");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("SpareParts");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.SparePartCompatibility", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SparePartId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("VehicleModelYearId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleNameId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VehicleVariantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SparePartId");
+
+                    b.HasIndex("VehicleModelYearId");
+
+                    b.HasIndex("VehicleNameId");
+
+                    b.HasIndex("VehicleVariantId");
+
+                    b.ToTable("SparePartCompatibilities");
                 });
 
             modelBuilder.Entity("AutoHub.Models.Entities.SystemDictionary", b =>
@@ -449,6 +559,9 @@ namespace AutoHub.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdditionalImages")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BodyStyle")
                         .HasColumnType("nvarchar(max)");
 
@@ -496,6 +609,9 @@ namespace AutoHub.Migrations
                     b.Property<int>("SeatingCapacity")
                         .HasColumnType("int");
 
+                    b.Property<string>("ThumbnailImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Transmission")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -503,9 +619,18 @@ namespace AutoHub.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("VehicleModelYearId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VehicleNameId")
+                        .HasColumnType("int");
+
                     b.Property<string>("VehicleType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("VehicleVariantId")
+                        .HasColumnType("int");
 
                     b.Property<double?>("Weight")
                         .HasColumnType("float");
@@ -513,6 +638,12 @@ namespace AutoHub.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
+
+                    b.HasIndex("VehicleModelYearId");
+
+                    b.HasIndex("VehicleNameId");
+
+                    b.HasIndex("VehicleVariantId");
 
                     b.ToTable("Vehicles");
                 });
@@ -546,6 +677,118 @@ namespace AutoHub.Migrations
                     b.HasIndex("VehicleId");
 
                     b.ToTable("VehicleColors");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleModelYear", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VehicleVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleVariantId", "Year")
+                        .IsUnique();
+
+                    b.ToTable("VehicleModelYears");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleName", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BodyStyle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId", "NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("VehicleNames");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("EngineCapacity")
+                        .HasColumnType("float");
+
+                    b.Property<string>("EngineType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VehicleNameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleNameId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("VehicleVariants");
                 });
 
             modelBuilder.Entity("AutoHub.Models.Entities.Brand", b =>
@@ -601,6 +844,26 @@ namespace AutoHub.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("AutoHub.Models.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.ProductCategory", "ParentCategory")
+                        .WithMany("ChildCategories")
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentCategory");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.Service", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.ProductCategory", "Category")
+                        .WithMany("Services")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("AutoHub.Models.Entities.SparePart", b =>
                 {
                     b.HasOne("AutoHub.Models.Entities.Brand", "Brand")
@@ -609,7 +872,47 @@ namespace AutoHub.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AutoHub.Models.Entities.ProductCategory", "CategoryMaster")
+                        .WithMany("SpareParts")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Brand");
+
+                    b.Navigation("CategoryMaster");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.SparePartCompatibility", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.SparePart", "SparePart")
+                        .WithMany("Compatibilities")
+                        .HasForeignKey("SparePartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AutoHub.Models.Entities.VehicleModelYear", "VehicleModelYear")
+                        .WithMany("SparePartCompatibilities")
+                        .HasForeignKey("VehicleModelYearId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AutoHub.Models.Entities.VehicleName", "VehicleName")
+                        .WithMany("SparePartCompatibilities")
+                        .HasForeignKey("VehicleNameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AutoHub.Models.Entities.VehicleVariant", "VehicleVariant")
+                        .WithMany("SparePartCompatibilities")
+                        .HasForeignKey("VehicleVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("SparePart");
+
+                    b.Navigation("VehicleModelYear");
+
+                    b.Navigation("VehicleName");
+
+                    b.Navigation("VehicleVariant");
                 });
 
             modelBuilder.Entity("AutoHub.Models.Entities.Vehicle", b =>
@@ -620,7 +923,28 @@ namespace AutoHub.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AutoHub.Models.Entities.VehicleModelYear", "VehicleModelYear")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleModelYearId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AutoHub.Models.Entities.VehicleName", "VehicleNameMaster")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleNameId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AutoHub.Models.Entities.VehicleVariant", "VehicleVariant")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Brand");
+
+                    b.Navigation("VehicleModelYear");
+
+                    b.Navigation("VehicleNameMaster");
+
+                    b.Navigation("VehicleVariant");
                 });
 
             modelBuilder.Entity("AutoHub.Models.Entities.VehicleColor", b =>
@@ -634,9 +958,44 @@ namespace AutoHub.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleModelYear", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.VehicleVariant", "VehicleVariant")
+                        .WithMany("ModelYears")
+                        .HasForeignKey("VehicleVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("VehicleVariant");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleName", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.Brand", "Brand")
+                        .WithMany("VehicleNames")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleVariant", b =>
+                {
+                    b.HasOne("AutoHub.Models.Entities.VehicleName", "VehicleName")
+                        .WithMany("Variants")
+                        .HasForeignKey("VehicleNameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("VehicleName");
+                });
+
             modelBuilder.Entity("AutoHub.Models.Entities.Brand", b =>
                 {
                     b.Navigation("SpareParts");
+
+                    b.Navigation("VehicleNames");
 
                     b.Navigation("Vehicles");
                 });
@@ -656,9 +1015,48 @@ namespace AutoHub.Migrations
                     b.Navigation("OrderDetails");
                 });
 
+            modelBuilder.Entity("AutoHub.Models.Entities.ProductCategory", b =>
+                {
+                    b.Navigation("ChildCategories");
+
+                    b.Navigation("Services");
+
+                    b.Navigation("SpareParts");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.SparePart", b =>
+                {
+                    b.Navigation("Compatibilities");
+                });
+
             modelBuilder.Entity("AutoHub.Models.Entities.Vehicle", b =>
                 {
                     b.Navigation("Colors");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleModelYear", b =>
+                {
+                    b.Navigation("SparePartCompatibilities");
+
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleName", b =>
+                {
+                    b.Navigation("SparePartCompatibilities");
+
+                    b.Navigation("Variants");
+
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("AutoHub.Models.Entities.VehicleVariant", b =>
+                {
+                    b.Navigation("ModelYears");
+
+                    b.Navigation("SparePartCompatibilities");
+
+                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

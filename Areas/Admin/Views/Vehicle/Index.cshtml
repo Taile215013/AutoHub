@@ -1,60 +1,71 @@
 @model IEnumerable<AutoHub.Models.Entities.Vehicle>
 
 @{
-    ViewData["Title"] = "Hệ Thống Quản Trị - AutoHub";
+    ViewData["Title"] = "Quan ly xe - AutoHub";
     Layout = "_AdminLayout";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-5">
-    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Kho Xe Hơi</h1>
-    <a href="@Url.Action("Create", "Admin")" class="btn-neon text-decoration-none">Thêm Xe Mới</a>
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quan ly kho xe</h1>
+    <a href="@Url.Action("Create", "Vehicle", new { area = "Admin" })" class="btn-neon text-decoration-none">Them xe moi</a>
 </div>
 
-            <div class="tech-panel">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
-                            <th>Tên Dòng Xe</th>
-                            <th>Phân Loại</th>
-                            <th>Nhiên Liệu</th>
-                            <th>Giá Thu Vào</th>
-                            <th>Giá Bán Ra</th>
-             >Tồn Kho</th>
-                            <th>Màu Sắc</th>
-                            <th class="text-end">Thao Tác</th>
-                        </tr>               <th
-                    </thead>
-                    <tbody>
-                        @foreach (var vehicle in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="fw-bold">@vehicle.Name</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">Động cơ: @vehicle.EngineType</div>
-                                </td>
-                                <td><span class="badge bg-dark">@vehicle.VehicleType</span></td>
-                                <td>@vehicle.FuelType</td>
-                                <td class="text-secondary fw-semibold">@string.Format("{0:N0}", vehicle.PurchasePrice) đ</td>
-                                <td class="text-danger fw-bold">@string.Format("{0:N0}", vehicle.CurrentPrice) đ</td>
-                                <td>@(vehicle.Quantity.HasValue ? $"{vehicle.Quantity.Value} chiếc" : "Hết / Sắp về")</td>
-                                <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @foreach (var color in vehicle.Colors)
-                                        {
-                                            <span class="badge bg-secondary" style="font-size:0.75rem;">@color.ColorName</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="text-end">
-                                    <a href="@Url.Action("Edit", "Admin", new { id = vehicle.Id })" class="btn btn-sm btn-outline-light border-secondary text-dark text-decoration-none">Sửa </a>
-
-                                    <form method="post" action="@Url.Action("Delete", "Admin", new { id = vehicle.Id })" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa xe này?')">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
+<div class="tech-panel">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
+                <th>Ten xe</th>
+                <th>Master data</th>
+                <th>Phan loai</th>
+                <th>Nhien lieu</th>
+                <th>Gia thu vao</th>
+                <th>Gia ban ra</th>
+                <th>Ton kho</th>
+                <th>Mau sac</th>
+                <th class="text-end">Thao tac</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vehicle in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-bold">@vehicle.Name</div>
+                        <div class="text-muted" style="font-size:0.8rem;">Dong co: @vehicle.EngineType</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.85rem;">
+                            <div>@(vehicle.VehicleNameMaster?.Name ?? "Chua gan ten goc")</div>
+                            <div class="text-muted">
+                                @(vehicle.VehicleVariant?.Name ?? "Chua co phien ban")
+                                @if (vehicle.VehicleModelYear != null)
+                                {
+                                    <span> - @vehicle.VehicleModelYear.Year</span>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-dark">@vehicle.VehicleType</span></td>
+                    <td>@vehicle.FuelType</td>
+                    <td class="text-secondary fw-semibold">@string.Format("{0:N0}", vehicle.PurchasePrice) d</td>
+                    <td class="text-danger fw-bold">@string.Format("{0:N0}", vehicle.CurrentPrice) d</td>
+                    <td>@(vehicle.Quantity.HasValue ? $"{vehicle.Quantity.Value} chiec" : "Het / sap ve")</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var color in vehicle.Colors)
+                            {
+                                <span class="badge bg-secondary" style="font-size:0.75rem;">@color.ColorName</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <a href="@Url.Action("Edit", "Vehicle", new { area = "Admin", id = vehicle.Id })" class="btn btn-sm btn-outline-light border-secondary text-dark text-decoration-none">Sua</a>
+                        <form method="post" action="@Url.Action("Delete", "Vehicle", new { area = "Admin", id = vehicle.Id })" style="display:inline;" onsubmit="return confirm('Ban co chac chan muon xoa xe nay?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xoa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

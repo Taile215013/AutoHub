@@ -1,130 +1,221 @@
 @model AutoHub.Models.Entities.SparePart
 
 @{
-    ViewData["Title"] = "Thêm Phụ Tùng Mới - AutoHub";
+    ViewData["Title"] = "Them phu tung - AutoHub";
     Layout = "_AdminLayout";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-5">
-    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Thêm Phụ Tùng Mới</h1>
-    <a href="@Url.Action("SpareParts", "Admin")" class="btn-neon text-white text-decoration-none">Quay Lại</a>
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Them phu tung moi</h1>
+    <a href="@Url.Action("Index", "SparePart", new { area = "Admin" })" class="btn-neon text-white text-decoration-none">Quay lai</a>
 </div>
 
-            <div class="tech-panel">
-                @if (!ViewData.ModelState.IsValid)
+<div class="tech-panel">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger border-danger p-3 mb-4 rounded">
+            <ul class="mb-0">
+                @foreach (var modelState in ViewData.ModelState.Values)
                 {
-                    <div class="alert alert-danger border-danger p-3 mb-4 rounded">
-                        <ul class="mb-0">
-                            @foreach (var modelState in ViewData.ModelState.Values)
-                            {
-                                foreach (var error in modelState.Errors)
-                                {
-                                    <li>@error.ErrorMessage</li>
-                                }
-                            }
-                        </ul>
-                    </div>
+                    foreach (var error in modelState.Errors)
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
                 }
+            </ul>
+        </div>
+    }
 
-                <form method="post" action="@Url.Action("CreateSparePart", "Admin")" onsubmit="return validatePrices()" enctype="multipart/form-data">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Tên Phụ Tùng / Phụ Kiện</label>
-                            <input type="text" name="Name" class="form-control border-secondary py-2" required placeholder="Ví dụ: Phuộc Brembo, Má phanh Nissin, Pô Akrapovic" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Hãng Sản Xuất</label>
-                            <select name="BrandId" class="form-select border-secondary py-2" required>
-                                @if (ViewBag.Brands != null)
-                                {
-                                    foreach (var brand in ViewBag.Brands)
-                                    {
-                                        <option value="@brand.Id">@brand.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phân Loại Danh Mục</label>
-                            <select name="Category" class="form-select border-secondary py-2" required>
-                                @if (ViewBag.Categories != null)
-                                {
-                                    foreach (var cat in ViewBag.Categories)
-                                    {
-                                        <option value="@cat.Code">@cat.Value</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Số Lượng Nhập Kho</label>
-                            <input type="number" name="StockQuantity" class="form-control border-secondary py-2" required value="50" min="0" />
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">Hình Ảnh (Tối ưu WebP Cloudinary)</label>
-                            <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInputSp" />
-                            <div class="mt-2 text-center d-none" id="previewContainerSp">
-                                <img id="imagePreviewSp" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height: 250px;" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase text-muted text-danger" style="font-size:0.8rem; font-weight:700;">Giá Nhập Kho (Giá Gốc từ Hãng)</label>
-                            <input type="number" step="0.01" id="costPriceInput" name="CostPrice" class="form-control border-danger py-2" required placeholder="Nhập giá nhập kho" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase text-muted text-success" style="font-size:0.8rem; font-weight:700;">Giá Bán Lẻ Ra Thị Trường</label>
-                            <input type="number" step="0.01" id="priceInput" name="Price" class="form-control border-success py-2" required placeholder="Nhập giá bán khách hàng" />
-                            <div class="text-danger mt-1 fw-semibold" id="priceValidationError" style="display:none; font-size:0.85rem;">
-                                Giá bán ra phải lớn hơn giá gốc nhập vào để đảm bảo có lợi nhuận!
-                            </div>
-                        </div>
-
-                        <div class="col-12 mt-5">
-                            <button type="submit" class="btn-neon w-100 py-3">Lưu Phụ Tùng</button>
-                        </div>
-                    </div>
-                </form>
+    <form method="post" action="@Url.Action("Create", "SparePart", new { area = "Admin" })" onsubmit="return validatePrices()" enctype="multipart/form-data">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Ten phu tung / phu kien</label>
+                <input type="text" name="Name" class="form-control border-secondary py-2" required placeholder="Vi du: Phuoc Brembo, Ma phanh Nissin" />
             </div>
+            <div class="col-md-6">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Hang san xuat</label>
+                <select name="BrandId" class="form-select border-secondary py-2" required>
+                    @if (ViewBag.Brands != null)
+                    {
+                        foreach (var brand in ViewBag.Brands)
+                        {
+                            <option value="@brand.Id">@brand.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Danh muc</label>
+                <select name="Category" class="form-select border-secondary py-2" required>
+                    @if (ViewBag.MasterCategories != null)
+                    {
+                        foreach (var cat in ViewBag.MasterCategories)
+                        {
+                            <option value="@cat.Name">@cat.Name</option>
+                        }
+                    }
+                    @if (ViewBag.Categories != null)
+                    {
+                        foreach (var cat in ViewBag.Categories)
+                        {
+                            <option value="@cat.Value">@cat.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Trang thai</label>
+                <select name="Status" class="form-select border-secondary py-2" required>
+                    <option value="InStock">Dang ban</option>
+                    <option value="Incoming">Dang ve hang</option>
+                    <option value="OutOfStock">Het hang</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Nam san xuat</label>
+                <input type="number" name="ManufactureYear" class="form-control border-secondary py-2" min="1900" max="2100" placeholder="Vi du: 2024" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Dung cho ten xe</label>
+                <select name="compatibleVehicleNameId" class="form-select border-secondary py-2">
+                    <option value="">-- Chua gan --</option>
+                    @if (ViewBag.VehicleNames != null)
+                    {
+                        foreach (var vehicleName in ViewBag.VehicleNames)
+                        {
+                            <option value="@vehicleName.Id">@vehicleName.Brand.Name - @vehicleName.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phien ban / phan khoi</label>
+                <select name="compatibleVehicleVariantId" class="form-select border-secondary py-2">
+                    <option value="">-- Tat ca phien ban --</option>
+                    @if (ViewBag.VehicleVariants != null)
+                    {
+                        foreach (var variant in ViewBag.VehicleVariants)
+                        {
+                            <option value="@variant.Id">@variant.VehicleName.Name - @variant.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Nam doi xe</label>
+                <select name="compatibleVehicleModelYearId" class="form-select border-secondary py-2">
+                    <option value="">-- Tat ca nam --</option>
+                    @if (ViewBag.VehicleModelYears != null)
+                    {
+                        foreach (var year in ViewBag.VehicleModelYears)
+                        {
+                            <option value="@year.Id">@year.VehicleVariant.VehicleName.Name @year.VehicleVariant.Name - @year.Year</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">So luong nhap kho</label>
+                <input type="number" name="StockQuantity" class="form-control border-secondary py-2" required value="50" min="0" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-warning" style="font-size:0.8rem; font-weight:700;">📷 Anh bia (Thumbnail)</label>
+                <input type="file" name="thumbnailFile" accept="image/*" class="form-control bg-dark text-white border-warning py-2" id="thumbnailInputSp" />
+                <div class="mt-2 text-center d-none" id="thumbnailPreviewSp">
+                    <img id="thumbnailImgSp" src="#" alt="Preview" class="img-fluid rounded border border-warning" style="max-height:100px;" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">🖼️ Anh goc</label>
+                <input type="file" name="ImageFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInputSp" />
+                <div class="mt-2 text-center d-none" id="imagePreviewSp">
+                    <img id="imageImgSp" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height:100px;" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-uppercase text-success" style="font-size:0.8rem; font-weight:700;">🖼️ Anh bo sung (nhieu)</label>
+                <input type="file" name="additionalFiles" accept="image/*" multiple class="form-control bg-dark text-white border-success py-2" id="additionalInputSp" />
+                <div class="mt-2 d-flex flex-wrap gap-2 d-none" id="additionalPreviewSp"></div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label text-uppercase text-danger" style="font-size:0.8rem; font-weight:700;">Gia nhap kho</label>
+                <input type="number" step="0.01" id="costPriceInput" name="CostPrice" class="form-control border-danger py-2" required placeholder="Nhap gia nhap kho" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-uppercase text-success" style="font-size:0.8rem; font-weight:700;">Gia ban le</label>
+                <input type="number" step="0.01" id="priceInput" name="Price" class="form-control border-success py-2" required placeholder="Nhap gia ban" />
+                <div class="text-danger mt-1 fw-semibold" id="priceValidationError" style="display:none; font-size:0.85rem;">
+                    Gia ban phai lon hon gia nhap.
+                </div>
+            </div>
+
+            <div class="col-12 mt-5">
+                <button type="submit" class="btn-neon w-100 py-3">Luu phu tung</button>
+            </div>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <script>
-        // Kiểm tra hợp lệ: Giá bán ra phải lớn hơn giá gốc
         function validatePrices() {
             var cost = parseFloat($('#costPriceInput').val());
             var price = parseFloat($('#priceInput').val());
-            if (!isNaN(cost) && !isNaN(price)) {
-                if (price <= cost) {
-                    $('#priceValidationError').show();
-                    $('#priceInput').addClass('is-invalid');
-                    return false;
-                }
+            if (!isNaN(cost) && !isNaN(price) && price <= cost) {
+                $('#priceValidationError').show();
+                $('#priceInput').addClass('is-invalid');
+                return false;
             }
+
             $('#priceValidationError').hide();
             $('#priceInput').removeClass('is-invalid');
             return true;
         }
 
         $(document).ready(function() {
-            // Tự động kiểm tra giá khi người dùng nhập dữ liệu
-            $('#costPriceInput, #priceInput').on('input', function() {
-                validatePrices();
+            $('#costPriceInput, #priceInput').on('input', validatePrices);
+
+            // Preview ảnh bìa
+            $('#thumbnailInputSp').change(function(e) {
+                var file = e.target.files[0];
+                if (!file) { $('#thumbnailPreviewSp').addClass('d-none'); return; }
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#thumbnailImgSp').attr('src', event.target.result);
+                    $('#thumbnailPreviewSp').removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
             });
 
-            // Hiển thị ảnh xem trước khi Admin chọn file
+            // Preview ảnh gốc
             $('#imageInputSp').change(function(e) {
                 var file = e.target.files[0];
-                if (file) {
+                if (!file) { $('#imagePreviewSp').addClass('d-none'); return; }
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#imageImgSp').attr('src', event.target.result);
+                    $('#imagePreviewSp').removeClass('d-none');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Preview ảnh bổ sung
+            $('#additionalInputSp').change(function(e) {
+                var container = $('#additionalPreviewSp');
+                container.empty();
+                if (e.target.files.length === 0) { container.addClass('d-none'); return; }
+                container.removeClass('d-none');
+                Array.from(e.target.files).forEach(function(file) {
                     var reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#imagePreviewSp').attr('src', e.target.result);
-                        $('#previewContainerSp').removeClass('d-none');
-                    }
+                    reader.onload = function(event) {
+                        container.append('<img src="' + event.target.result + '" class="img-fluid rounded border border-success" style="max-height:80px; max-width:100px; object-fit:cover;" />');
+                    };
                     reader.readAsDataURL(file);
-                } else {
-                    $('#previewContainerSp').addClass('d-none');
-                }
+                });
             });
         });
     </script>

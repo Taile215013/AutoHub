@@ -20,6 +20,13 @@ public class EfSparePartRepository : ISparePartRepository
     {
         return await _context.SpareParts
             .Include(sp => sp.Brand)
+            .Include(sp => sp.CategoryMaster)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleName)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleVariant)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleModelYear)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -28,6 +35,13 @@ public class EfSparePartRepository : ISparePartRepository
     {
         return await _context.SpareParts
             .Include(sp => sp.Brand)
+            .Include(sp => sp.CategoryMaster)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleName)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleVariant)
+            .Include(sp => sp.Compatibilities)
+                .ThenInclude(c => c.VehicleModelYear)
             .FirstOrDefaultAsync(sp => sp.Id == id);
     }
 
@@ -55,5 +69,13 @@ public class EfSparePartRepository : ISparePartRepository
             sparePart.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task AddCompatibilityAsync(SparePartCompatibility compatibility)
+    {
+        compatibility.CreatedAt = DateTime.UtcNow;
+        compatibility.IsDeleted = false;
+        await _context.SparePartCompatibilities.AddAsync(compatibility);
+        await _context.SaveChangesAsync();
     }
 }

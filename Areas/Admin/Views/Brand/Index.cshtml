@@ -84,6 +84,80 @@
                 </table>
             </div>
 
+<!-- Modal Thêm/Sửa Thương Hiệu -->
+<div class="modal fade" id="brandModal" tabindex="-1" aria-labelledby="brandModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: rgba(30,30,40,0.95); backdrop-filter: blur(10px); color: #fff;">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title fw-bold text-uppercase" id="brandModalLabel" style="letter-spacing: 1px;">Cập Nhật Thương Hiệu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="brandForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="brandId" value="0" />
+                    
+                    <div class="alert alert-danger d-none" id="errorMessage"></div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted text-uppercase fw-bold" style="font-size:0.8rem;">Tên Hãng</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="brandName" required placeholder="Nhập tên hãng...">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted text-uppercase fw-bold" style="font-size:0.8rem;">Quốc Gia</label>
+                        <select class="form-select bg-dark text-white border-secondary" id="brandCountry" required>
+                            @if (ViewBag.Countries != null)
+                            {
+                                foreach (var country in ViewBag.Countries)
+                                {
+                                    <option value="@country.Id">@country.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted text-uppercase fw-bold" style="font-size:0.8rem;">Ảnh Logo (Tùy Chọn)</label>
+                        <input type="file" class="form-control bg-dark text-white border-secondary" id="brandImage" accept="image/*">
+                    </div>
+
+                    <label class="form-label text-muted text-uppercase fw-bold mb-3" style="font-size:0.8rem;">Lĩnh Vực Hoạt Động</label>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isVehicleBrand">
+                            <label class="form-check-label" for="isVehicleBrand">Sản Xuất Xe</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isPartBrand">
+                            <label class="form-check-label" for="isPartBrand">Sản Xuất Phụ Tùng</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isToyBrand">
+                            <label class="form-check-label" for="isToyBrand">Sản Xuất Đồ Chơi</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-neon border-0">Lưu Thông Tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Thông báo -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="appToast" class="toast align-items-center text-white bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-bold" id="toastMessage">
+                Thao tác thành công!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         // Khởi tạo Bootstrap Elements
@@ -99,20 +173,25 @@
                 e.preventDefault();
                 $('#errorMessage').addClass('d-none').text('');
 
-                // Thu thập dữ liệu form thủ công để xử lý các thuộc tính checkbox boolean chính xác
-                var formData = {
-                    Id: parseInt($('#brandId').val()) || 0,
-                    Name: $('#brandName').val().trim(),
-                    CountryId: parseInt($('#brandCountry').val()),
-                    IsVehicleBrand: $('#isVehicleBrand').is(':checked'),
-                    IsPartBrand: $('#isPartBrand').is(':checked'),
-                    IsToyBrand: $('#isToyBrand').is(':checked')
-                };
+                // Thu thập dữ liệu form bằng FormData để xử lý file
+                var formData = new FormData();
+                formData.append('Id', parseInt($('#brandId').val()) || 0);
+                formData.append('Name', $('#brandName').val().trim());
+                formData.append('CountryId', parseInt($('#brandCountry').val()));
+                formData.append('IsVehicleBrand', $('#isVehicleBrand').is(':checked'));
+                formData.append('IsPartBrand', $('#isPartBrand').is(':checked'));
+                formData.append('IsToyBrand', $('#isToyBrand').is(':checked'));
+                
+                var imageFile = $('#brandImage')[0].files[0];
+                if (imageFile) {
+                    formData.append('imageFile', imageFile);
+                }
 
                 $.ajax({
-                    url: '@Url.Action("SaveBrand", "Admin")',
+                    url: '@Url.Action("SaveBrand", "Brand")',
                     type: 'POST',
-                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    contentType: false,
+                    processData: false,
                     data: formData,
                     success: function(res) {
                         if (res.success) {
@@ -200,6 +279,7 @@
             $('#isVehicleBrand').prop('checked', false);
             $('#isPartBrand').prop('checked', false);
             $('#isToyBrand').prop('checked', false);
+            $('#brandImage').val('');
             $('#errorMessage').addClass('d-none').text('');
             brandModal.show();
         }
@@ -221,6 +301,7 @@
             $('#isVehicleBrand').prop('checked', isVehicle);
             $('#isPartBrand').prop('checked', isPart);
             $('#isToyBrand').prop('checked', isToy);
+            $('#brandImage').val('');
             $('#errorMessage').addClass('d-none').text('');
             
             brandModal.show();

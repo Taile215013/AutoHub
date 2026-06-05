@@ -4,7 +4,9 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -29,6 +31,36 @@ namespace AutoHub.Services
 
         public async Task<string> UploadImageAsync(IFormFile file, string folderName)
         {
+            return await ProcessAndUploadAsync(file, folderName, maxWidth: 1920, quality: 80);
+        }
+
+        public async Task<string> UploadThumbnailAsync(IFormFile file, string folderName)
+        {
+            return await ProcessAndUploadAsync(file, $"thumbnails/{folderName}", maxWidth: 480, quality: 60);
+        }
+
+        public async Task<string> UploadMultipleImagesAsync(List<IFormFile> files, string folderName)
+        {
+            if (files == null || files.Count == 0) return string.Empty;
+
+            var urls = new List<string>();
+            foreach (var file in files)
+            {
+                var url = await UploadImageAsync(file, folderName);
+                if (!string.IsNullOrEmpty(url))
+                {
+                    urls.Add(url);
+                }
+            }
+
+            return urls.Count > 0 ? JsonSerializer.Serialize(urls) : string.Empty;
+        }
+
+        /// <summary>
+        /// Logic xử lý ảnh dùng chung: resize + nén WebP + upload Cloudinary
+        /// </summary>
+        private async Task<string> ProcessAndUploadAsync(IFormFile file, string folderName, int maxWidth, int quality)
+        {
             if (file == null || file.Length == 0) return string.Empty;
 
             var uploadResult = new ImageUploadResult();
@@ -38,15 +70,15 @@ namespace AutoHub.Services
                 // 1. Đưa file vào bộ nhớ RAM và dùng ImageSharp để xử lý
                 using (var image = await Image.LoadAsync(file.OpenReadStream()))
                 {
-                    // 2. Resize: Nếu bề ngang ảnh > 1920px thì ép về 1920px (Tỉ lệ tự động cân bằng)
-                    if (image.Width > 1920)
+                    // 2. Resize: Nếu bề ngang ảnh > maxWidth thì ép về maxWidth (Tỉ lệ tự động cân bằng)
+                    if (image.Width > maxWidth)
                     {
-                        var newHeight = (int)((1920.0 / image.Width) * image.Height);
-                        image.Mutate(x => x.Resize(1920, newHeight));
+                        var newHeight = (int)(((double)maxWidth / image.Width) * image.Height);
+                        image.Mutate(x => x.Resize(maxWidth, newHeight));
                     }
 
-                    // 3. Ép cân: Đổi sang chuẩn WebP siêu nhẹ với Quality 80% (không phân biệt được bằng mắt thường)
-                    var encoder = new WebpEncoder { Quality = 80 };
+                    // 3. Ép cân: Đổi sang chuẩn WebP siêu nhẹ
+                    var encoder = new WebpEncoder { Quality = quality };
                     await image.SaveAsync(memoryStream, encoder);
                 }
 
@@ -68,3 +100,4 @@ namespace AutoHub.Services
         }
     }
 }
+

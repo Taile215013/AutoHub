@@ -20,6 +20,9 @@ public class EfVehicleRepository : IVehicleRepository
     {
         var query = _context.Vehicles
             .Include(v => v.Brand)
+            .Include(v => v.VehicleNameMaster)
+            .Include(v => v.VehicleVariant)
+            .Include(v => v.VehicleModelYear)
             .Include(v => v.Colors)
             .AsQueryable();
 
@@ -45,6 +48,9 @@ public class EfVehicleRepository : IVehicleRepository
     {
         return await _context.Vehicles
             .Include(v => v.Brand)
+            .Include(v => v.VehicleNameMaster)
+            .Include(v => v.VehicleVariant)
+            .Include(v => v.VehicleModelYear)
             .Include(v => v.Colors)
             .FirstOrDefaultAsync(v => v.Id == id);
     }

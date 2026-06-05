@@ -21,7 +21,7 @@
                         </div>
                     }
 
-                    <form method="post" action="@Url.Action("Register", "Home")">
+                    <form method="post" action="@Url.Action("Register", "Account")">
                         <div class="mb-3">
                             <label class="label-tech">Tên Đăng Nhập <span class="text-danger">*</span></label>
                             <input type="text" name="Username" value="@Model?.Username" class="form-control input-premium w-100" required placeholder="Viết liền không dấu..." />
@@ -90,7 +90,7 @@
                     </form>
 
                     <div class="text-center mt-4">
-                        <p class="text-muted" style="font-size: 0.85rem;">Đã sở hữu thẻ thành viên? <a href="@Url.Action("Login", "Home")" class="text-gradient-gold" style="font-weight: 700; text-decoration: none;">Đăng nhập ngay</a></p>
+                        <p class="text-muted" style="font-size: 0.85rem;">Đã sở hữu thẻ thành viên? <a href="@Url.Action("Login", "Account")" class="text-gradient-gold" style="font-weight: 700; text-decoration: none;">Đăng nhập ngay</a></p>
                     </div>
                 </div>
             </div>

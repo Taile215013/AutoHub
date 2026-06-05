@@ -21,6 +21,11 @@ namespace AutoHub.Data
         public DbSet<SystemDictionary> SystemDictionaries { get; set; } = null!;
         public DbSet<Cart> Carts { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; } = null!;
+        public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
+        public DbSet<VehicleName> VehicleNames { get; set; } = null!;
+        public DbSet<VehicleVariant> VehicleVariants { get; set; } = null!;
+        public DbSet<VehicleModelYear> VehicleModelYears { get; set; } = null!;
+        public DbSet<SparePartCompatibility> SparePartCompatibilities { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +43,11 @@ namespace AutoHub.Data
             modelBuilder.Entity<SystemDictionary>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Cart>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CartItem>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<ProductCategory>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<VehicleName>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<VehicleVariant>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<VehicleModelYear>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SparePartCompatibility>().HasQueryFilter(e => !e.IsDeleted);
 
             modelBuilder.Entity<Brand>()
                 .HasOne(b => b.Country)
@@ -51,6 +61,54 @@ namespace AutoHub.Data
                 .HasForeignKey(v => v.BrandId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<VehicleName>()
+                .HasOne(vn => vn.Brand)
+                .WithMany(b => b.VehicleNames)
+                .HasForeignKey(vn => vn.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VehicleName>()
+                .HasIndex(vn => new { vn.BrandId, vn.NormalizedName })
+                .IsUnique();
+
+            modelBuilder.Entity<VehicleVariant>()
+                .HasOne(vv => vv.VehicleName)
+                .WithMany(vn => vn.Variants)
+                .HasForeignKey(vv => vv.VehicleNameId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VehicleVariant>()
+                .HasIndex(vv => new { vv.VehicleNameId, vv.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<VehicleModelYear>()
+                .HasOne(vy => vy.VehicleVariant)
+                .WithMany(vv => vv.ModelYears)
+                .HasForeignKey(vy => vy.VehicleVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VehicleModelYear>()
+                .HasIndex(vy => new { vy.VehicleVariantId, vy.Year })
+                .IsUnique();
+
+            modelBuilder.Entity<Vehicle>()
+                .HasOne(v => v.VehicleNameMaster)
+                .WithMany(vn => vn.Vehicles)
+                .HasForeignKey(v => v.VehicleNameId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Vehicle>()
+                .HasOne(v => v.VehicleVariant)
+                .WithMany(vv => vv.Vehicles)
+                .HasForeignKey(v => v.VehicleVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Vehicle>()
+                .HasOne(v => v.VehicleModelYear)
+                .WithMany(vy => vy.Vehicles)
+                .HasForeignKey(v => v.VehicleModelYearId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<VehicleColor>()
                 .HasOne(vc => vc.Vehicle)
                 .WithMany(v => v.Colors)
@@ -61,6 +119,52 @@ namespace AutoHub.Data
                 .HasOne(sp => sp.Brand)
                 .WithMany(b => b.SpareParts)
                 .HasForeignKey(sp => sp.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProductCategory>()
+                .HasOne(c => c.ParentCategory)
+                .WithMany(c => c.ChildCategories)
+                .HasForeignKey(c => c.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProductCategory>()
+                .HasIndex(c => new { c.CategoryType, c.Code })
+                .IsUnique();
+
+            modelBuilder.Entity<SparePart>()
+                .HasOne(sp => sp.CategoryMaster)
+                .WithMany(c => c.SpareParts)
+                .HasForeignKey(sp => sp.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Service>()
+                .HasOne(s => s.Category)
+                .WithMany(c => c.Services)
+                .HasForeignKey(s => s.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SparePartCompatibility>()
+                .HasOne(c => c.SparePart)
+                .WithMany(sp => sp.Compatibilities)
+                .HasForeignKey(c => c.SparePartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SparePartCompatibility>()
+                .HasOne(c => c.VehicleName)
+                .WithMany(vn => vn.SparePartCompatibilities)
+                .HasForeignKey(c => c.VehicleNameId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SparePartCompatibility>()
+                .HasOne(c => c.VehicleVariant)
+                .WithMany(vv => vv.SparePartCompatibilities)
+                .HasForeignKey(c => c.VehicleVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SparePartCompatibility>()
+                .HasOne(c => c.VehicleModelYear)
+                .WithMany(vy => vy.SparePartCompatibilities)
+                .HasForeignKey(c => c.VehicleModelYearId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()

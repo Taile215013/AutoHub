@@ -8,7 +8,17 @@ public class Vehicle : BaseEntity
 
     public int BrandId { get; set; }
 
+    public int? VehicleNameId { get; set; }
+
+    public int? VehicleVariantId { get; set; }
+
+    public int? VehicleModelYearId { get; set; }
+
     public string? ImageUrl { get; set; }
+
+    public string? ThumbnailImageUrl { get; set; }
+
+    public string? AdditionalImages { get; set; }
 
     public string VehicleType { get; set; } = string.Empty;
 
@@ -33,6 +43,12 @@ public class Vehicle : BaseEntity
     public string? BodyStyle { get; set; }
 
     public Brand Brand { get; set; } = null!;
+
+    public VehicleName? VehicleNameMaster { get; set; }
+
+    public VehicleVariant? VehicleVariant { get; set; }
+
+    public VehicleModelYear? VehicleModelYear { get; set; }
 
     public ICollection<VehicleColor> Colors { get; set; } = new List<VehicleColor>();
 

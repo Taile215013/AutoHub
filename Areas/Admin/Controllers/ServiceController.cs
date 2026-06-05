@@ -13,13 +13,16 @@ namespace AutoHub.Areas.Admin.Controllers
     {
         private readonly IServiceRepository _serviceRepository;
         private readonly ISystemDictionaryService _dictService;
+        private readonly IMasterDataRepository _masterDataRepository;
 
         public ServiceController(
             IServiceRepository serviceRepository,
-            ISystemDictionaryService dictService)
+            ISystemDictionaryService dictService,
+            IMasterDataRepository masterDataRepository)
         {
             _serviceRepository = serviceRepository;
             _dictService = dictService;
+            _masterDataRepository = masterDataRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -27,6 +30,7 @@ namespace AutoHub.Areas.Admin.Controllers
             var services = await _serviceRepository.GetAllAsync();
             var dicts = await _dictService.GetAllAsync();
             ViewBag.VehicleTypes = dicts.Where(d => d.Type == "VehicleType").ToList();
+            ViewBag.ServiceCategories = await _masterDataRepository.GetCategoriesByTypeAsync("Service");
             return View(services);
         }
 
@@ -47,6 +51,8 @@ namespace AutoHub.Areas.Admin.Controllers
                     id = service.Id,
                     serviceName = service.ServiceName,
                     vehicleType = service.VehicleType,
+                    categoryId = service.CategoryId,
+                    categoryName = service.Category?.Name,
                     basePrice = service.BasePrice,
                     requiresQuote = service.RequiresQuote,
                     isActive = service.IsActive
@@ -55,7 +61,7 @@ namespace AutoHub.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveService(Service service)
+        public async Task<IActionResult> SaveService(Service service, string? newCategory)
         {
             if (string.IsNullOrWhiteSpace(service.ServiceName))
             {
@@ -69,6 +75,12 @@ namespace AutoHub.Areas.Admin.Controllers
 
                 if (isNew)
                 {
+                    if (!service.CategoryId.HasValue && !string.IsNullOrWhiteSpace(newCategory))
+                    {
+                        var category = await _masterDataRepository.FindOrCreateCategoryAsync("Service", newCategory);
+                        service.CategoryId = category?.Id;
+                    }
+
                     service.CreatedAt = DateTime.UtcNow;
                     service.IsDeleted = false;
                     await _serviceRepository.AddAsync(service);
@@ -82,6 +94,12 @@ namespace AutoHub.Areas.Admin.Controllers
                     }
 
                     existing.ServiceName = service.ServiceName.Trim();
+                    if (!service.CategoryId.HasValue && !string.IsNullOrWhiteSpace(newCategory))
+                    {
+                        var category = await _masterDataRepository.FindOrCreateCategoryAsync("Service", newCategory);
+                        service.CategoryId = category?.Id;
+                    }
+                    existing.CategoryId = service.CategoryId;
                     existing.VehicleType = service.VehicleType;
                     existing.BasePrice = service.RequiresQuote ? null : service.BasePrice;
                     existing.RequiresQuote = service.RequiresQuote;
@@ -104,6 +122,8 @@ namespace AutoHub.Areas.Admin.Controllers
                         id = saved!.Id,
                         serviceName = saved.ServiceName,
                         vehicleType = saved.VehicleType,
+                        categoryId = saved.CategoryId,
+                        categoryName = saved.Category?.Name,
                         basePrice = saved.BasePrice,
                         requiresQuote = saved.RequiresQuote,
                         isActive = saved.IsActive

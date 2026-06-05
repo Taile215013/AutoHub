@@ -1,0 +1,268 @@
+@model AutoHub.Models.Entities.Vehicle
+@{
+    ViewData["Title"] = Model.Name;
+    
+    // Parse additional images if available (assuming comma-separated)
+    var additionalImages = new List<string>();
+    if (!string.IsNullOrEmpty(Model.AdditionalImages))
+    {
+        additionalImages = Model.AdditionalImages.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+    
+    var allImages = new List<string>();
+    if (!string.IsNullOrEmpty(Model.ImageUrl)) allImages.Add(Model.ImageUrl);
+    allImages.AddRange(additionalImages);
+    
+    if (!allImages.Any())
+    {
+        if (!string.IsNullOrEmpty(Model.ThumbnailImageUrl))
+        {
+            allImages.Add(Model.ThumbnailImageUrl);
+        }
+        else
+        {
+            allImages.Add("/images/no-image.png");
+        }
+    }
+    
+    if (!allImages.Any())
+    {
+        allImages.Add("/images/no-image.png");
+    }
+}
+
+<div class="container py-4 bg-white">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">@Model.VehicleType</a></li>
+            <li class="breadcrumb-item active text-dark" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Left Column (Images, Specs, Description) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-3 p-3">
+                <!-- Main Carousel -->
+                <div id="vehicleCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner rounded">
+                        @for (int i = 0; i < allImages.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@allImages[i]" class="d-block w-100" style="height: 500px; object-fit: contain; background-color: #f8f9fa;" alt="@Model.Name">
+                            </div>
+                        }
+                    </div>
+                    @if (allImages.Count > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    }
+                </div>
+
+                <!-- Thumbnail Gallery -->
+                @if (allImages.Count > 1)
+                {
+                    <div class="d-flex gap-2 mt-3" style="overflow-x: auto;">
+                        @for (int i = 0; i < allImages.Count; i++)
+                        {
+                            <img src="@allImages[i]" class="thumbnail-item rounded @(i == 0 ? "border-danger border-2" : "border")" style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;" data-bs-target="#vehicleCarousel" data-bs-slide-to="@i" alt="Thumbnail @(i+1)">
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Details Section -->
+            <div class="card shadow-sm border-0 p-4 mb-4">
+                <h4 class="mb-3 fw-bold">Thông số kỹ thuật</h4>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">🛡️</span>
+                            <div>
+                                <div class="text-muted small">Hãng xe</div>
+                                <div class="fw-bold">@(Model.Brand?.Name ?? "Đang cập nhật")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">📅</span>
+                            <div>
+                                <div class="text-muted small">Năm sản xuất</div>
+                                <div class="fw-bold">@(Model.VehicleModelYear?.Year.ToString() ?? "Đang cập nhật")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">⚙️</span>
+                            <div>
+                                <div class="text-muted small">Động cơ</div>
+                                <div class="fw-bold">@Model.EngineType @(Model.EngineCapacity.HasValue ? $"- {Model.EngineCapacity}L" : "")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">🕹️</span>
+                            <div>
+                                <div class="text-muted small">Hộp số</div>
+                                <div class="fw-bold">@Model.Transmission</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">⛽</span>
+                            <div>
+                                <div class="text-muted small">Nhiên liệu</div>
+                                <div class="fw-bold">@Model.FuelType</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">🚗</span>
+                            <div>
+                                <div class="text-muted small">Kiểu dáng</div>
+                                <div class="fw-bold">@(Model.BodyStyle ?? "Tiêu chuẩn")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">👥</span>
+                            <div>
+                                <div class="text-muted small">Số chỗ ngồi</div>
+                                <div class="fw-bold">@Model.SeatingCapacity chỗ</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded border">
+                            <span class="text-secondary fs-5">⚖️</span>
+                            <div>
+                                <div class="text-muted small">Trọng lượng</div>
+                                <div class="fw-bold">@(Model.Weight.HasValue ? $"{Model.Weight} kg" : "Đang cập nhật")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="mb-3 fw-bold">Màu sắc</h4>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    @if (Model.Colors != null && Model.Colors.Any())
+                    {
+                        foreach (var color in Model.Colors)
+                        {
+                            <span class="badge border border-secondary text-dark bg-white p-2" style="font-size: 0.9rem;">@color.ColorName</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">Đang cập nhật</span>
+                    }
+                </div>
+
+                <h4 class="mb-3 fw-bold">Mô tả chi tiết</h4>
+                <div class="lh-lg text-dark" style="white-space: pre-line;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Người bán chưa cung cấp mô tả chi tiết cho sản phẩm này." : Model.Description)
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (Info, Contact & Seller) -->
+        <div class="col-lg-4">
+            <div>
+                <!-- Main Info Panel (Title, Price, Location, Buttons) -->
+                <div class="card shadow-sm border-0 mb-3 p-4">
+                    <h1 class="fs-4 fw-bold mb-3 text-dark" style="line-height: 1.4;">@Model.Name</h1>
+                    <div class="text-danger fs-3 fw-bold mb-3">@string.Format("{0:N0}", Model.CurrentPrice) đ <span class="fs-6 text-muted fw-normal">(Trả góp từ @string.Format("{0:N0}", Model.CurrentPrice / 60) đ/tháng)</span></div>
+                    
+                    <!-- Market Price Fake Snippet -->
+                    <div class="p-3 mb-4 rounded bg-light border">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Khoảng giá thị trường <i class="bi bi-info-circle"></i></span>
+                            <span class="badge bg-primary">@string.Format("{0:N0}", Model.CurrentPrice) đ</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 text-muted" style="font-size: 0.75rem;">
+                            <span>@string.Format("{0:N0}", Model.CurrentPrice * 0.9m) đ</span>
+                            <span>@string.Format("{0:N0}", Model.CurrentPrice * 1.1m) đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn btn-outline-secondary fw-bold w-100" onclick="alert('Đang mở Zalo...')">Zalo</button>
+                        <button class="btn btn-outline-secondary fw-bold w-100" onclick="alert('Đang mở Chat...')">Chat</button>
+                        <button class="btn btn-warning fw-bold w-100 text-dark" onclick="alert('Hotline: 0938.06x.xxx')"><i class="bi bi-telephone-fill"></i> Hiện số</button>
+                    </div>
+
+                    <div class="text-muted small mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-geo-alt" style="font-size: 1.1rem;"></i>
+                        <div>
+                            <div class="text-dark fw-semibold">Hệ Thống Phân Phối AutoHub Toàn Quốc</div>
+                            <div>Xem xe trực tiếp tại Showroom AutoHub</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-muted small d-flex align-items-center gap-2">
+                        <i class="bi bi-clock" style="font-size: 1.1rem;"></i>
+                        <span>Đăng @Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+
+                <!-- Seller Profile Panel -->
+                <div class="card shadow-sm border-0 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="/images/avatar-placeholder.png" alt="AutoHub Team" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd;" onerror="this.src='https://ui-avatars.com/api/?name=Auto+Hub&background=f0f0f0&color=333'" />
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">AUTOHUB OFFICIAL <i class="bi bi-check-circle-fill text-primary"></i></h6>
+                            <div class="text-muted" style="font-size: 0.8rem;">
+                                <span class="text-warning fw-bold">4.9 <i class="bi bi-star-fill"></i></span> (99+ Đánh giá) • 100+ đã bán
+                            </div>
+                            <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                <span class="text-success">● Hoạt động 5 phút trước</span> &nbsp;|&nbsp; Phản hồi: 98%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-2 p-2 rounded bg-light border">
+                        <input type="text" class="form-control border-0 bg-transparent shadow-none" placeholder="Đăng nhập để gửi tin nhắn..." disabled />
+                        <button class="btn btn-warning fw-bold px-3 py-1 rounded text-dark" onclick="alert('Vui lòng đăng nhập!')">Gửi</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Synchronize thumbnail click with carousel
+            $('.thumbnail-item').click(function () {
+                $('.thumbnail-item').removeClass('border-danger border-2').addClass('border');
+                $(this).removeClass('border').addClass('border-danger border-2');
+            });
+
+            // Update active thumbnail on carousel slide
+            $('#vehicleCarousel').on('slide.bs.carousel', function (e) {
+                $('.thumbnail-item').removeClass('border-danger border-2').addClass('border');
+                $('.thumbnail-item').eq(e.to).removeClass('border').addClass('border-danger border-2');
+            });
+        });
+    </script>
+}

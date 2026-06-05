@@ -17,17 +17,20 @@ namespace AutoHub.Areas.Admin.Controllers
         private readonly IBrandRepository _brandRepository;
         private readonly IFileService _fileService;
         private readonly ISystemDictionaryService _dictService;
+        private readonly IMasterDataRepository _masterDataRepository;
 
         public VehicleController(
             IVehicleRepository vehicleRepository,
             IBrandRepository brandRepository,
             IFileService fileService,
-            ISystemDictionaryService dictService)
+            ISystemDictionaryService dictService,
+            IMasterDataRepository masterDataRepository)
         {
             _vehicleRepository = vehicleRepository;
             _brandRepository = brandRepository;
             _fileService = fileService;
             _dictService = dictService;
+            _masterDataRepository = masterDataRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -49,16 +52,73 @@ namespace AutoHub.Areas.Admin.Controllers
             ViewBag.VehicleColors = dicts.Where(d => d.Type == "VehicleColor").ToList();
             ViewBag.EngineTypes = dicts.Where(d => d.Type == "EngineType").ToList();
             ViewBag.BodyStyles = dicts.Where(d => d.Type == "BodyStyle").ToList();
+            ViewBag.VehicleNames = await _masterDataRepository.GetVehicleNamesAsync();
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Vehicle vehicle, List<string> colors, IFormFile? uploadedFile)
+        public async Task<IActionResult> Create(
+            Vehicle vehicle,
+            List<string> colors,
+            IFormFile? uploadedFile,
+            IFormFile? thumbnailFile,
+            List<IFormFile>? additionalFiles,
+            int? vehicleNameId,
+            string? newVehicleName,
+            string? variantName,
+            int? modelYear)
         {
+            var vehicleName = vehicleNameId.HasValue
+                ? (await _masterDataRepository.GetVehicleNamesAsync()).FirstOrDefault(vn => vn.Id == vehicleNameId.Value)
+                : null;
+
+            if (vehicleName == null && !string.IsNullOrWhiteSpace(newVehicleName))
+            {
+                vehicleName = await _masterDataRepository.FindOrCreateVehicleNameAsync(
+                    vehicle.BrandId,
+                    newVehicleName,
+                    vehicle.VehicleType,
+                    vehicle.BodyStyle);
+            }
+
+            if (vehicleName != null)
+            {
+                vehicle.VehicleNameId = vehicleName.Id;
+                vehicle.Name = vehicleName.Name;
+
+                var variant = await _masterDataRepository.FindOrCreateVehicleVariantAsync(
+                    vehicleName.Id,
+                    variantName,
+                    vehicle.EngineType,
+                    vehicle.EngineCapacity);
+
+                if (variant != null)
+                {
+                    vehicle.VehicleVariantId = variant.Id;
+                    vehicle.Name = $"{vehicleName.Name} {variant.Name}";
+
+                    var year = await _masterDataRepository.FindOrCreateVehicleModelYearAsync(variant.Id, modelYear);
+                    if (year != null)
+                    {
+                        vehicle.VehicleModelYearId = year.Id;
+                    }
+                }
+            }
+
             if (uploadedFile != null && uploadedFile.Length > 0)
             {
                 vehicle.ImageUrl = await _fileService.UploadImageAsync(uploadedFile, "vehicles");
+            }
+
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                vehicle.ThumbnailImageUrl = await _fileService.UploadThumbnailAsync(thumbnailFile, "vehicles");
+            }
+
+            if (additionalFiles != null && additionalFiles.Count > 0)
+            {
+                vehicle.AdditionalImages = await _fileService.UploadMultipleImagesAsync(additionalFiles, "vehicles");
             }
 
             vehicle.CreatedAt = DateTime.UtcNow;
@@ -106,12 +166,23 @@ namespace AutoHub.Areas.Admin.Controllers
             ViewBag.VehicleColors = dicts.Where(d => d.Type == "VehicleColor").ToList();
             ViewBag.EngineTypes = dicts.Where(d => d.Type == "EngineType").ToList();
             ViewBag.BodyStyles = dicts.Where(d => d.Type == "BodyStyle").ToList();
+            ViewBag.VehicleNames = await _masterDataRepository.GetVehicleNamesAsync();
 
             return View(vehicle);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Vehicle vehicle, List<string> colors, IFormFile? uploadedFile)
+        public async Task<IActionResult> Edit(
+            int id,
+            Vehicle vehicle,
+            List<string> colors,
+            IFormFile? uploadedFile,
+            IFormFile? thumbnailFile,
+            List<IFormFile>? additionalFiles,
+            int? vehicleNameId,
+            string? newVehicleName,
+            string? variantName,
+            int? modelYear)
         {
             if (id != vehicle.Id) return BadRequest();
 
@@ -128,7 +199,53 @@ namespace AutoHub.Areas.Admin.Controllers
                     existingVehicle.ImageUrl = await _fileService.UploadImageAsync(uploadedFile, "vehicles");
                 }
 
+                if (thumbnailFile != null && thumbnailFile.Length > 0)
+                {
+                    existingVehicle.ThumbnailImageUrl = await _fileService.UploadThumbnailAsync(thumbnailFile, "vehicles");
+                }
+
+                if (additionalFiles != null && additionalFiles.Count > 0)
+                {
+                    existingVehicle.AdditionalImages = await _fileService.UploadMultipleImagesAsync(additionalFiles, "vehicles");
+                }
+
+                var vehicleName = vehicleNameId.HasValue
+                    ? (await _masterDataRepository.GetVehicleNamesAsync()).FirstOrDefault(vn => vn.Id == vehicleNameId.Value)
+                    : null;
+
+                if (vehicleName == null && !string.IsNullOrWhiteSpace(newVehicleName))
+                {
+                    vehicleName = await _masterDataRepository.FindOrCreateVehicleNameAsync(
+                        vehicle.BrandId,
+                        newVehicleName,
+                        vehicle.VehicleType,
+                        vehicle.BodyStyle);
+                }
+
                 existingVehicle.Name = vehicle.Name;
+                existingVehicle.VehicleNameId = vehicleName?.Id;
+                existingVehicle.VehicleVariantId = null;
+                existingVehicle.VehicleModelYearId = null;
+
+                if (vehicleName != null)
+                {
+                    existingVehicle.Name = vehicleName.Name;
+                    var variant = await _masterDataRepository.FindOrCreateVehicleVariantAsync(
+                        vehicleName.Id,
+                        variantName,
+                        vehicle.EngineType,
+                        vehicle.EngineCapacity);
+
+                    if (variant != null)
+                    {
+                        existingVehicle.VehicleVariantId = variant.Id;
+                        existingVehicle.Name = $"{vehicleName.Name} {variant.Name}";
+
+                        var year = await _masterDataRepository.FindOrCreateVehicleModelYearAsync(variant.Id, modelYear);
+                        existingVehicle.VehicleModelYearId = year?.Id;
+                    }
+                }
+
                 existingVehicle.BrandId = vehicle.BrandId;
                 existingVehicle.VehicleType = vehicle.VehicleType;
                 existingVehicle.BodyStyle = vehicle.BodyStyle;
@@ -159,6 +276,7 @@ namespace AutoHub.Areas.Admin.Controllers
                 ViewBag.VehicleColors = dicts.Where(d => d.Type == "VehicleColor").ToList();
                 ViewBag.EngineTypes = dicts.Where(d => d.Type == "EngineType").ToList();
                 ViewBag.BodyStyles = dicts.Where(d => d.Type == "BodyStyle").ToList();
+                ViewBag.VehicleNames = await _masterDataRepository.GetVehicleNamesAsync();
 
                 return View(vehicle);
             }

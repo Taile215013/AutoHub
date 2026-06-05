@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using AutoHub.Models.Entities;
 using AutoHub.Repositories;
+using AutoHub.Services;
 
 namespace AutoHub.Areas.Admin.Controllers
 {
@@ -11,10 +13,12 @@ namespace AutoHub.Areas.Admin.Controllers
     public class BrandController : Controller
     {
         private readonly IBrandRepository _brandRepository;
+        private readonly IFileService _fileService;
 
-        public BrandController(IBrandRepository brandRepository)
+        public BrandController(IBrandRepository brandRepository, IFileService fileService)
         {
             _brandRepository = brandRepository;
+            _fileService = fileService;
         }
 
         public async Task<IActionResult> Index()
@@ -66,13 +70,14 @@ namespace AutoHub.Areas.Admin.Controllers
                     countryId = brand.CountryId,
                     isVehicleBrand = brand.IsVehicleBrand,
                     isPartBrand = brand.IsPartBrand,
-                    isToyBrand = brand.IsToyBrand
+                    isToyBrand = brand.IsToyBrand,
+                    imageUrl = brand.ImageUrl
                 }
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveBrand(Brand brand)
+        public async Task<IActionResult> SaveBrand(Brand brand, IFormFile? imageFile)
         {
             if (string.IsNullOrWhiteSpace(brand.Name))
             {
@@ -82,6 +87,16 @@ namespace AutoHub.Areas.Admin.Controllers
             try
             {
                 bool isNew = (brand.Id == 0);
+
+                if (imageFile != null && isNew)
+                {
+                    var imageUrl = await _fileService.UploadImageAsync(imageFile, "brands");
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        brand.ImageUrl = imageUrl;
+                    }
+                }
+
                 if (isNew)
                 {
                     brand.CreatedAt = DateTime.UtcNow;
@@ -101,6 +116,15 @@ namespace AutoHub.Areas.Admin.Controllers
                     existingBrand.IsVehicleBrand = brand.IsVehicleBrand;
                     existingBrand.IsPartBrand = brand.IsPartBrand;
                     existingBrand.IsToyBrand = brand.IsToyBrand;
+
+                    if (imageFile != null)
+                    {
+                        var imageUrl = await _fileService.UploadImageAsync(imageFile, "brands");
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            existingBrand.ImageUrl = imageUrl;
+                        }
+                    }
 
                     await _brandRepository.UpdateAsync(existingBrand);
                 }
@@ -122,7 +146,8 @@ namespace AutoHub.Areas.Admin.Controllers
                         countryName = updatedBrand.Country?.Name ?? "N/A",
                         isVehicleBrand = updatedBrand.IsVehicleBrand,
                         isPartBrand = updatedBrand.IsPartBrand,
-                        isToyBrand = updatedBrand.IsToyBrand
+                        isToyBrand = updatedBrand.IsToyBrand,
+                        imageUrl = updatedBrand.ImageUrl
                     }
                 });
             }

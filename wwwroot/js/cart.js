@@ -193,7 +193,7 @@ async function renderCartItems() {
         const typeIcon = item.type === 'service' ? '⚙️' : '🚗';
         
         // Dùng name làm ID nếu đăng nhập, ngược lại dùng index
-        const arg = isLoggedIn ? \`'\${item.name.replace(/'/g, "\\'")}'\` : i;
+        const arg = isLoggedIn ? `'${item.name.replace(/'/g, "\\'")}'` : i;
 
         html += `
             <div style="padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; gap:12px; align-items:flex-start;">

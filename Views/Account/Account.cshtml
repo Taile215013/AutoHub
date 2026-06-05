@@ -2,7 +2,7 @@
 <main b-7vnz5sug0f="" role="main" class="">
   <ul class="nav">
     <li class="nav-item ms-3">
-            <a class="btn-neon" href="@Url.Action("Logout", "Home")">Đăng Xuất</a>
+            <a class="btn-neon" href="@Url.Action("Logout", "Account")">Đăng Xuất</a>
         </li>
   </ul>
 </main>
@@ -89,7 +89,7 @@
                     Quản Lý Địa Chỉ Giao Nhận
                 </h4>
 
-                <form method="post" action="@Url.Action("UpdateAddress", "Home")">
+                <form method="post" action="@Url.Action("UpdateAddress", "Account")">
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="label-tech">Tỉnh / Thành Phố</label>
@@ -408,7 +408,7 @@
             btn.textContent = 'Đang lưu...';
 
             $.ajax({
-                url: '@Url.Action("UpdateProfile", "Home")',
+                url: '@Url.Action("UpdateProfile", "Account")',
                 method: 'POST',
                 data: {
                     FirstName: firstName,

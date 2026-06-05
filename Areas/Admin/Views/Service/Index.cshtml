@@ -5,6 +5,8 @@
     Layout = "_AdminLayout";
     var vehicleTypes = ViewBag.VehicleTypes as IEnumerable<AutoHub.Models.Entities.SystemDictionary>
                        ?? new List<AutoHub.Models.Entities.SystemDictionary>();
+    var serviceCategories = ViewBag.ServiceCategories as IEnumerable<AutoHub.Models.Entities.ProductCategory>
+                            ?? new List<AutoHub.Models.Entities.ProductCategory>();
 }
 
 @section Styles {
@@ -325,7 +327,7 @@
         btn.textContent = 'Đang lưu...';
 
         $.ajax({
-            url: '@Url.Action("SaveService", "Admin")',
+            url: '@Url.Action("SaveService", "Service")',
             method: 'POST',
             data: {
                 Id: id,

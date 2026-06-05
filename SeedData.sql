@@ -1,3 +1,7 @@
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 -- Tự động tạo bảng SystemDictionaries nếu chưa tồn tại
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SystemDictionaries')
 BEGIN
@@ -17,20 +21,30 @@ IF OBJECT_ID('OrderDetails', 'U') IS NOT NULL DELETE FROM OrderDetails;
 IF OBJECT_ID('Orders', 'U') IS NOT NULL DELETE FROM Orders;
 IF OBJECT_ID('Users', 'U') IS NOT NULL DELETE FROM Users;
 IF OBJECT_ID('VehicleColors', 'U') IS NOT NULL DELETE FROM VehicleColors;
+IF OBJECT_ID('SparePartCompatibilities', 'U') IS NOT NULL DELETE FROM SparePartCompatibilities;
 IF OBJECT_ID('SpareParts', 'U') IS NOT NULL DELETE FROM SpareParts;
 IF OBJECT_ID('Vehicles', 'U') IS NOT NULL DELETE FROM Vehicles;
+IF OBJECT_ID('VehicleModelYears', 'U') IS NOT NULL DELETE FROM VehicleModelYears;
+IF OBJECT_ID('VehicleVariants', 'U') IS NOT NULL DELETE FROM VehicleVariants;
+IF OBJECT_ID('VehicleNames', 'U') IS NOT NULL DELETE FROM VehicleNames;
 IF OBJECT_ID('Brands', 'U') IS NOT NULL DELETE FROM Brands;
 IF OBJECT_ID('Countries', 'U') IS NOT NULL DELETE FROM Countries;
+IF OBJECT_ID('ProductCategories', 'U') IS NOT NULL DELETE FROM ProductCategories;
 
 -- Thiết lập lại IDENTITY (chỉ khi bảng tồn tại)
 IF OBJECT_ID('OrderDetails', 'U') IS NOT NULL DBCC CHECKIDENT ('OrderDetails', RESEED, 0);
 IF OBJECT_ID('Orders', 'U') IS NOT NULL DBCC CHECKIDENT ('Orders', RESEED, 0);
 IF OBJECT_ID('Users', 'U') IS NOT NULL DBCC CHECKIDENT ('Users', RESEED, 0);
 IF OBJECT_ID('VehicleColors', 'U') IS NOT NULL DBCC CHECKIDENT ('VehicleColors', RESEED, 0);
+IF OBJECT_ID('SparePartCompatibilities', 'U') IS NOT NULL DBCC CHECKIDENT ('SparePartCompatibilities', RESEED, 0);
 IF OBJECT_ID('SpareParts', 'U') IS NOT NULL DBCC CHECKIDENT ('SpareParts', RESEED, 0);
 IF OBJECT_ID('Vehicles', 'U') IS NOT NULL DBCC CHECKIDENT ('Vehicles', RESEED, 0);
+IF OBJECT_ID('VehicleModelYears', 'U') IS NOT NULL DBCC CHECKIDENT ('VehicleModelYears', RESEED, 0);
+IF OBJECT_ID('VehicleVariants', 'U') IS NOT NULL DBCC CHECKIDENT ('VehicleVariants', RESEED, 0);
+IF OBJECT_ID('VehicleNames', 'U') IS NOT NULL DBCC CHECKIDENT ('VehicleNames', RESEED, 0);
 IF OBJECT_ID('Brands', 'U') IS NOT NULL DBCC CHECKIDENT ('Brands', RESEED, 0);
 IF OBJECT_ID('Countries', 'U') IS NOT NULL DBCC CHECKIDENT ('Countries', RESEED, 0);
+IF OBJECT_ID('ProductCategories', 'U') IS NOT NULL DBCC CHECKIDENT ('ProductCategories', RESEED, 0);
 
 -- Chèn dữ liệu Từ điển Hệ thống (Master Data) bằng câu lệnh MERGE thông minh (Upsert)
 ;WITH SourceData (Type, Code, Value) AS (
@@ -57,7 +71,6 @@ IF OBJECT_ID('Countries', 'U') IS NOT NULL DBCC CHECKIDENT ('Countries', RESEED,
         (N'VehicleColor', N'Silver', N'Bạc'),
         (N'VehicleColor', N'Orange', N'Cam'),
         (N'VehicleColor', N'Yellow', N'Vàng'),
-        -- Loại Động Cơ (EngineType)
         (N'EngineType', N'I3', N'Động cơ I3 (3 xi-lanh thẳng hàng)'),
         (N'EngineType', N'I4', N'Động cơ I4 (4 xi-lanh thẳng hàng)'),
         (N'EngineType', N'I6', N'Động cơ I6 (6 xi-lanh thẳng hàng)'),
@@ -71,7 +84,6 @@ IF OBJECT_ID('Countries', 'U') IS NOT NULL DBCC CHECKIDENT ('Countries', RESEED,
         (N'EngineType', N'Hybrid', N'Động cơ lai xăng điện (Hybrid)'),
         (N'EngineType', N'SingleCylinder', N'Động cơ đơn (1 xi-lanh - Xe máy)'),
         (N'EngineType', N'TwinCylinder', N'Động cơ đôi (2 xi-lanh - Xe máy)'),
-        -- Kiểu Dáng Xe (BodyStyle)
         (N'BodyStyle', N'Sedan', N'Sedan (4 Cửa truyền thống)'),
         (N'BodyStyle', N'SUV', N'SUV (Thể thao đa dụng)'),
         (N'BodyStyle', N'Crossover', N'Crossover (Gầm cao đô thị)'),
@@ -125,15 +137,56 @@ INSERT INTO Brands (Id, Name, CountryId, IsVehicleBrand, IsPartBrand, IsToyBrand
 (9, N'Thai Summit', 4, 0, 1, 0, GETUTCDATE(), 0);
 SET IDENTITY_INSERT Brands OFF;
 
+-- Chèn dữ liệu ProductCategories
+SET IDENTITY_INSERT ProductCategories ON;
+INSERT INTO ProductCategories (Id, Name, Code, CategoryType, ParentCategoryId, CreatedAt, IsDeleted) VALUES
+(1, N'Động Cơ (Engine)', N'ENGINE', N'SparePart', NULL, GETUTCDATE(), 0),
+(2, N'Phanh / An Toàn (Brake)', N'BRAKE', N'SparePart', NULL, GETUTCDATE(), 0),
+(3, N'Ngoại Thất / Trang Trí (Exterior)', N'EXTERIOR', N'SparePart', NULL, GETUTCDATE(), 0);
+SET IDENTITY_INSERT ProductCategories OFF;
+
+-- Chèn dữ liệu VehicleNames
+SET IDENTITY_INSERT VehicleNames ON;
+INSERT INTO VehicleNames (Id, BrandId, Name, NormalizedName, VehicleType, BodyStyle, CreatedAt, IsDeleted) VALUES
+(1, 2, N'Camry', N'camry', N'Auto', N'Sedan', GETUTCDATE(), 0),
+(2, 1, N'VF 8', N'vf8', N'Auto', N'SUV', GETUTCDATE(), 0),
+(3, 3, N'3 Series', N'3series', N'Auto', N'Sedan', GETUTCDATE(), 0),
+(4, 5, N'Ranger', N'ranger', N'Auto', N'Pickup', GETUTCDATE(), 0),
+(5, 6, N'F8 Tributo', N'f8tributo', N'Auto', N'Coupe', GETUTCDATE(), 0),
+(6, 7, N'Atto 3', N'atto3', N'Auto', N'Crossover', GETUTCDATE(), 0);
+SET IDENTITY_INSERT VehicleNames OFF;
+
+-- Chèn dữ liệu VehicleVariants
+SET IDENTITY_INSERT VehicleVariants ON;
+INSERT INTO VehicleVariants (Id, VehicleNameId, Name, EngineType, EngineCapacity, CreatedAt, IsDeleted) VALUES
+(1, 1, N'2.5Q', N'I4 Dual VVT-i', 2.5, GETUTCDATE(), 0),
+(2, 2, N'Plus', N'Dual Electric Motor', 0, GETUTCDATE(), 0),
+(3, 3, N'320i Sport Line', N'TwinPower Turbo I4', 2.0, GETUTCDATE(), 0),
+(4, 4, N'Wildtrak', N'Bi-Turbo I4', 2.0, GETUTCDATE(), 0),
+(5, 5, N'Base', N'V8 Twin-Turbo', 3.9, GETUTCDATE(), 0),
+(6, 6, N'Premium', N'Single Electric Motor', 0, GETUTCDATE(), 0);
+SET IDENTITY_INSERT VehicleVariants OFF;
+
+-- Chèn dữ liệu VehicleModelYears
+SET IDENTITY_INSERT VehicleModelYears ON;
+INSERT INTO VehicleModelYears (Id, VehicleVariantId, Year, CreatedAt, IsDeleted) VALUES
+(1, 1, 2023, GETUTCDATE(), 0),
+(2, 2, 2023, GETUTCDATE(), 0),
+(3, 3, 2022, GETUTCDATE(), 0),
+(4, 4, 2023, GETUTCDATE(), 0),
+(5, 5, 2021, GETUTCDATE(), 0),
+(6, 6, 2024, GETUTCDATE(), 0);
+SET IDENTITY_INSERT VehicleModelYears OFF;
+
 -- Chèn dữ liệu các dòng xe (Vehicles)
 SET IDENTITY_INSERT Vehicles ON;
-INSERT INTO Vehicles (Id, Name, BrandId, VehicleType, FuelType, Transmission, PurchasePrice, CurrentPrice, Quantity, EngineType, EngineCapacity, SeatingCapacity, Weight, BodyStyle, CreatedAt, IsDeleted) VALUES
-(1, N'Toyota Camry 2.5Q', 2, N'Auto', N'Gasoline', N'Automatic', 950000000.00, 1050000000.00, 3, N'I4 Dual VVT-i', 2.5, 5, 1560, N'Sedan', GETUTCDATE(), 0),
-(2, N'VinFast VF 8 Plus', 1, N'Auto', N'Electric', N'Automatic', 880000000.00, 990000000.00, 5, N'Dual Electric Motor', 0, 5, 2600, N'SUV', GETUTCDATE(), 0),
-(3, N'BMW 320i Sport Line', 3, N'Auto', N'Gasoline', N'Automatic', 1200000000.00, 1350000000.00, 2, N'TwinPower Turbo I4', 2.0, 5, 1500, N'Sedan', GETUTCDATE(), 0),
-(4, N'Ford Ranger Wildtrak', 5, N'Auto', N'Gasoline', N'Automatic', 720000000.00, 820000000.00, 4, N'Bi-Turbo I4', 2.0, 5, 2238, N'Pickup', GETUTCDATE(), 0),
-(5, N'Ferrari F8 Tributo', 6, N'Auto', N'Gasoline', N'Automatic', 18000000000.00, 20500000000.00, 1, N'V8 Twin-Turbo', 3.9, 2, 1435, N'Coupe', GETUTCDATE(), 0),
-(6, N'BYD Atto 3', 7, N'Auto', N'Electric', N'Automatic', 650000000.00, 760000000.00, 6, N'Single Electric Motor', 0, 5, 1750, N'Crossover', GETUTCDATE(), 0);
+INSERT INTO Vehicles (Id, Name, BrandId, VehicleNameId, VehicleVariantId, VehicleModelYearId, VehicleType, FuelType, Transmission, PurchasePrice, CurrentPrice, Quantity, EngineType, EngineCapacity, SeatingCapacity, Weight, BodyStyle, CreatedAt, IsDeleted) VALUES
+(1, N'Toyota Camry 2.5Q 2023', 2, 1, 1, 1, N'Auto', N'Gasoline', N'Automatic', 950000000.00, 1050000000.00, 3, N'I4 Dual VVT-i', 2.5, 5, 1560, N'Sedan', GETUTCDATE(), 0),
+(2, N'VinFast VF 8 Plus', 1, 2, 2, 2, N'Auto', N'Electric', N'Automatic', 880000000.00, 990000000.00, 5, N'Dual Electric Motor', 0, 5, 2600, N'SUV', GETUTCDATE(), 0),
+(3, N'BMW 320i Sport Line', 3, 3, 3, 3, N'Auto', N'Gasoline', N'Automatic', 1200000000.00, 1350000000.00, 2, N'TwinPower Turbo I4', 2.0, 5, 1500, N'Sedan', GETUTCDATE(), 0),
+(4, N'Ford Ranger Wildtrak', 5, 4, 4, 4, N'Auto', N'Gasoline', N'Automatic', 720000000.00, 820000000.00, 4, N'Bi-Turbo I4', 2.0, 5, 2238, N'Pickup', GETUTCDATE(), 0),
+(5, N'Ferrari F8 Tributo', 6, 5, 5, 5, N'Auto', N'Gasoline', N'Automatic', 18000000000.00, 20500000000.00, 1, N'V8 Twin-Turbo', 3.9, 2, 1435, N'Coupe', GETUTCDATE(), 0),
+(6, N'BYD Atto 3', 7, 6, 6, 6, N'Auto', N'Electric', N'Automatic', 650000000.00, 760000000.00, 6, N'Single Electric Motor', 0, 5, 1750, N'Crossover', GETUTCDATE(), 0);
 SET IDENTITY_INSERT Vehicles OFF;
 
 -- Chèn dữ liệu màu sắc xe (VehicleColors)
@@ -157,21 +210,30 @@ SET IDENTITY_INSERT VehicleColors OFF;
 
 -- Chèn dữ liệu phụ tùng (SpareParts)
 SET IDENTITY_INSERT SpareParts ON;
-INSERT INTO SpareParts (Id, Name, BrandId, Category, CostPrice, Price, StockQuantity, CreatedAt, IsDeleted) VALUES
-(1, N'Bugi Bosch Bạch Kim', 4, N'Engine', 120000.00, 250000.00, 100, GETUTCDATE(), 0),
-(2, N'Má phanh trước Toyota Camry', 2, N'Brake', 850000.00, 1450000.00, 40, GETUTCDATE(), 0),
-(3, N'Gạt mưa silicon VinFast VF8', 1, N'Exterior', 300000.00, 550000.00, 50, GETUTCDATE(), 0),
-(4, N'Lọc gió động cơ K&N', 5, N'Engine', 450000.00, 800000.00, 30, GETUTCDATE(), 0),
-(5, N'Dầu động cơ cao cấp Liqui Moly 5W-30', 4, N'Engine', 600000.00, 950000.00, 60, GETUTCDATE(), 0),
-(6, N'Lọc dầu Astra Indonesia', 8, N'Engine', 90000.00, 180000.00, 120, GETUTCDATE(), 0),
-(7, N'Khung sườn Thai Summit', 9, N'Exterior', 2500000.00, 4200000.00, 15, GETUTCDATE(), 0);
+INSERT INTO SpareParts (Id, Name, BrandId, CategoryId, Category, Status, CostPrice, Price, StockQuantity, CreatedAt, IsDeleted) VALUES
+(1, N'Bugi Bosch Bạch Kim', 4, 1, N'Engine', N'InStock', 120000.00, 250000.00, 100, GETUTCDATE(), 0),
+(2, N'Má phanh trước Toyota Camry', 2, 2, N'Brake', N'InStock', 850000.00, 1450000.00, 40, GETUTCDATE(), 0),
+(3, N'Gạt mưa silicon VinFast VF8', 1, 3, N'Exterior', N'InStock', 300000.00, 550000.00, 50, GETUTCDATE(), 0),
+(4, N'Lọc gió động cơ K&N', 5, 1, N'Engine', N'InStock', 450000.00, 800000.00, 30, GETUTCDATE(), 0),
+(5, N'Dầu động cơ cao cấp Liqui Moly 5W-30', 4, 1, N'Engine', N'InStock', 600000.00, 950000.00, 60, GETUTCDATE(), 0),
+(6, N'Lọc dầu Astra Indonesia', 8, 1, N'Engine', N'InStock', 90000.00, 180000.00, 120, GETUTCDATE(), 0),
+(7, N'Khung sườn Thai Summit', 9, 3, N'Exterior', N'InStock', 2500000.00, 4200000.00, 15, GETUTCDATE(), 0);
 SET IDENTITY_INSERT SpareParts OFF;
+
+-- Chèn dữ liệu SparePartCompatibilities
+SET IDENTITY_INSERT SparePartCompatibilities ON;
+INSERT INTO SparePartCompatibilities (Id, SparePartId, VehicleNameId, VehicleVariantId, VehicleModelYearId, CreatedAt, IsDeleted) VALUES
+(1, 1, 1, 1, 1, GETUTCDATE(), 0), 
+(2, 2, 1, 1, 1, GETUTCDATE(), 0), 
+(3, 3, 2, 2, 2, GETUTCDATE(), 0); 
+SET IDENTITY_INSERT SparePartCompatibilities OFF;
+
 
 -- Chèn dữ liệu Người dùng mẫu (Users)
 -- Password: 123456 → SHA256 hash
 SET IDENTITY_INSERT Users ON;
-INSERT INTO Users (Id, FirstName, LastName, Gender, Email, PhoneNumber, PasswordHash, HouseNumber, StreetName, Ward, District, City, RankLevel, CreatedAt, IsDeleted) VALUES
-(1, N'Tài', N'Nguyễn Thanh', N'Nam', N'tai.nguyen@autohub.vn', N'0912345678', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'123', N'Đường Quang Trung', N'Phường 10', N'Quận Gò Vấp', N'Hồ Chí Minh', N'Gold', GETUTCDATE(), 0);
+INSERT INTO Users (Id, Username, FirstName, LastName, Gender, Email, PhoneNumber, PasswordHash, HouseNumber, StreetName, Ward, District, City, RankLevel, CreatedAt, IsDeleted) VALUES
+(1, N'tainguyen', N'Tài', N'Nguyễn Thanh', N'Nam', N'tai.nguyen@autohub.vn', N'0912345678', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'123', N'Đường Quang Trung', N'Phường 10', N'Quận Gò Vấp', N'Hồ Chí Minh', N'Gold', GETUTCDATE(), 0);
 SET IDENTITY_INSERT Users OFF;
 
 -- Chèn dữ liệu Đơn hàng mẫu (Orders)

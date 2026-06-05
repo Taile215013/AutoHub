@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+    using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +19,7 @@ public class EfServiceRepository : IServiceRepository
     public async Task<IEnumerable<Service>> GetAllAsync()
     {
         return await _context.Services
+            .Include(s => s.Category)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
     }
@@ -26,6 +27,7 @@ public class EfServiceRepository : IServiceRepository
     public async Task<IEnumerable<Service>> GetAllActiveAsync(string? vehicleType)
     {
         var query = _context.Services
+            .Include(s => s.Category)
             .Where(s => s.IsActive)
             .AsQueryable();
 
@@ -39,7 +41,9 @@ public class EfServiceRepository : IServiceRepository
 
     public async Task<Service?> GetByIdAsync(int id)
     {
-        return await _context.Services.FindAsync(id);
+        return await _context.Services
+            .Include(s => s.Category)
+            .FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task AddAsync(Service service)

@@ -15,4 +15,6 @@ public interface ISparePartRepository
     Task UpdateAsync(SparePart sparePart);
 
     Task DeleteAsync(int id);
+
+    Task AddCompatibilityAsync(SparePartCompatibility compatibility);
 }

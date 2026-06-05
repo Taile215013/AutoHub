@@ -1,17 +1,19 @@
 @model AutoHub.Models.Entities.Vehicle
 
 @{
-    ViewData["Title"] = "Them xe moi - AutoHub";
+    ViewData["Title"] = "Sua xe - AutoHub";
     Layout = "_AdminLayout";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-5">
-    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Them xe moi</h1>
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Sua xe</h1>
     <a href="@Url.Action("Index", "Vehicle", new { area = "Admin" })" class="btn-neon text-white text-decoration-none">Quay lai</a>
 </div>
 
 <div class="tech-panel">
-    <form method="post" action="@Url.Action("Create", "Vehicle", new { area = "Admin" })" enctype="multipart/form-data">
+    <form method="post" action="@Url.Action("Edit", "Vehicle", new { area = "Admin", id = Model.Id })" enctype="multipart/form-data">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Ten xe goc da co</label>
@@ -21,7 +23,7 @@
                     {
                         foreach (var vehicleName in ViewBag.VehicleNames)
                         {
-                            <option value="@vehicleName.Id">@vehicleName.Brand.Name - @vehicleName.Name</option>
+                            <option value="@vehicleName.Id" selected="@(Model.VehicleNameId == vehicleName.Id)">@vehicleName.Brand.Name - @vehicleName.Name</option>
                         }
                     }
                 </select>
@@ -29,14 +31,15 @@
             <div class="col-md-6">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Ten xe moi neu chua co</label>
                 <input type="text" name="newVehicleName" class="form-control border-secondary py-2" placeholder="Vi du: Airblade, Civic, Camry" />
+                <input type="hidden" name="Name" value="@Model.Name" />
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phien ban / phan khoi</label>
-                <input type="text" name="variantName" class="form-control border-secondary py-2" placeholder="Vi du: 125, 150, 160, RS" />
+                <input type="text" name="variantName" class="form-control border-secondary py-2" value="@Model.VehicleVariant?.Name" placeholder="Vi du: 125, 150, 160" />
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Nam doi xe</label>
-                <input type="number" name="modelYear" class="form-control border-secondary py-2" min="1900" max="2100" placeholder="Vi du: 2023" />
+                <input type="number" name="modelYear" class="form-control border-secondary py-2" value="@Model.VehicleModelYear?.Year" min="1900" max="2100" />
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Phan loai</label>
@@ -45,7 +48,7 @@
                     {
                         foreach (var type in ViewBag.VehicleTypes)
                         {
-                            <option value="@type.Code">@type.Value</option>
+                            <option value="@type.Code" selected="@(Model.VehicleType == type.Code)">@type.Value</option>
                         }
                     }
                 </select>
@@ -57,7 +60,7 @@
                     {
                         foreach (var fuel in ViewBag.FuelTypes)
                         {
-                            <option value="@fuel.Code">@fuel.Value</option>
+                            <option value="@fuel.Code" selected="@(Model.FuelType == fuel.Code)">@fuel.Value</option>
                         }
                     }
                 </select>
@@ -70,7 +73,7 @@
                     {
                         foreach (var trans in ViewBag.Transmissions)
                         {
-                            <option value="@trans.Code">@trans.Value</option>
+                            <option value="@trans.Code" selected="@(Model.Transmission == trans.Code)">@trans.Value</option>
                         }
                     }
                 </select>
@@ -82,7 +85,7 @@
                     {
                         foreach (var brand in ViewBag.Brands)
                         {
-                            <option value="@brand.Id">@brand.Name</option>
+                            <option value="@brand.Id" selected="@(Model.BrandId == brand.Id)">@brand.Name</option>
                         }
                     }
                 </select>
@@ -94,23 +97,23 @@
                     {
                         foreach (var engine in ViewBag.EngineTypes)
                         {
-                            <option value="@engine.Code">@engine.Value</option>
+                            <option value="@engine.Code" selected="@(Model.EngineType == engine.Code)">@engine.Value</option>
                         }
                     }
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Dung tich dong co</label>
-                <input type="number" step="0.1" name="EngineCapacity" class="form-control border-secondary py-2" placeholder="Vi du: 1.5, 150" />
+                <input type="number" step="0.1" name="EngineCapacity" value="@Model.EngineCapacity" class="form-control border-secondary py-2" />
             </div>
 
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">So cho ngoi</label>
-                <input type="number" name="SeatingCapacity" class="form-control border-secondary py-2" required value="5" />
+                <input type="number" name="SeatingCapacity" value="@Model.SeatingCapacity" class="form-control border-secondary py-2" required />
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Trong luong (kg)</label>
-                <input type="number" step="0.1" name="Weight" class="form-control border-secondary py-2" placeholder="Vi du: 1300" />
+                <input type="number" step="0.1" name="Weight" value="@Model.Weight" class="form-control border-secondary py-2" />
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Dang xe</label>
@@ -119,68 +122,71 @@
                     {
                         foreach (var body in ViewBag.BodyStyles)
                         {
-                            <option value="@body.Code">@body.Value</option>
+                            <option value="@body.Code" selected="@(Model.BodyStyle == body.Code)">@body.Value</option>
                         }
                     }
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label text-uppercase text-muted" style="font-size:0.8rem; font-weight:600;">Ton kho</label>
-                <input type="number" name="Quantity" class="form-control border-secondary py-2" placeholder="Trong = het / sap ve" />
+                <input type="number" name="Quantity" value="@Model.Quantity" class="form-control border-secondary py-2" />
             </div>
 
             <div class="col-md-6">
-                <label class="form-label text-uppercase text-warning" style="font-size:0.8rem; font-weight:700;">📷 Anh bia (Thumbnail) - 1 anh duy nhat</label>
+                <label class="form-label text-uppercase text-warning" style="font-size:0.8rem; font-weight:700;">📷 Doi anh bia (Thumbnail)</label>
+                @if (!string.IsNullOrEmpty(Model.ThumbnailImageUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ThumbnailImageUrl" alt="Thumbnail hien tai" class="img-fluid rounded border border-warning" style="max-height:100px;" />
+                        <small class="text-muted d-block">Anh bia hien tai</small>
+                    </div>
+                }
                 <input type="file" name="thumbnailFile" accept="image/*" class="form-control bg-dark text-white border-warning py-2" id="thumbnailInput" />
                 <div class="mt-2 text-center d-none" id="thumbnailPreview">
-                    <img id="thumbnailImg" src="#" alt="Thumbnail Preview" class="img-fluid rounded border border-warning" style="max-height: 150px;" />
+                    <img id="thumbnailImg" src="#" alt="Preview" class="img-fluid rounded border border-warning" style="max-height:100px;" />
                 </div>
             </div>
             <div class="col-md-6">
-                <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">🖼️ Anh goc chat luong cao - 1 anh</label>
+                <label class="form-label text-uppercase text-info" style="font-size:0.8rem; font-weight:700;">🖼️ Doi anh goc chat luong cao</label>
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ImageUrl" alt="Anh goc hien tai" class="img-fluid rounded border border-info" style="max-height:100px;" />
+                        <small class="text-muted d-block">Anh goc hien tai</small>
+                    </div>
+                }
                 <input type="file" name="uploadedFile" accept="image/*" class="form-control bg-dark text-white border-info py-2" id="imageInput" />
                 <div class="mt-2 text-center d-none" id="previewContainer">
-                    <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height: 150px;" />
+                    <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded border border-info" style="max-height:100px;" />
                 </div>
             </div>
             <div class="col-md-12">
-                <label class="form-label text-uppercase text-success" style="font-size:0.8rem; font-weight:700;">🖼️ Anh bo sung (chon nhieu anh)</label>
+                <label class="form-label text-uppercase text-success" style="font-size:0.8rem; font-weight:700;">🖼️ Them anh bo sung (chon nhieu anh)</label>
+                @if (!string.IsNullOrEmpty(Model.AdditionalImages))
+                {
+                    <div class="mb-2 d-flex flex-wrap gap-2">
+                        @foreach (var imgUrl in System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.AdditionalImages) ?? new List<string>())
+                        {
+                            <img src="@imgUrl" alt="Anh bo sung" class="img-fluid rounded border border-success" style="max-height:80px; max-width:100px; object-fit:cover;" />
+                        }
+                        <small class="text-muted d-block w-100">Anh bo sung hien tai (chon file moi se thay the)</small>
+                    </div>
+                }
                 <input type="file" name="additionalFiles" accept="image/*" multiple class="form-control bg-dark text-white border-success py-2" id="additionalInput" />
                 <div class="mt-2 d-flex flex-wrap gap-2 d-none" id="additionalPreview"></div>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label text-uppercase text-danger" style="font-size:0.8rem; font-weight:700;">Gia thu vao</label>
-                <input type="number" step="0.01" name="PurchasePrice" class="form-control border-danger py-2" required placeholder="Nhap gia nhap kho" />
+                <input type="number" step="0.01" name="PurchasePrice" value="@Model.PurchasePrice" class="form-control border-danger py-2" required />
             </div>
             <div class="col-md-6">
                 <label class="form-label text-uppercase text-success" style="font-size:0.8rem; font-weight:700;">Gia ban ra</label>
-                <input type="number" step="0.01" name="CurrentPrice" class="form-control border-success py-2" required placeholder="Nhap gia ban" />
-            </div>
-
-            <div class="col-12 mt-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="text-uppercase" style="font-weight:800; margin:0;">Danh sach mau sac</h5>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="addColorRow()">+ Them mau</button>
-                </div>
-                <div id="colorContainer" class="d-flex flex-column gap-2">
-                    <div class="input-group color-row">
-                        <select name="colors" class="form-select border-secondary" required>
-                            @if (ViewBag.VehicleColors != null)
-                            {
-                                foreach (var color in ViewBag.VehicleColors)
-                                {
-                                    <option value="@color.Value">@color.Value</option>
-                                }
-                            }
-                        </select>
-                        <button type="button" class="btn btn-outline-danger" onclick="removeColorRow(this)">&times;</button>
-                    </div>
-                </div>
+                <input type="number" step="0.01" name="CurrentPrice" value="@Model.CurrentPrice" class="form-control border-success py-2" required />
             </div>
 
             <div class="col-12 mt-5">
-                <button type="submit" class="btn-neon w-100 py-3">Luu du lieu xe</button>
+                <button type="submit" class="btn-neon w-100 py-3">Luu thay doi</button>
             </div>
         </div>
     </form>
@@ -188,30 +194,6 @@
 
 @section Scripts {
     <script>
-        function addColorRow() {
-            var optionsHtml = '';
-            @if (ViewBag.VehicleColors != null)
-            {
-                foreach (var color in ViewBag.VehicleColors)
-                {
-                    <text>optionsHtml += '<option value="@color.Value">@color.Value</option>';</text>
-                }
-            }
-            var row = $('<div class="input-group color-row"><select name="colors" class="form-select border-secondary" required>' +
-                optionsHtml +
-                '</select><button type="button" class="btn btn-outline-danger" onclick="removeColorRow(this)">&times;</button></div>');
-            $('#colorContainer').append(row);
-        }
-
-        function removeColorRow(button) {
-            var rows = $('.color-row');
-            if (rows.length > 1) {
-                $(button).closest('.color-row').remove();
-            } else {
-                alert('Phai co it nhat 1 mau cho xe.');
-            }
-        }
-
         function previewSingleImage(inputId, previewContainerId, previewImgId) {
             $(inputId).change(function(e) {
                 var file = e.target.files[0];
@@ -237,7 +219,7 @@
                 Array.from(e.target.files).forEach(function(file) {
                     var reader = new FileReader();
                     reader.onload = function(event) {
-                        container.append('<img src="' + event.target.result + '" class="img-fluid rounded border border-success" style="max-height:100px; max-width:120px; object-fit:cover;" />');
+                        container.append('<img src="' + event.target.result + '" class="img-fluid rounded border border-success" style="max-height:80px; max-width:100px; object-fit:cover;" />');
                     };
                     reader.readAsDataURL(file);
                 });

@@ -14,9 +14,13 @@ public class Brand : BaseEntity
 
     public bool IsToyBrand { get; set; } = false;
 
+    public string? ImageUrl { get; set; }
+
     public Country Country { get; set; } = null!;
 
     public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+
+    public ICollection<VehicleName> VehicleNames { get; set; } = new List<VehicleName>();
 
     public ICollection<SparePart> SpareParts { get; set; } = new List<SparePart>();
 }

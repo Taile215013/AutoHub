@@ -1,70 +1,90 @@
 @model IEnumerable<AutoHub.Models.Entities.SparePart>
 
 @{
-    ViewData["Title"] = "Quản Lý Phụ Tùng - AutoHub";
+    ViewData["Title"] = "Quan ly phu tung - AutoHub";
     Layout = "_AdminLayout";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-5">
-    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quản Lý Phụ Tùng & Đồ Chơi</h1>
-    <a href="@Url.Action("CreateSparePart", "Admin")" class="btn-neon text-decoration-none">Thêm Phụ Tùng</a>
+    <h1 class="text-uppercase" style="font-weight:900; letter-spacing:-1px;">Quan ly phu tung</h1>
+    <a href="@Url.Action("Create", "SparePart", new { area = "Admin" })" class="btn-neon text-decoration-none">Them phu tung</a>
 </div>
 
-            <div class="tech-panel">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
-                            <th>Tên Phụ Tùng</th>
-                            <th>Hãng Sản Xuất</th>
-                            <th>Phân Loại</th>
-                            <th>Giá Nhập Kho (Cost)</th>
-                            <th>Giá Bán Ra (Retail)</th>
-                            <th>Lợi Nhuận Gộp</th>
-                            <th>Tồn Kho</th>
-                            <th class="text-end">Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var part in Model)
+<div class="tech-panel">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr class="text-uppercase text-muted" style="font-size:0.8rem;">
+                <th>Ten phu tung</th>
+                <th>Hang</th>
+                <th>Danh muc</th>
+                <th>Tuong thich xe</th>
+                <th>Trang thai</th>
+                <th>Gia nhap</th>
+                <th>Gia ban</th>
+                <th>Ton kho</th>
+                <th class="text-end">Thao tac</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var part in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-bold">@part.Name</div>
+                        @if (part.ManufactureYear.HasValue)
                         {
-                            var profit = part.Price - part.CostPrice;
-                            <tr>
-                                <td>
-                                    <div class="fw-bold">@part.Name</div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary py-2 px-3">@(part.Brand != null ? part.Brand.Name : "N/A")</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-dark">@part.Category</span>
-                                </td>
-                                <td class="text-secondary fw-semibold">@string.Format("{0:N0}", part.CostPrice) đ</td>
-                                <td class="text-success fw-bold">@string.Format("{0:N0}", part.Price) đ</td>
-                                <td class="text-danger fw-bold">
-                                    +@string.Format("{0:N0}", profit) đ
-                                </td>
-                                <td>
-                                    @if (part.StockQuantity > 10)
-                                    {
-                                        <span class="text-success fw-semibold">@part.StockQuantity cái</span>
-                                    }
-                                    else if (part.StockQuantity > 0)
-                                    {
-                                        <span class="text-warning fw-bold">Chỉ còn @part.StockQuantity cái</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger fw-bold">Hết hàng</span>
-                                    }
-                                </td>
-                                <td class="text-end">
-                                    <form method="post" action="@Url.Action("DeleteSparePart", "Admin", new { id = part.Id })" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phụ tùng này?')">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            <div class="text-muted" style="font-size:0.8rem;">Nam SX: @part.ManufactureYear</div>
                         }
-                    </tbody>
-                </table>
-            </div>
-
+                    </td>
+                    <td><span class="badge bg-secondary py-2 px-3">@(part.Brand?.Name ?? "N/A")</span></td>
+                    <td><span class="badge bg-dark">@(part.CategoryMaster?.Name ?? part.Category)</span></td>
+                    <td>
+                        @if (part.Compatibilities.Any())
+                        {
+                            foreach (var item in part.Compatibilities)
+                            {
+                                <div style="font-size:0.85rem;">
+                                    @item.VehicleName.Name
+                                    @if (item.VehicleVariant != null)
+                                    {
+                                        <span> @item.VehicleVariant.Name</span>
+                                    }
+                                    @if (item.VehicleModelYear != null)
+                                    {
+                                        <span> - @item.VehicleModelYear.Year</span>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted" style="font-size:0.85rem;">Chua gan</span>
+                        }
+                    </td>
+                    <td>
+                        @if (part.Status == "Incoming")
+                        {
+                            <span class="badge bg-warning text-dark">Dang ve hang</span>
+                        }
+                        else if (part.Status == "OutOfStock")
+                        {
+                            <span class="badge bg-danger">Het hang</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Dang ban</span>
+                        }
+                    </td>
+                    <td class="text-secondary fw-semibold">@string.Format("{0:N0}", part.CostPrice) d</td>
+                    <td class="text-success fw-bold">@string.Format("{0:N0}", part.Price) d</td>
+                    <td>@part.StockQuantity cai</td>
+                    <td class="text-end">
+                        <form method="post" action="@Url.Action("Delete", "SparePart", new { area = "Admin", id = part.Id })" style="display:inline;" onsubmit="return confirm('Ban co chac chan muon xoa phu tung nay?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger border-0">Xoa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
