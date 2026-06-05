@@ -1,0 +1,60 @@
+AutoHub
+│
+├── Areas
+│   └── Admin
+│       │
+│       ├── Controllers
+│       │   ├── DashboardController.cs
+│       │   ├── VehicleController.cs
+│       │   ├── BrandController.cs
+│       │   ├── ServiceController.cs
+│       │   ├── UserController.cs
+│       │   ├── BookingController.cs
+│       │   └── OrderController.cs
+│       │
+│       ├── Views
+│       │   ├── Dashboard
+│       │   ├── Vehicle
+│       │   ├── Brand
+│       │   ├── Service
+│       │   ├── User
+│       │   ├── Booking
+│       │   └── Order
+│       │
+│       └── ViewModels
+│
+├── Controllers
+│   ├── HomeController.cs
+│   ├── VehicleController.cs ( chưa làm tới )
+│   ├── ServiceController.cs ( chưa làm tới )	
+│   ├── AccountController.cs
+│   └── BookingController.cs ( chưa làm tới )
+│
+├── Models
+│
+├── Repositories
+│
+├── Services
+│
+├── ViewModels
+│
+├── Views
+│   ├── Home
+│   ├── Vehicle
+│   ├── Service
+│   ├── Booking
+│   ├── Account
+│   └── Shared
+│
+├── wwwroot
+│   ├── css
+│   │   ├── admin
+│   │   └── site
+│   │
+│   ├── js
+│   │   ├── admin
+│   │   └── site
+│   │
+│   └── images
+│
+└── Program.cs

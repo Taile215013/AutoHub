@@ -1,199 +1,163 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using AutoHub.Data;
 using AutoHub.Models.Entities;
-using System.Collections.Generic;
+using AutoHub.Repositories;
 
-namespace AutoHub.Controllers
+namespace AutoHub.Controllers;
+
+/// <summary>
+/// Xử lý giỏ hàng của người dùng đã đăng nhập.
+/// Người dùng chưa đăng nhập sẽ dùng localStorage ở phía client (cart.js).
+/// </summary>
+public class CartController : Controller
 {
-    public class CartController : Controller
+    private readonly ICartRepository _cartRepository;
+
+    public CartController(ICartRepository cartRepository)
+        => _cartRepository = cartRepository;
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    private int? CurrentUserId
+        => HttpContext.Session.GetInt32("UserId");
+
+    private IActionResult NotLoggedIn()
+        => Json(new { success = false, message = "Chưa đăng nhập" });
+
+    // ── Endpoints ──────────────────────────────────────────────────────────
+
+    [HttpGet]
+    public async Task<IActionResult> GetCart()
     {
-        private readonly AppDbContext _context;
+        if (CurrentUserId is not int userId) return NotLoggedIn();
 
-        public CartController(AppDbContext context)
+        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        if (cart == null) return Json(Array.Empty<object>());
+
+        var items = cart.Items.Select(i => new
         {
-            _context = context;
+            id   = i.Id,
+            name = i.Name,
+            price = i.Price,
+            type = i.ProductType,
+            qty  = i.Quantity
+        });
+
+        return Json(items);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddToCart([FromBody] CartItemInput input)
+    {
+        if (CurrentUserId is not int userId) return NotLoggedIn();
+
+        var cart = await _cartRepository.GetOrCreateAsync(userId);
+
+        var existing = cart.Items.FirstOrDefault(i => i.Name == input.Name);
+        if (existing != null)
+        {
+            existing.Quantity += Math.Max(input.Qty, 1);
+            existing.UpdatedAt = DateTime.UtcNow;
         }
-
-        private int? GetUserId()
+        else
         {
-            return HttpContext.Session.GetInt32("UserId");
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetCart()
-        {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false, message = "Not logged in" });
-
-            var cart = await _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (cart == null)
+            cart.Items.Add(new CartItem
             {
-                return Json(new List<object>()); // empty cart
-            }
-
-            var items = cart.Items.Select(i => new
-            {
-                id = i.Id,
-                name = i.Name,
-                price = i.Price,
-                type = i.ProductType,
-                qty = i.Quantity
+                Name        = input.Name,
+                Price       = input.Price,
+                ProductType = input.Type,
+                Quantity    = Math.Max(input.Qty, 1),
+                UpdatedAt   = DateTime.UtcNow
             });
-
-            return Json(items);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddToCart([FromBody] CartItemInput input)
+        cart.UpdatedAt = DateTime.UtcNow;
+        await _cartRepository.SaveAsync();
+
+        return Json(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveItem([FromBody] CartItemInput input)
+    {
+        if (CurrentUserId is not int userId) return NotLoggedIn();
+
+        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        var item = cart?.Items.FirstOrDefault(i => i.Name == input.Name);
+        if (item != null) await _cartRepository.RemoveItemAsync(item);
+
+        return Json(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateQuantity([FromBody] CartItemInput input)
+    {
+        if (CurrentUserId is not int userId) return NotLoggedIn();
+
+        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        var item = cart?.Items.FirstOrDefault(i => i.Name == input.Name);
+        if (item != null)
         {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false });
+            item.Quantity  = input.Qty;
+            item.UpdatedAt = DateTime.UtcNow;
+            cart!.UpdatedAt = DateTime.UtcNow;
+            await _cartRepository.SaveAsync();
+        }
 
-            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
-            if (cart == null)
-            {
-                cart = new Cart { UserId = userId.Value, UpdatedAt = DateTime.UtcNow };
-                _context.Carts.Add(cart);
-                await _context.SaveChangesAsync();
-            }
+        return Json(new { success = true });
+    }
 
-            var existingItem = cart.Items.FirstOrDefault(i => i.Name == input.Name);
-            if (existingItem != null)
+    [HttpPost]
+    public async Task<IActionResult> ClearCart()
+    {
+        if (CurrentUserId is not int userId) return NotLoggedIn();
+
+        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        if (cart?.Items.Any() == true)
+            await _cartRepository.RemoveItemsAsync(cart.Items.ToList());
+
+        return Json(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SyncCart([FromBody] List<CartItemInput>? localItems)
+    {
+        if (CurrentUserId is not int userId) return NotLoggedIn();
+        if (localItems is null || !localItems.Any()) return Json(new { success = true });
+
+        var cart = await _cartRepository.GetOrCreateAsync(userId);
+
+        foreach (var input in localItems)
+        {
+            var existing = cart.Items.FirstOrDefault(i => i.Name == input.Name);
+            if (existing != null)
             {
-                existingItem.Quantity += (input.Qty > 0 ? input.Qty : 1);
-                existingItem.UpdatedAt = DateTime.UtcNow;
+                existing.Quantity += Math.Max(input.Qty, 1);
+                existing.UpdatedAt = DateTime.UtcNow;
             }
             else
             {
                 cart.Items.Add(new CartItem
                 {
-                    Name = input.Name,
-                    Price = input.Price,
+                    Name        = input.Name,
+                    Price       = input.Price,
                     ProductType = input.Type,
-                    Quantity = input.Qty > 0 ? input.Qty : 1,
-                    UpdatedAt = DateTime.UtcNow
+                    Quantity    = Math.Max(input.Qty, 1),
+                    UpdatedAt   = DateTime.UtcNow
                 });
             }
-
-            cart.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RemoveItem([FromBody] CartItemInput input)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false });
+        cart.UpdatedAt = DateTime.UtcNow;
+        await _cartRepository.SaveAsync();
 
-            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
-            if (cart != null)
-            {
-                var item = cart.Items.FirstOrDefault(i => i.Name == input.Name);
-                if (item != null)
-                {
-                    _context.CartItems.Remove(item);
-                    cart.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
-                }
-            }
-            return Json(new { success = true });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateQuantity([FromBody] CartItemInput input)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false });
-
-            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
-            if (cart != null)
-            {
-                var item = cart.Items.FirstOrDefault(i => i.Name == input.Name);
-                if (item != null)
-                {
-                    item.Quantity = input.Qty;
-                    item.UpdatedAt = DateTime.UtcNow;
-                    cart.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
-                }
-            }
-            return Json(new { success = true });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ClearCart()
-        {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false });
-
-            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
-            if (cart != null)
-            {
-                _context.CartItems.RemoveRange(cart.Items);
-                cart.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
-            return Json(new { success = true });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SyncCart([FromBody] List<CartItemInput> localItems)
-        {
-            var userId = GetUserId();
-            if (userId == null) return Json(new { success = false });
-            if (localItems == null || !localItems.Any()) return Json(new { success = true });
-
-            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
-            if (cart == null)
-            {
-                cart = new Cart { UserId = userId.Value, UpdatedAt = DateTime.UtcNow };
-                _context.Carts.Add(cart);
-                await _context.SaveChangesAsync(); // save to get ID
-            }
-
-            foreach (var input in localItems)
-            {
-                var existingItem = cart.Items.FirstOrDefault(i => i.Name == input.Name);
-                if (existingItem != null)
-                {
-                    existingItem.Quantity += (input.Qty > 0 ? input.Qty : 1);
-                    existingItem.UpdatedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                    cart.Items.Add(new CartItem
-                    {
-                        Name = input.Name,
-                        Price = input.Price,
-                        ProductType = input.Type,
-                        Quantity = input.Qty > 0 ? input.Qty : 1,
-                        UpdatedAt = DateTime.UtcNow
-                    });
-                }
-            }
-
-            cart.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true });
-        }
-    }
-
-    public class CartItemInput
-    {
-        public string Name { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public string Type { get; set; } = string.Empty;
-        public int Qty { get; set; }
+        return Json(new { success = true });
     }
 }
+
+/// <summary>DTO từ client gửi lên — tách ra để không bind trực tiếp vào entity.</summary>
+public sealed record CartItemInput(string Name, decimal Price, string Type, int Qty);

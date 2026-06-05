@@ -1,0 +1,70 @@
+AI chỉ nên tham khảo thôi nhé, vì tôi chỉ mới bắt đầu c# thôi
+phép bạn chia sẻ Model (Class) giữa Backend và Frontend, giảm thiểu sai sót.
+
+MudBlazor / Ant Design Blazor: Các bộ UI Component cực đẹp dành riêng cho .NET, giúp bạn làm Dashboard Admin cực nhanh và chuyên nghiệp mà không cần giỏi CSS.
+
+4. Background Tasks & Jobs (Xử lý ngầm)
+Hangfire: Dự án của bạn có chức năng Booking. Bạn sẽ cần Hangfire để:
+
+Tự động gửi mail nhắc lịch bảo trì trước 1 ngày.
+
+Hủy các lịch hẹn nếu khách không đến xác nhận sau 30 phút.
+
+Quét kho để cảnh báo phụ tùng sắp hết.
+
+5. API Documentation & Testing
+Swagger (NSwag): Visual Studio 2026 sẽ mặc định tích hợp cái này, giúp bạn có trang tài liệu API để test ngay lập tức.
+
+xUnit & Moq: Để viết Unit Test. Một hệ thống bán xe giá trị cao cần sự chính xác tuyệt đối trong logic tính toán tiền bạc.
+
+6. Gợi ý về Kiến trúc (Architecture)
+Với VS 2026, hãy áp dụng Clean Architecture (hoặc Onion Architecture).
+
+Folder Structure: Chia dự án thành các Layer: Domain, Application, Infrastructure, và WebAPI.
+
+CQRS Pattern (với thư viện MediatR): Tách biệt giữa lệnh Ghi (Đặt hàng) và lệnh Đọc (Thống kê). Điều này giúp phần "Thống kê mua bán cho tất cả" của Admin không làm ảnh hưởng đến tốc độ đặt hàng của Khách.
+
+
+
+
+
+
+
+
+====================================================
+
+Sự khác biệt lớn nhất giữa bản cập nhật mới nhất và các bản phác thảo ban đầu nằm ở độ trễ (latency), tính thực tế của công nghệ (C#/.NET Core) và khả năng bảo trì.
+
+Dưới đây là bảng so sánh chi tiết để bạn thấy tại sao bản mới này lại "xịn" hơn:
+
+1. Phân tách Layer (Layered Architecture)
+Cũ: Thường chỉ vẽ "User -> Server -> Database". Đây là cách vẽ cơ bản, chỉ mô tả luồng dữ liệu thô.
+
+Mới: Tách biệt rõ Presentation (Frontend), Logic Layer (API & Service), và Data Layer (EF Core).
+
+Lợi ích: Điều này khớp hoàn toàn với cấu trúc Folder trong Visual Studio của bạn. Bạn biết chính xác đoạn code nào nằm ở lớp nào.
+
+2. Sự xuất hiện của SignalR (Real-time Hub)
+Cũ: Admin muốn biết có lịch mới thì phải "F5" trình duyệt hoặc gọi API kiểm tra liên tục (Polling).
+
+Mới: Có sự xuất hiện của SignalR Hub.
+
+Lợi ích: Ngay khi Service lưu xong vào DB, nó ra lệnh cho Hub đẩy thông báo xuống máy Admin ngay lập tức (Push Notification). Đây là tính năng "ăn tiền" cho trải nghiệm người dùng.
+
+3. Quy trình xác thực (Validation Flow)
+Cũ: Bỏ qua các bước kiểm tra, nhảy thẳng vào lưu dữ liệu.
+
+Mới: Chia làm 2 Phase rõ rệt:
+
+Phase 1 (Check-slots): Kiểm tra thợ có trống lịch không trước khi cho phép đặt.
+
+Phase 2 (Execution): Lưu dữ liệu và kích hoạt các Side-effects (thông báo, gửi SMS).
+
+Lợi ích: Tránh việc 2 khách hàng đặt trùng 1 thợ vào cùng 1 khung giờ (Race condition).
+
+4. Chi tiết kỹ thuật .NET
+Cũ: Dùng thuật ngữ chung chung.
+
+Mới: Sử dụng các khái niệm chuyên sâu như EF Core (Entity Framework) và DTO (Data Transfer Object).
+
+Lợi ích: Khi bạn nhìn vào biểu đồ, bạn biết mình phải cài NuGet package nào và viết loại Object nào (DTO) để truyền dữ liệu qua mạng.

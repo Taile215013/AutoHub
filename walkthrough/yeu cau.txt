@@ -1,0 +1,32 @@
+Backend: ASP.NET Core MVC , Dependency Injection (DI), Repository & Unit of Work Pattern
+
+Database: SQL Server
+
+ORM: Entity Framework Core
+
+Frontend cơ bản: Razor View + Bootstrap + JavaScript
+
+Source control: Git/GitHub,Docker nếu dễ và còn thời gian
+
+diagram: plantuml
+
+
+
+
+ecomerce bán xe hơi ,2 bánh, phụ tùng ( có hãng sản xuất ) 
+ chức năng chính là book service để dùng dịch vụ, có thể là dán decal, rửa xe, check máy,... sau này sẽ nghĩ ra thêm
+áp dụgn chat box trực tuyến
+
+Khách mua trên web thì ntn 
+Thống kê mua bán ra sao 
+Lịch sử mua hàng của từng khách hàng ntn
+
+
+
+với yêu cầu là: làm được những gì,chức năng gì, mục đích gì, học được những gì từ ngày đó
+bạn phải nói rõ ra FE sẽ làm chức năng, trang gì
+BE sẽ ra sao, 
+sử dụng kiến thức gì, trả lời logic chặt chẽ nhé
+
+yêu cầu timeline 11 tuần, tuần làm 5 ngày: dành cho ngời mới học c#, người hướng dẫn có thể nhìn ra ngay
+

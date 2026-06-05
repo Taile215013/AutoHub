@@ -1,143 +1,8 @@
-//using System;
-//using System.IO;
-//using Microsoft.AspNetCore.Builder;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.Hosting;
-//using Microsoft.EntityFrameworkCore;
-//using AutoHub.Infrastructure;
-//using AutoHub.Data;
-//using AutoHub.Repositories;
-//using AutoHub.Models.Settings;
-//using AutoHub.Services;
-//using AutoHub.Models.Settings; // Thay đổi namespace này cho đúng với class CloudinarySettings của bạn
-
-//// =========================================================================
-//// BƯỚC 1: NẠP FILE .ENV LÊN BỘ NHỚ TRƯỚC TIÊN (QUAN TRỌNG NHẤT)
-//// =========================================================================
-//EnvLoader.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
-
-//// =========================================================================
-//// BƯỚC 2: KHỞI TẠO WEB APPLICATION BUILDER
-//// =========================================================================
-//var builder = WebApplication.CreateBuilder(args);
-
-//// =========================================================================
-//// BƯỚC 3: TRUY XUẤT CHUỖI KẾT NỐI DATABASE (ƯU TIÊN .ENV, SƠ CUA APPSETTINGS)
-//// =========================================================================
-
-//var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
-//    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
-//builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseSqlServer(connectionString));
-
-//builder.Services.AddScoped<IUserRepository, EfUserRepository>();
-//builder.Services.AddScoped<IVehicleRepository, EfVehicleRepository>();
-//builder.Services.AddScoped<IServiceRepository, EfServiceRepository>();
-//builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
-//builder.Services.AddScoped<IBrandRepository, EfBrandRepository>();
-//builder.Services.AddScoped<ISparePartRepository, EfSparePartRepository>();
-
-//builder.Services.AddScoped<ILocationService, LocationService>();
-//builder.Services.AddScoped<IAuthService, AuthService>();
-//builder.Services.AddScoped<IDashboardService, DashboardService>();
-//builder.Services.AddScoped<ISystemDictionaryService, SystemDictionaryService>();
-
-//builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-//builder.Services.AddScoped<IFileService, CloudinaryService>();
-//builder.Services.AddHttpContextAccessor();
-
-
-//builder.Services.AddSession(options =>
-//{
-//    options.IdleTimeout = TimeSpan.FromMinutes(30);
-//    options.Cookie.HttpOnly = true;
-//    options.Cookie.IsEssential = true;
-//});
-
-//builder.Services.AddControllersWithViews();
-
-//var app = builder.Build();
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    try
-//    {
-//        context.Database.EnsureCreated();
-
-//        var tableExists = false;
-//        try
-//        {
-//            var conn = context.Database.GetDbConnection();
-//            if (conn.State != System.Data.ConnectionState.Open) conn.Open();
-//            using (var cmd = conn.CreateCommand())
-//            {
-//                cmd.CommandText = "SELECT COUNT(*) FROM sys.tables WHERE name = 'SystemDictionaries'";
-//                var count = (int)(cmd.ExecuteScalar() ?? 0);
-//                tableExists = count > 0;
-//            }
-//        }
-//        catch 
-//        {
-//        }
-
-//        var needSeed = !tableExists;
-//        if (tableExists)
-//        {
-//            try
-//            {
-//                needSeed = !context.SystemDictionaries.Any(d => d.Type == "VehicleColor");
-//            }
-//            catch
-//            {
-//                needSeed = true;
-//            }
-//        }
-
-//        if (needSeed)
-//        {
-//            var sqlPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedData.sql");
-//            if (File.Exists(sqlPath))
-//            {
-//                var sql = File.ReadAllText(sqlPath);
-//                context.Database.ExecuteSqlRaw(sql);
-//            }
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine($"Error during DB initialization: {ex.Message}");
-//    }
-//}
-
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    app.UseHsts();
-//}
-
-//app.UseHttpsRedirection();
-//app.UseRouting();
-
-//app.UseSession();
-
-//app.UseAuthorization();
-
-//app.MapStaticAssets();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}")
-//    .WithStaticAssets();
-
-//app.Run();
-
 using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using AutoHub.Infrastructure;
 using AutoHub.Data;
@@ -145,142 +10,114 @@ using AutoHub.Repositories;
 using AutoHub.Models.Settings;
 using AutoHub.Services;
 
-// =========================================================================
-// BƯỚC 1: NẠP FILE .ENV LÊN BỘ NHỚ TRƯỚC TIÊN (QUAN TRỌNG NHẤT)
-// =========================================================================
+// ── 1. Nạp biến môi trường từ .env (phải chạy trước mọi thứ) ──────────────
 EnvLoader.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
-// =========================================================================
-// BƯỚC 2: KHỞI TẠO WEB APPLICATION BUILDER
-// =========================================================================
 var builder = WebApplication.CreateBuilder(args);
 
-// =========================================================================
-// BƯỚC 3: TRUY XUẤT CHUỖI KẾT NỐI DATABASE (ƯU TIÊN .ENV, SƠ CUA APPSETTINGS)
-// =========================================================================
+// ── 2. Database ────────────────────────────────────────────────────────────
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(connectionString));
 
-// Đăng ký các Repositories (DI)
-builder.Services.AddScoped<IUserRepository, EfUserRepository>();
-builder.Services.AddScoped<IVehicleRepository, EfVehicleRepository>();
-builder.Services.AddScoped<IServiceRepository, EfServiceRepository>();
-builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
-builder.Services.AddScoped<IBrandRepository, EfBrandRepository>();
-builder.Services.AddScoped<ISparePartRepository, EfSparePartRepository>();
-builder.Services.AddScoped<IMasterDataRepository, EfMasterDataRepository>();
-builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
+// ── 3. Repositories ────────────────────────────────────────────────────────
+builder.Services.AddScoped<IUserRepository,        EfUserRepository>();
+builder.Services.AddScoped<IVehicleRepository,     EfVehicleRepository>();
+builder.Services.AddScoped<IServiceRepository,     EfServiceRepository>();
+builder.Services.AddScoped<IOrderRepository,       EfOrderRepository>();
+builder.Services.AddScoped<IBrandRepository,       EfBrandRepository>();
+builder.Services.AddScoped<ISparePartRepository,   EfSparePartRepository>();
+builder.Services.AddScoped<IMasterDataRepository,  EfMasterDataRepository>();
+builder.Services.AddScoped<IEmployeeRepository,    EfEmployeeRepository>();
+builder.Services.AddScoped<ICartRepository,        EfCartRepository>();
 
-// Đăng ký các Services (DI)
-builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<ISystemDictionaryService, SystemDictionaryService>();
+// ── 4. Services ────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IAuthService,              AuthService>();
+builder.Services.AddScoped<IDashboardService,         DashboardService>();
+builder.Services.AddScoped<ILocationService,          LocationService>();
+builder.Services.AddScoped<ISystemDictionaryService,  SystemDictionaryService>();
+builder.Services.AddScoped<IEmployeeService,          EmployeeService>();
 
-// =========================================================================
-// SỬA TẠI ĐÂY: ĐỌC ĐỒNG THỜI TỪ FILE .ENV ĐỂ TRANH LỘ SECRET KEY
-// =========================================================================
-builder.Services.Configure<CloudinarySettings>(options =>
+// ── 5. Cloudinary — đọc từ .env, không để secret trong appsettings ─────────
+builder.Services.Configure<CloudinarySettings>(opt =>
 {
-    options.CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME")
-                        ?? builder.Configuration["CloudinarySettings:CloudName"];
-
-    options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")
-                     ?? builder.Configuration["CloudinarySettings:ApiKey"];
-
-    options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
-                        ?? builder.Configuration["CloudinarySettings:ApiSecret"];
+    opt.CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME")
+                    ?? builder.Configuration["CloudinarySettings:CloudName"];
+    opt.ApiKey    = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")
+                    ?? builder.Configuration["CloudinarySettings:ApiKey"];
+    opt.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
+                    ?? builder.Configuration["CloudinarySettings:ApiSecret"];
 });
-
 builder.Services.AddScoped<IFileService, CloudinaryService>();
+
+// ── 6. HTTP infrastructure ─────────────────────────────────────────────────
 builder.Services.AddHttpContextAccessor();
 
-// Cấu hình Session
-builder.Services.AddSession(options =>
+// Nén response (gzip/brotli) — giảm ~70% kích thước HTML/JSON gửi xuống client
+builder.Services.AddResponseCompression(opt =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    opt.EnableForHttps = true;
+    opt.Providers.Add<BrotliCompressionProvider>();
+    opt.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.AddSession(opt =>
+{
+    opt.IdleTimeout        = TimeSpan.FromMinutes(30);
+    opt.Cookie.HttpOnly    = true;
+    opt.Cookie.IsEssential = true;
 });
 
 builder.Services.AddControllersWithViews();
 
+// ── 7. Build app ───────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Khởi tạo Database và Seed Data tự động từ file SQL mẫu nếu cần
+// ── 8. Seed dữ liệu lần đầu nếu SystemDictionaries chưa có ────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        context.Database.EnsureCreated();
+        db.Database.EnsureCreated();
 
-        var tableExists = false;
-        try
-        {
-            var conn = context.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open) conn.Open();
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = "SELECT COUNT(*) FROM sys.tables WHERE name = 'SystemDictionaries'";
-                var count = (int)(cmd.ExecuteScalar() ?? 0);
-                tableExists = count > 0;
-            }
-        }
-        catch { }
-
-        var needSeed = !tableExists;
-        if (tableExists)
-        {
-            try
-            {
-                needSeed = !context.SystemDictionaries.Any(d => d.Type == "VehicleColor");
-            }
-            catch
-            {
-                needSeed = true;
-            }
-        }
-
+        var needSeed = !await db.SystemDictionaries.AnyAsync(d => d.Type == "VehicleColor");
         if (needSeed)
         {
             var sqlPath = Path.Combine(Directory.GetCurrentDirectory(), "SeedData.sql");
             if (File.Exists(sqlPath))
-            {
-                var sql = File.ReadAllText(sqlPath);
-                context.Database.ExecuteSqlRaw(sql);
-            }
+                db.Database.ExecuteSqlRaw(await File.ReadAllTextAsync(sqlPath));
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error during DB initialization: {ex.Message}");
+        Console.WriteLine($"[Seed] Lỗi khởi tạo DB: {ex.Message}");
     }
 }
 
-// Cấu hình HTTP Request Pipeline (Middleware)
+// ── 9. Middleware pipeline ─────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
+app.UseResponseCompression(); // phải đứng trước UseStaticFiles và UseRouting
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 app.MapStaticAssets();
 
+// ── 10. Routes ─────────────────────────────────────────────────────────────
 app.MapControllerRoute(
-    name: "areas",
+    name:    "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapControllerRoute(
-    name: "default",
+    name:    "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 

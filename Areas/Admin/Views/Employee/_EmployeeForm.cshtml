@@ -17,7 +17,7 @@
     <h5 class="text-uppercase text-muted mb-4" style="font-size:0.8rem;letter-spacing:1px;">📷 Ảnh & Thông Tin Cá Nhân</h5>
     <div class="row g-4">
 
-        {{!-- Avatar --}}
+@* ── Avatar ── *@
         <div class="col-md-3 text-center">
             <div id="avatarPreviewWrap" style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:3px solid rgba(212,175,55,0.4);background:rgba(255,255,255,0.05);margin:0 auto 12px;">
                 @if (!string.IsNullOrEmpty(Model?.ThumbnailImageUrl))
@@ -55,7 +55,7 @@
                     </select>
                 </div>
 
-                {{!-- Ngày sinh --}}
+                @* ── Ngày sinh ── *@
                 <div class="col-md-6">
                     <label class="label-tech">Ngày Sinh <span class="text-danger">*</span></label>
                     <div class="d-flex gap-2">

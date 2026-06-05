@@ -341,7 +341,7 @@
             
             if (confirm(`Bạn có chắc chắn muốn xóa hãng "${name}"? Việc xóa hãng có thể ảnh hưởng tới các sản phẩm liên quan.`)) {
                 $.ajax({
-                    url: '@Url.Action("DeleteBrandAjax", "Admin")/' + id,
+                    url: '@Url.Action("DeleteBrandAjax", "Brand")/' + id,
                     type: 'POST',
                     success: function(res) {
                         if (res.success) {

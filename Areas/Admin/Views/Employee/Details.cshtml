@@ -1,18 +1,9 @@
 @model AutoHub.Models.Entities.Employee
-@using System.Text.Json
 @{
     ViewData["Title"] = $"{Model.LastName} {Model.FirstName} - AutoHub Admin";
     Layout = "_AdminLayout";
 
-    var age = DateTime.Today.Year - Model.DateOfBirth.Year
-        - (DateTime.Today < Model.DateOfBirth.AddYears(DateTime.Today.Year - Model.DateOfBirth.Year) ? 1 : 0);
-
-    List<string> extraImages = new();
-    if (!string.IsNullOrEmpty(Model.ImageUrl))
-    {
-        try { extraImages = JsonSerializer.Deserialize<List<string>>(Model.ImageUrl) ?? new(); }
-        catch { }
-    }
+    var extraImages = Model.GetImageList();
 
     double? bmi = null;
     if (Model.HeightCm.HasValue && Model.WeightKg.HasValue && Model.HeightCm > 0)
@@ -31,7 +22,7 @@
 </div>
 
 <div class="row g-4">
-    {{!-- Cột trái: Avatar + thể trạng --}}
+@* ── Cột trái: Avatar + thể trạng ── *@
     <div class="col-md-3">
         <div class="tech-panel text-center p-4">
             @if (!string.IsNullOrEmpty(Model.ThumbnailImageUrl))
@@ -46,7 +37,7 @@
                 </div>
             }
             <h4 class="mt-3 fw-bold">@Model.LastName @Model.FirstName</h4>
-            <p class="text-muted mb-2">@Model.Gender • @age tuổi</p>
+            <p class="text-muted mb-2">@Model.Gender • @Model.Age tuổi</p>
             @if (Model.IsActive)
             {
                 <span class="badge rounded-pill px-3 py-1" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;">● Đang Làm Việc</span>
@@ -86,7 +77,7 @@
         </div>
     </div>
 
-    {{!-- Cột phải: Thông tin chi tiết --}}
+@* ── Cột phải: Thông tin chi tiết ── *@
     <div class="col-md-9">
         <div class="tech-panel mb-4">
             <h5 class="text-muted text-uppercase mb-4" style="font-size:0.8rem;letter-spacing:1px;">📌 Thông Tin Cá Nhân</h5>

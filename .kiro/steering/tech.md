@@ -47,7 +47,7 @@
 
 ```bash
 # Run the application
-dotnet run
+dotnet watch run
 
 # Build
 dotnet build

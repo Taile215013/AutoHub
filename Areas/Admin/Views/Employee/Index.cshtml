@@ -32,8 +32,6 @@
             {
                 foreach (var emp in Model)
                 {
-                    var age = DateTime.Today.Year - emp.DateOfBirth.Year
-                        - (DateTime.Today < emp.DateOfBirth.AddYears(DateTime.Today.Year - emp.DateOfBirth.Year) ? 1 : 0);
                     var posLabel = positions.FirstOrDefault(p => p.Code == emp.Position)?.Value ?? emp.Position;
 
                     <tr id="emp-row-@emp.Id">
@@ -64,7 +62,7 @@
                             <span class="badge bg-dark text-uppercase" style="font-size:0.72rem;">@posLabel</span>
                         </td>
                         <td class="text-gradient-gold fw-bold">@string.Format("{0:N0}", emp.BaseSalary) đ</td>
-                        <td class="text-muted">@age tuổi</td>
+                        <td class="text-muted">@emp.Age tuổi</td>
                         <td>
                             @if (emp.IsActive)
                             {
