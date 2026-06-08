@@ -12,7 +12,8 @@
    Dùng cho: Logo AutoHub, tiêu đề đặc biệt
    HTML: <span class="text-gradient-gold">AutoHub</span> */
 .text-gradient-gold {
-  background: linear-gradient(to right, #D4AF37, #FFF5D1, #D4AF37);
+  /* background: linear-gradient(to right, #D4AF37, #FFF5D1, #D4AF37); */
+  background-color: rgb(187, 223, 29);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

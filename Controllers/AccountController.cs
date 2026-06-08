@@ -268,6 +268,36 @@ namespace AutoHub.Controllers
             }
         }
 
+        // ---------- ĐỔI AVATAR ---------- //
+        [HttpPost]
+        public async Task<IActionResult> UpdateAvatar(IFormFile avatarFile)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn!" });
+
+            try
+            {
+                if (avatarFile != null && avatarFile.Length > 0)
+                {
+                    var user = await _userRepository.GetByIdAsync(userId.Value);
+                    if (user != null)
+                    {
+                        var url = await _fileService.UploadImageAsync(avatarFile, "avatars");
+                        user.AvatarUrl = url;
+                        await _userRepository.UpdateAsync(user);
+                        return Json(new { success = true, url = url, message = "Cập nhật ảnh đại diện thành công!" });
+                    }
+                }
+                return Json(new { success = false, message = "File ảnh không hợp lệ." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating avatar: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại!" });
+            }
+        }
+
         // ---------- ĐĂNG TIN XE ---------- //
 
         [HttpPost]
@@ -344,8 +374,24 @@ namespace AutoHub.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error posting vehicle: {ex.Message}");
-                TempData["Error"] = "Đăng tin thất bại. Vui lòng thử lại.";
+                Console.WriteLine($"Error posting vehicle: {ex.Message}\n{ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                var requiredFields = new List<string>();
+                if (vehicle.BrandId == 0) requiredFields.Add("Thương hiệu");
+                if (vehicle.PurchasePrice == 0) requiredFields.Add("Giá nhập");
+                if (vehicle.CurrentPrice == 0) requiredFields.Add("Giá bán");
+                
+                if (requiredFields.Any())
+                {
+                    TempData["Error"] = $"Đăng tin thất bại. Thiếu thông tin bắt buộc: {string.Join(", ", requiredFields)}";
+                }
+                else
+                {
+                    TempData["Error"] = "Đăng tin thất bại. Vui lòng kiểm tra lại thông tin. Chi tiết lỗi: " + ex.Message;
+                }
             }
 
             return RedirectToAction("Account", "Account", new { tab = "post" });

@@ -100,8 +100,14 @@ hr { border-color: rgba(0,0,0,.1) !important; }
 
                 @* Avatar + tên *@
                 <div class="text-center mb-4">
-                    <div class="avatar-ring mb-3" id="sideAvatarChar">
-                        @(Model.FirstName?.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "U")
+                    <div class="position-relative d-inline-block mb-3">
+                        <div class="avatar-ring" id="sideAvatarChar" style="@(!string.IsNullOrEmpty(Model.AvatarUrl) ? $"background:url('{Model.AvatarUrl}') center/cover; color:transparent; border-color:var(--accent-gold,#d4af37);" : "")">
+                            @(Model.FirstName?.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "U")
+                        </div>
+                        <label for="avatarUploadInput" class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; border:2px solid #fff;" title="Đổi ảnh đại diện">
+                            <i style="font-size:12px;">📷</i>
+                        </label>
+                        <input type="file" id="avatarUploadInput" class="d-none" accept="image/*" />
                     </div>
                     <h5 class="text-gradient-gold mb-1" id="sideFullName" style="font-weight:800;">
                         @Model.LastName @Model.FirstName
@@ -133,7 +139,7 @@ hr { border-color: rgba(0,0,0,.1) !important; }
                         <span class="icon">🧾</span> Lịch Sử Đơn Hàng
                     </a>
                     <a href="#" class="nav-link @(activeTab=="post"?"active":"")" data-tab="post">
-                        <span class="icon">🚗</span> Đăng Tin Xe
+                        <span class="icon">🚗</span> Quản Lý Tin Đăng
                     </a>
                 </nav>
 
@@ -182,6 +188,19 @@ hr { border-color: rgba(0,0,0,.1) !important; }
                         <div class="col-6">
                             <span class="label-sm">Số Điện Thoại</span>
                             <p class="text-white mb-0" id="dispPhone">@(Model.PhoneNumber ?? "Chưa thiết lập")</p>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <span class="label-sm">Địa Chỉ Hiện Tại</span>
+                            <p class="text-white mb-0" id="dispCurrentAddress">
+                                @if(!string.IsNullOrWhiteSpace(Model.City))
+                                {
+                                    @($"{Model.HouseNumber} — {Model.Ward}, {Model.District}, {Model.City}")
+                                }
+                                else
+                                {
+                                    @:Chưa thiết lập
+                                }
+                            </p>
                         </div>
                     </div>
 
@@ -314,15 +333,68 @@ hr { border-color: rgba(0,0,0,.1) !important; }
                 </div>
             </div>
 
-            <!-- ── TAB 4: ĐĂNG TIN XE ─────────────────────────── -->
+            <!-- ── TAB 4: QUẢN LÝ TIN ĐĂNG ─────────────────────────── -->
             <div class="tab-content-area @(activeTab=="post"?"active":"")" id="tab-post">
                 <div class="tech-panel">
-                    <h4 class="text-gradient-gold mb-4" style="font-weight:900;text-transform:uppercase;">
-                        🚗 Đăng Tin Xe
-                    </h4>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="text-gradient-gold mb-0" style="font-weight:900;text-transform:uppercase;">
+                            🚗 Quản Lý Tin Đăng
+                        </h4>
+                        <button class="btn-neon px-4 py-2" data-bs-toggle="modal" data-bs-target="#postVehicleModal">
+                            + Đăng Tin Mới
+                        </button>
+                    </div>
 
-                    <form method="post" action="@Url.Action("PostVehicle","Account")"
-                          enctype="multipart/form-data" id="postVehicleForm">
+                    @{ var tab4Vehicles = ViewBag.Vehicles as IEnumerable<Vehicle> ?? new List<Vehicle>(); }
+                    @if (!tab4Vehicles.Any())
+                    {
+                        <p class="text-muted text-center py-4">Chưa có tin đăng nào.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle history-table" style="background:transparent;">
+                                <thead>
+                                    <tr class="border-bottom border-secondary">
+                                        <th class="bg-transparent">Hình Ảnh</th>
+                                        <th class="bg-transparent">Tên Xe</th>
+                                        <th class="bg-transparent text-end">Giá Bán</th>
+                                        <th class="bg-transparent text-center">Trạng Thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var v in tab4Vehicles)
+                                    {
+                                        <tr class="border-bottom border-secondary" style="border-color:rgba(255,255,255,.06)!important;">
+                                            <td class="bg-transparent">
+                                                <img src="@(v.ImageUrl ?? "/images/no-image.jpg")" alt="Car" style="width:60px; height:40px; object-fit:cover; border-radius:4px;" />
+                                            </td>
+                                            <td class="bg-transparent"><strong>@v.Name</strong></td>
+                                            <td class="bg-transparent text-end text-gradient-gold fw-700">@v.CurrentPrice.ToString("N0") ₫</td>
+                                            <td class="bg-transparent text-center">
+                                                <span class="status-badge status-done">Đang hiển thị</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: ĐĂNG TIN XE
+════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="postVehicleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0" style="background:#18181c; border:1px solid rgba(255,255,255,.1)!important;">
+            <div class="modal-header border-0 px-4 py-3">
+                <h5 class="modal-title text-gradient-gold" style="font-weight:900;">🚗 Đăng Tin Xe</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-white">
+                <form method="post" action="@Url.Action("PostVehicle","Account")" enctype="multipart/form-data" id="postVehicleForm">
 
                         @* ─ Thông tin cơ bản ─ *@
                         <div class="row g-3 mb-4">
@@ -499,8 +571,10 @@ hr { border-color: rgba(0,0,0,.1) !important; }
                             </button>
                         </div>
                     </form>
-                </div>
             </div>
+        </div>
+    </div>
+</div>
 
         </div>@* /col content *@
     </div>@* /row *@
@@ -791,5 +865,34 @@ function submitProfile() {
         }
     });
 }
+
+// Avatar Upload
+document.getElementById('avatarUploadInput')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const formData = new FormData();
+    formData.append('avatarFile', file);
+
+    fetch('@Url.Action("UpdateAvatar","Account")', {
+        method: 'POST',
+        body: formData
+    }).then(r => r.json()).then(res => {
+        if(res.success) {
+            const charDiv = document.getElementById('sideAvatarChar');
+            charDiv.style.background = `url('${res.url}') center/cover`;
+            charDiv.style.color = 'transparent';
+            charDiv.style.borderColor = 'var(--accent-gold,#d4af37)';
+            const alert = document.getElementById('ajaxAlert');
+            alert.innerHTML = `<div class="alert-strip alert-success-strip">✅ ${res.message}</div>`;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 4000);
+        } else {
+            alert('Lỗi: ' + res.message);
+        }
+    }).catch(err => {
+        alert('Lỗi kết nối!');
+    });
+});
 </script>
 }

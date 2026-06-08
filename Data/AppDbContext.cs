@@ -23,6 +23,7 @@ namespace AutoHub.Data
         public DbSet<SystemDictionary> SystemDictionaries { get; set; } = null!;
         public DbSet<Cart> Carts { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; } = null!;
+        public DbSet<SocialPost> SocialPosts { get; set; } = null!;
         public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
         public DbSet<VehicleName> VehicleNames { get; set; } = null!;
         public DbSet<VehicleVariant> VehicleVariants { get; set; } = null!;
@@ -52,6 +53,7 @@ namespace AutoHub.Data
             modelBuilder.Entity<SystemDictionary>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Cart>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CartItem>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SocialPost>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ProductCategory>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<VehicleName>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<VehicleVariant>().HasQueryFilter(e => !e.IsDeleted);

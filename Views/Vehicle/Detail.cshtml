@@ -184,10 +184,11 @@
             <div>
                 <!-- Main Info Panel (Title, Price, Location, Buttons) -->
                 <div class="card shadow-sm border-0 mb-3 p-4">
-                    <h1 class="fs-4 fw-bold mb-3 text-dark" style="line-height: 1.4;">@Model.Name</h1>
-                    <div class="text-danger fs-3 fw-bold mb-3">@string.Format("{0:N0}", Model.CurrentPrice) đ <span class="fs-6 text-muted fw-normal">(Trả góp từ @string.Format("{0:N0}", Model.CurrentPrice / 60) đ/tháng)</span></div>
+                    <h1 class="fs-4 fw-bold mb-3 text-dark" style="line-height: 1.4;">@(Model.Brand?.Name ?? "Đang cập nhật") @Model.Name</h1>
                     
-                    <!-- Market Price Fake Snippet -->
+                    <!-- <div class="text-danger fs-3 fw-bold mb-3">@string.Format("{0:N0}", Model.CurrentPrice) đ <span class="fs-6 text-muted fw-normal">(Trả góp từ @string.Format("{0:N0}", Model.CurrentPrice / 60) đ/tháng)</span></div> -->
+                    <div class="text-danger fs-3 fw-bold mb-3">@string.Format("{0:N0}", Model.CurrentPrice) đ <span class="fs-6 text-muted fw-normal"></span></div>
+                    <!-- Market Price Fake Snippet
                     <div class="p-3 mb-4 rounded bg-light border">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Khoảng giá thị trường <i class="bi bi-info-circle"></i></span>
@@ -200,7 +201,7 @@
                             <span>@string.Format("{0:N0}", Model.CurrentPrice * 0.9m) đ</span>
                             <span>@string.Format("{0:N0}", Model.CurrentPrice * 1.1m) đ</span>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 mb-4">

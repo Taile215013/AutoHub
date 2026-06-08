@@ -33,6 +33,7 @@ builder.Services.AddScoped<IEmployeeRepository,    EfEmployeeRepository>();
 builder.Services.AddScoped<ICartRepository,        EfCartRepository>();
 builder.Services.AddScoped<IShowroomRepository,    EfShowroomRepository>();
 builder.Services.AddScoped<ILocationRepository,    EfLocationRepository>();
+builder.Services.AddScoped<ISocialPostRepository,  EfSocialPostRepository>();
 
 // ── 4. Services ────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IAuthService,              AuthService>();
