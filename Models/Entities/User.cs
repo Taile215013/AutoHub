@@ -29,4 +29,11 @@ public class User : BaseEntity
     public string City { get; set; } = "Hồ Chí Minh";
 
     public string RankLevel { get; set; } = "Bronze";
+
+    // ── Tọa độ địa lý (Nominatim geocode từ địa chỉ) ──────────────────
+    /// <summary>Vĩ độ — null cho đến khi geocode.</summary>
+    public double? Latitude  { get; set; }
+
+    /// <summary>Kinh độ — null cho đến khi geocode.</summary>
+    public double? Longitude { get; set; }
 }

@@ -1,0 +1,434 @@
+@model IEnumerable<AutoHub.Models.Entities.Showroom>
+@{
+    ViewData["Title"] = "Quản Lý Showroom - AutoHub Admin";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .map-preview { height: 220px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        #modalMap    { height: 300px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }
+        .coord-badge { background: rgba(46,229,157,0.12); border: 1px solid rgba(46,229,157,0.3);
+                       border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; color: #2ee59d; }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="text-uppercase" style="font-weight:900;letter-spacing:-1px;">📍 Showroom</h1>
+        <p class="text-muted mb-0">@Model.Count() chi nhánh trong hệ thống</p>
+    </div>
+    <button class="btn-neon" onclick="openModal(0)">+ Thêm Showroom</button>
+</div>
+
+<div id="alertBox" class="mb-4" style="display:none;"></div>
+
+@* ── Bản đồ tổng quan tất cả showroom ── *@
+<div class="tech-panel mb-5">
+    <h6 class="text-muted text-uppercase mb-3" style="font-size:0.78rem;letter-spacing:1px;">🗺️ Bản Đồ Tổng Quan</h6>
+    <div id="overviewMap" style="height:400px;border-radius:10px;"></div>
+</div>
+
+@* ── Bảng danh sách ── *@
+<div class="tech-panel p-0" style="overflow:hidden;">
+    <table class="table table-hover align-middle mb-0">
+        <thead style="background:rgba(255,255,255,0.04);">
+            <tr class="text-uppercase text-muted" style="font-size:0.78rem;letter-spacing:0.5px;">
+                <th class="px-4 py-3">Showroom</th>
+                <th class="py-3">Địa Chỉ</th>
+                <th class="py-3">Liên Hệ</th>
+                <th class="py-3">Giờ Mở Cửa</th>
+                <th class="py-3">Tọa Độ</th>
+                <th class="py-3">Trạng Thái</th>
+                <th class="py-3 text-end px-4">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody id="showroomTbody">
+            @if (!Model.Any())
+            {
+                <tr id="emptyRow">
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <div style="font-size:2.5rem;opacity:0.25;">📍</div>
+                        <p class="mt-2">Chưa có showroom nào. Thêm chi nhánh đầu tiên!</p>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var s in Model)
+                {
+                    <tr id="row-@s.Id">
+                        <td class="px-4">
+                            <div class="d-flex align-items-center gap-3">
+                                @if (!string.IsNullOrEmpty(s.ThumbnailImageUrl))
+                                {
+                                    <img src="@s.ThumbnailImageUrl" style="width:48px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                                }
+                                else
+                                {
+                                    <div style="width:48px;height:36px;background:rgba(255,255,255,0.06);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;">📍</div>
+                                }
+                                <div class="fw-bold">@s.Name</div>
+                            </div>
+                        </td>
+                        <td style="font-size:0.85rem;">@s.FullAddress</td>
+                        <td style="font-size:0.85rem;">@(s.PhoneNumber ?? "—")</td>
+                        <td style="font-size:0.85rem;">@(s.OpeningHours ?? "—")</td>
+                        <td>
+                            @if (s.HasCoordinates)
+                            {
+                                <span class="coord-badge">@s.Latitude!.Value.ToString("F4"), @s.Longitude!.Value.ToString("F4")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted" style="font-size:0.8rem;">Chưa có</span>
+                            }
+                        </td>
+                        <td>
+                            @if (s.IsActive)
+                            {
+                                <span class="badge rounded-pill px-3" style="background:rgba(46,229,157,0.15);color:#2ee59d;border:1px solid #2ee59d;font-size:0.72rem;">● Hoạt Động</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill px-3" style="background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid #ff5050;font-size:0.72rem;">○ Tạm Đóng</span>
+                            }
+                        </td>
+                        <td class="text-end px-4">
+                            <button class="btn btn-sm btn-outline-warning border-0 fw-bold me-1" onclick="openModal(@s.Id)">Sửa</button>
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteShowroom(@s.Id, '@s.Name')">Xóa</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@* ══════════════════════════════════════════════════════════════
+   MODAL THÊM / SỬA SHOWROOM
+══════════════════════════════════════════════════════════════ *@
+<div class="modal fade" id="showroomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0" style="background:#18181c;color:#fff;">
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <h5 class="modal-title text-gradient-gold fw-bold" id="modalTitle">Thêm Showroom Mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <input type="hidden" id="srId" value="0" />
+
+                <div class="row g-4">
+                    @* ── Cột trái: form ── *@
+                    <div class="col-md-7">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="label-tech">Tên Showroom <span class="text-danger">*</span></label>
+                                <input type="text" id="srName" class="form-control input-premium" placeholder="AutoHub Quận 1" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-tech">Số Điện Thoại</label>
+                                <input type="tel" id="srPhone" class="form-control input-premium" placeholder="028 xxxx xxxx" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-tech">Email</label>
+                                <input type="email" id="srEmail" class="form-control input-premium" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-tech">Số Nhà</label>
+                                <input type="text" id="srHouseNumber" class="form-control input-premium" />
+                            </div>
+                            <div class="col-md-8">
+                                <label class="label-tech">Tên Đường</label>
+                                <input type="text" id="srStreet" class="form-control input-premium" placeholder="Đường Lý Tự Trọng" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-tech">Phường / Xã</label>
+                                <input type="text" id="srWard" class="form-control input-premium" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-tech">Quận / Huyện</label>
+                                <input type="text" id="srDistrict" class="form-control input-premium" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-tech">Tỉnh / Thành Phố</label>
+                                <input type="text" id="srCity" class="form-control input-premium" value="Hồ Chí Minh" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-tech">Giờ Mở Cửa</label>
+                                <input type="text" id="srHours" class="form-control input-premium" placeholder="07:00 – 20:30" />
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check form-switch ms-2 mb-2">
+                                    <input class="form-check-input" type="checkbox" id="srIsActive" checked />
+                                    <label class="form-check-label text-white fw-bold" for="srIsActive">Đang Hoạt Động</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="label-tech">Mô Tả</label>
+                                <textarea id="srDesc" rows="2" class="form-control input-premium" placeholder="Giới thiệu ngắn về chi nhánh..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="label-tech" style="color:#d4af37;">📷 Ảnh Showroom</label>
+                                <input type="file" id="srThumb" accept="image/*" class="form-control input-premium" style="border-color:#d4af37;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    @* ── Cột phải: bản đồ + tọa độ ── *@
+                    <div class="col-md-5">
+                        <label class="label-tech mb-2">🗺️ Tọa Độ & Bản Đồ</label>
+
+                        @* Geocode từ địa chỉ *@
+                        <button type="button" class="btn btn-sm w-100 mb-3 fw-bold"
+                                style="background:rgba(46,229,157,0.15);border:1px solid #2ee59d;color:#2ee59d;border-radius:6px;"
+                                onclick="geocodeAddress()">
+                            🔍 Tự Động Lấy Tọa Độ Từ Địa Chỉ (Nominatim)
+                        </button>
+
+                        <div id="modalMap" class="mb-3"></div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="label-tech" style="font-size:0.72rem;">Vĩ Độ (Latitude)</label>
+                                <input type="number" id="srLat" step="0.000001" class="form-control input-premium text-center"
+                                       placeholder="10.7769" oninput="updateMapFromCoords()" />
+                            </div>
+                            <div class="col-6">
+                                <label class="label-tech" style="font-size:0.72rem;">Kinh Độ (Longitude)</label>
+                                <input type="number" id="srLng" step="0.000001" class="form-control input-premium text-center"
+                                       placeholder="106.7009" oninput="updateMapFromCoords()" />
+                            </div>
+                        </div>
+                        <p class="text-muted mt-2" style="font-size:0.75rem;">
+                            💡 Click trên bản đồ để đặt pin hoặc dùng nút Tự Động bên trên.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="modalError" class="mt-3 text-danger" style="font-size:0.85rem;display:none;"></div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <button class="btn-neon px-5 py-2 flex-grow-1" onclick="saveShowroom()" id="saveBtn">Lưu</button>
+                    <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+var overviewMap, modalMap, modalMarker;
+var overviewMarkers = [];
+
+// ── Khởi tạo bản đồ tổng quan khi trang load ──────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    overviewMap = L.map('overviewMap').setView([16.0, 106.0], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18
+    }).addTo(overviewMap);
+
+    // Thêm marker cho từng showroom đã có tọa độ
+    var showrooms = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Where(s => s.HasCoordinates).Select(s => new {
+            id   = s.Id,
+            name = s.Name,
+            addr = s.FullAddress,
+            phone = s.PhoneNumber ?? "",
+            hours = s.OpeningHours ?? "",
+            lat  = s.Latitude,
+            lng  = s.Longitude
+        })
+    ));
+
+    showrooms.forEach(function(s) {
+        var marker = L.marker([s.lat, s.lng])
+            .bindPopup(`<b>${s.name}</b><br>${s.addr}<br>${s.phone}<br>🕐 ${s.hours}`)
+            .addTo(overviewMap);
+        overviewMarkers.push(marker);
+    });
+
+    if (overviewMarkers.length > 0) {
+        var group = new L.featureGroup(overviewMarkers);
+        overviewMap.fitBounds(group.getBounds().pad(0.2));
+    }
+});
+
+// ── Modal map ─────────────────────────────────────────────────────────────
+function initModalMap(lat, lng) {
+    var center = (lat && lng) ? [lat, lng] : [10.7769, 106.7009];
+
+    if (!modalMap) {
+        modalMap = L.map('modalMap').setView(center, 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap', maxZoom: 18
+        }).addTo(modalMap);
+
+        // Click trên bản đồ để đặt pin
+        modalMap.on('click', function(e) {
+            placePin(e.latlng.lat, e.latlng.lng);
+        });
+    } else {
+        modalMap.setView(center, 14);
+    }
+
+    if (lat && lng) placePin(lat, lng);
+    else if (modalMarker) { modalMarker.remove(); modalMarker = null; }
+
+    // Invalidate sau khi modal show xong (fix tile không load)
+    setTimeout(() => modalMap.invalidateSize(), 300);
+}
+
+function placePin(lat, lng) {
+    if (modalMarker) modalMarker.setLatLng([lat, lng]);
+    else modalMarker = L.marker([lat, lng], { draggable: true }).addTo(modalMap);
+
+    modalMarker.on('dragend', function(e) {
+        var pos = e.target.getLatLng();
+        $('#srLat').val(pos.lat.toFixed(6));
+        $('#srLng').val(pos.lng.toFixed(6));
+    });
+
+    $('#srLat').val(lat.toFixed(6));
+    $('#srLng').val(lng.toFixed(6));
+    modalMap.panTo([lat, lng]);
+}
+
+function updateMapFromCoords() {
+    var lat = parseFloat($('#srLat').val());
+    var lng = parseFloat($('#srLng').val());
+    if (!isNaN(lat) && !isNaN(lng)) placePin(lat, lng);
+}
+
+// ── Nominatim geocoding (địa chỉ → tọa độ) ───────────────────────────────
+function geocodeAddress() {
+    var house   = $('#srHouseNumber').val().trim();
+    var street  = $('#srStreet').val().trim();
+    var ward    = $('#srWard').val().trim();
+    var dist    = $('#srDistrict').val().trim();
+    var city    = $('#srCity').val().trim();
+
+    var query = [house, street, ward, dist, city, 'Vietnam'].filter(Boolean).join(', ');
+    if (!query) { alert('Vui lòng nhập địa chỉ trước!'); return; }
+
+    var btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '⏳ Đang tìm...';
+
+    // Nominatim public API — rate limit 1 req/s, chỉ dùng cho admin
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`, {
+        headers: { 'Accept-Language': 'vi', 'User-Agent': 'AutoHub-Admin/1.0' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.textContent = '🔍 Tự Động Lấy Tọa Độ Từ Địa Chỉ (Nominatim)';
+        if (!data || data.length === 0) {
+            alert('Không tìm thấy tọa độ cho địa chỉ này. Thử nhập đầy đủ hơn hoặc đặt pin thủ công!');
+            return;
+        }
+        var lat = parseFloat(data[0].lat);
+        var lng = parseFloat(data[0].lon);
+        placePin(lat, lng);
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.textContent = '🔍 Tự Động Lấy Tọa Độ Từ Địa Chỉ (Nominatim)';
+        alert('Lỗi kết nối Nominatim. Vui lòng đặt pin thủ công!');
+    });
+}
+
+// ── Mở modal ─────────────────────────────────────────────────────────────
+function openModal(id) {
+    // Reset form
+    $('#srId').val(0); $('#srName').val(''); $('#srPhone').val('');
+    $('#srEmail').val(''); $('#srHouseNumber').val(''); $('#srStreet').val('');
+    $('#srWard').val(''); $('#srDistrict').val(''); $('#srCity').val('Hồ Chí Minh');
+    $('#srHours').val('07:00 – 20:30'); $('#srIsActive').prop('checked', true);
+    $('#srDesc').val(''); $('#srLat').val(''); $('#srLng').val('');
+    $('#modalError').hide(); $('#modalTitle').text('+ Thêm Showroom Mới');
+
+    if (id === 0) {
+        $('#showroomModal').modal('show');
+        setTimeout(() => initModalMap(null, null), 400);
+        return;
+    }
+
+    $('#modalTitle').text('✏️ Sửa Showroom');
+    $.get('@Url.Action("Get", "Showroom", new { area = "Admin" })', { id: id }, function(res) {
+        if (!res.success) return;
+        var d = res.data;
+        $('#srId').val(d.id); $('#srName').val(d.name);
+        $('#srPhone').val(d.phoneNumber); $('#srEmail').val(d.email);
+        $('#srHouseNumber').val(d.houseNumber); $('#srStreet').val(d.streetName);
+        $('#srWard').val(d.ward); $('#srDistrict').val(d.district);
+        $('#srCity').val(d.city); $('#srHours').val(d.openingHours);
+        $('#srIsActive').prop('checked', d.isActive); $('#srDesc').val(d.description);
+        $('#srLat').val(d.latitude || ''); $('#srLng').val(d.longitude || '');
+        $('#showroomModal').modal('show');
+        setTimeout(() => initModalMap(d.latitude, d.longitude), 400);
+    });
+}
+
+// ── Lưu showroom (AJAX + FormData cho ảnh) ───────────────────────────────
+function saveShowroom() {
+    var name = $('#srName').val().trim();
+    if (!name) { $('#modalError').text('Tên showroom không được trống!').show(); return; }
+    $('#modalError').hide();
+
+    var fd = new FormData();
+    fd.append('Id',           $('#srId').val());
+    fd.append('Name',         name);
+    fd.append('PhoneNumber',  $('#srPhone').val());
+    fd.append('Email',        $('#srEmail').val());
+    fd.append('HouseNumber',  $('#srHouseNumber').val());
+    fd.append('StreetName',   $('#srStreet').val());
+    fd.append('Ward',         $('#srWard').val());
+    fd.append('District',     $('#srDistrict').val());
+    fd.append('City',         $('#srCity').val());
+    fd.append('OpeningHours', $('#srHours').val());
+    fd.append('IsActive',     $('#srIsActive').is(':checked'));
+    fd.append('Description',  $('#srDesc').val());
+    if ($('#srLat').val()) fd.append('Latitude',  $('#srLat').val());
+    if ($('#srLng').val()) fd.append('Longitude', $('#srLng').val());
+
+    var thumb = $('#srThumb')[0].files[0];
+    if (thumb) fd.append('thumbnailFile', thumb);
+
+    var btn = $('#saveBtn').prop('disabled', true).text('Đang lưu...');
+
+    $.ajax({
+        url: '@Url.Action("Save", "Showroom", new { area = "Admin" })',
+        method: 'POST', contentType: false, processData: false, data: fd,
+        success: function(res) {
+            btn.prop('disabled', false).text('Lưu');
+            if (!res.success) { $('#modalError').text(res.message).show(); return; }
+            $('#showroomModal').modal('hide');
+            showAlert(res.message, 'success');
+            setTimeout(() => location.reload(), 800);
+        },
+        error: function() { btn.prop('disabled', false).text('Lưu'); showAlert('Lỗi server!', 'error'); }
+    });
+}
+
+// ── Xóa showroom ─────────────────────────────────────────────────────────
+function deleteShowroom(id, name) {
+    if (!confirm(`Xóa showroom "${name}"?`)) return;
+    $.post('@Url.Action("Delete", "Showroom", new { area = "Admin" })', { id: id }, function(res) {
+        if (res.success) { $(`#row-${id}`).fadeOut(400, () => $(`#row-${id}`).remove()); showAlert(res.message, 'success'); }
+        else showAlert(res.message, 'error');
+    });
+}
+
+function showAlert(msg, type) {
+    var color = type === 'success' ? '#2ee59d' : '#ff5050';
+    $('#alertBox').html(`<div class="alert py-3" style="border-left:4px solid ${color};background:rgba(0,0,0,0.2);color:${color};border-radius:0;">${msg}</div>`).show();
+    setTimeout(() => $('#alertBox').hide(), 4000);
+}
+</script>
+}

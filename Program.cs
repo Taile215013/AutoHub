@@ -31,6 +31,7 @@ builder.Services.AddScoped<ISparePartRepository,   EfSparePartRepository>();
 builder.Services.AddScoped<IMasterDataRepository,  EfMasterDataRepository>();
 builder.Services.AddScoped<IEmployeeRepository,    EfEmployeeRepository>();
 builder.Services.AddScoped<ICartRepository,        EfCartRepository>();
+builder.Services.AddScoped<IShowroomRepository,    EfShowroomRepository>();
 
 // ── 4. Services ────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IAuthService,              AuthService>();

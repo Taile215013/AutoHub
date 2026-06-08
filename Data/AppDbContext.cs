@@ -17,6 +17,7 @@ namespace AutoHub.Data
         public DbSet<Service> Services { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Employee> Employees { get; set; } = null!;
+        public DbSet<Showroom> Showrooms { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public DbSet<SystemDictionary> SystemDictionaries { get; set; } = null!;
@@ -40,6 +41,7 @@ namespace AutoHub.Data
             modelBuilder.Entity<Service>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Showroom>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Order>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<OrderDetail>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<SystemDictionary>().HasQueryFilter(e => !e.IsDeleted);

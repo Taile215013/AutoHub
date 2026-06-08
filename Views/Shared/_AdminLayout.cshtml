@@ -95,6 +95,14 @@
                     </a>
                 </li>
 
+                <!-- Mục Quản Lý Showroom -->
+                <li class="admin-menu-item @(currentController == "Showroom" ? "active" : "")">
+                    <a href="@Url.Action("Index", "Showroom", new { area = "Admin" })">
+                        <span>📍</span>
+                        <span class="sidebar-text">Quản Lý Showroom</span>
+                    </a>
+                </li>
+
                 <!-- Mục quay về giao diện Cửa hàng -->
                 <li class="admin-menu-item">
                     <a href="@Url.Action("Index", "Home", new { area = "" })">
