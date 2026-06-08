@@ -1,297 +1,573 @@
 @model AutoHub.Models.Entities.User
-<main b-7vnz5sug0f="" role="main" class="">
-  <ul class="nav">
-    <li class="nav-item ms-3">
-            <a class="btn-neon" href="@Url.Action("Logout", "Account")">Đăng Xuất</a>
-        </li>
-  </ul>
-</main>
-
+@using AutoHub.Models.Entities
 
 @{
     ViewData["Title"] = "Không Gian Thành Viên - AutoHub";
+    var queryTab = Context.Request.Query["tab"].ToString();
+    var activeTab = TempData["ActiveTab"]?.ToString();
+    if (string.IsNullOrEmpty(activeTab)) activeTab = queryTab;
+    if (string.IsNullOrEmpty(activeTab)) activeTab = "profile";
 }
 
-<div class="container px-4 py-5">
-        
+@section Styles {
+<style>
+/* ── Account Layout ──────────────────────────────────────────────────── */
+.account-page { background: transparent; min-height: calc(100vh - 64px); padding: 2.5rem 0 4rem; }
+.account-sidebar { position: sticky; top: 1.5rem; }
 
-    @if (!string.IsNullOrEmpty(ViewBag.Warning))
-    {
-        <div class="alert alert-warning py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-gold); background-color: rgba(212, 175, 55, 0.1); color: #856404; border-radius: 0;">
-            <i class="me-2 fw-bold">⚠️</i> <strong>Hệ Thống Đang Bảo Trì:</strong> @ViewBag.Warning
-        </div>
-    }
+/* Avatar */
+.avatar-ring { width:88px; height:88px; border-radius:50%; background:var(--glass-bg, #fff);
+               border:2.5px solid var(--accent-gold,#d4af37);
+               display:flex; align-items:center; justify-content:center;
+               font-size:2.2rem; font-weight:800; color:var(--color-text-primary, #111); margin:0 auto; }
+.rank-badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:.72rem;
+              font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+.rank-bronze { background:rgba(205,127,50,.18); color:#cd7f32; border:1px solid #cd7f32; }
+.rank-silver { background:rgba(192,192,192,.18); color:#888; border:1px solid #c0c0c0; }
+.rank-gold   { background:rgba(212,175,55,.18);  color:#d4af37; border:1px solid #d4af37; }
 
+/* Sidebar nav */
+.account-nav .nav-link { color:var(--color-text-muted, #666); font-weight:600; font-size:.83rem;
+                          letter-spacing:.5px; text-transform:uppercase; border-radius:8px;
+                          padding:.65rem 1rem; transition:all .2s; display:flex; align-items:center; gap:10px; }
+.account-nav .nav-link:hover  { color:var(--color-text-primary, #111); background:rgba(0,0,0,.04); }
+.account-nav .nav-link.active { color:#d4af37; background:rgba(212,175,55,.1); border-left:3px solid #d4af37; }
+.account-nav .nav-link .icon  { font-size:1rem; width:20px; text-align:center; }
+
+/* Content panels */
+.tab-content-area { display:none; }
+.tab-content-area.active { display:block; }
+
+/* Form labels */
+.label-sm { font-size:.72rem; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+             color:var(--color-text-muted, #666); margin-bottom:.35rem; display:block; }
+
+/* Address cascade selects */
+select.input-premium:disabled { opacity:.35; cursor:not-allowed; }
+
+/* History table */
+.history-table th { font-size:.72rem; letter-spacing:.5px; text-transform:uppercase;
+                    color:var(--color-text-muted, #666); font-weight:600; }
+.status-badge { padding:3px 10px; border-radius:12px; font-size:.72rem; font-weight:700; }
+.status-done  { background:rgba(46,229,157,.15); color:#21a36f; border:1px solid #2ee59d; }
+
+/* Post form */
+.color-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(0,0,0,.04);
+              border:1px solid rgba(0,0,0,.1); border-radius:20px;
+              padding:4px 10px; font-size:.78rem; cursor:default; }
+.color-tag .remove { cursor:pointer; color:#ff5050; font-weight:700; font-size:1rem; line-height:1; }
+
+/* Alert strip */
+.alert-strip { padding:.75rem 1.25rem; border-radius:0; border-left:4px solid; font-size:.88rem; margin-bottom:1.5rem; }
+.alert-success-strip { border-color:#2ee59d; background:rgba(46,229,157,.08); color:#21a36f; }
+.alert-error-strip   { border-color:#ff5050; background:rgba(255,80,80,.08);   color:#ff5050; }
+.alert-warn-strip    { border-color:#d4af37; background:rgba(212,175,55,.08);  color:#d4af37; }
+
+/* Light Theme Overrides for hardcoded text-white in HTML */
+.text-white { color: var(--color-text-primary, #111) !important; }
+hr { border-color: rgba(0,0,0,.1) !important; }
+.table-dark { background: transparent !important; --bs-table-bg: transparent; --bs-table-color: var(--color-text-primary); }
+.modal-content { background: var(--glass-bg, #fff) !important; border: 1px solid rgba(0,0,0,.1) !important; box-shadow: var(--glass-shadow); }
+.modal-body.text-white { color: var(--color-text-primary, #111) !important; }
+.btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+</style>
+}
+
+<div class="account-page">
+<div class="container px-4">
+
+    @* ── Global alerts ── *@
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success py-3 mb-4" style="font-size: 0.9rem; border-left: 4px solid var(--accent-mint); background-color: rgba(46, 229, 157, 0.1); color: var(--accent-mint); border-radius: 0;">
-            <i class="me-2 fw-bold">✅</i> @TempData["Success"]
-        </div>
+        <div class="alert-strip alert-success-strip">✅ @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert-strip alert-error-strip">❌ @TempData["Error"]</div>
+    }
+    @if (!string.IsNullOrEmpty(ViewBag.Warning as string))
+    {
+        <div class="alert-strip alert-warn-strip">⚠️ @ViewBag.Warning</div>
     }
 
-    <!-- Alert AJAX -->
+    <div class="row g-4">
 
-    
-    <div id="profileAlert" style="display:none;" class="mb-4"></div>
+        <!-- ══════════════════════════════════════════════════════
+             SIDEBAR
+        ══════════════════════════════════════════════════════ -->
+        <div class="col-lg-3 col-md-4">
+            <div class="account-sidebar tech-panel">
 
-    <div class="row g-4 mb-5">
-        <!-- ============ SIDEBAR: Avatar + Thông Tin + Nút ============ -->
-        <div class="col-lg-4">
-            <div class="tech-panel text-center">
-
-                <!-- Avatar -->
-                <div class="mb-4 d-inline-flex rounded-circle bg-dark text-white align-items-center justify-content-center mx-auto"
-                     id="avatarCircle"
-                     style="width:90px; height:90px; font-size:2.5rem; font-weight:800; border:2px solid var(--accent-gold);">
-                    @Model.FirstName?[0]
+                @* Avatar + tên *@
+                <div class="text-center mb-4">
+                    <div class="avatar-ring mb-3" id="sideAvatarChar">
+                        @(Model.FirstName?.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "U")
+                    </div>
+                    <h5 class="text-gradient-gold mb-1" id="sideFullName" style="font-weight:800;">
+                        @Model.LastName @Model.FirstName
+                    </h5>
+                    <div class="mb-2">
+                        @{
+                            var rankClass = Model.RankLevel?.ToLower() switch {
+                                "silver"  => "rank-silver",
+                                "gold"    => "rank-gold",
+                                _         => "rank-bronze"
+                            };
+                        }
+                        <span class="rank-badge @rankClass">@(Model.RankLevel ?? "Bronze")</span>
+                    </div>
+                    <p class="text-muted mb-0" style="font-size:.78rem;">@@<strong>@Model.Username</strong></p>
                 </div>
 
-                <h3 class="text-gradient-gold" style="font-weight:800;" id="displayFullName">
-                    @Model.LastName @Model.FirstName
-                </h3>
+                <hr style="border-color:rgba(255,255,255,.08);" />
 
-                <hr class="my-4" style="border-color: rgba(255,255,255,0.1);" />
+                @* Nav tabs *@
+                <nav class="account-nav d-flex flex-column gap-1 mt-3">
+                    <a href="#" class="nav-link @(activeTab=="profile"?"active":"")" data-tab="profile">
+                        <span class="icon">👤</span> Thông Tin Cá Nhân
+                    </a>
+                    <a href="#" class="nav-link @(activeTab=="address"?"active":"")" data-tab="address">
+                        <span class="icon">📍</span> Địa Chỉ Giao Nhận
+                    </a>
+                    <a href="#" class="nav-link @(activeTab=="orders"?"active":"")" data-tab="orders">
+                        <span class="icon">🧾</span> Lịch Sử Đơn Hàng
+                    </a>
+                    <a href="#" class="nav-link @(activeTab=="post"?"active":"")" data-tab="post">
+                        <span class="icon">🚗</span> Đăng Tin Xe
+                    </a>
+                </nav>
 
-                <!-- Thông tin tóm tắt -->
-                <div class="text-start mb-4">
-                    <p class="mb-2">
-                        <strong class="text-muted">Email:</strong> <br />
-                        <span id="displayEmail">@(Model.Email ?? "Chưa thiết lập")</span>
-                    </p>
-                    <p class="mb-2">
-                        <strong class="text-muted">Điện Thoại:</strong> <br />
-                        <span id="displayPhone">@(Model.PhoneNumber ?? "Chưa thiết lập")</span>
-                    </p>
-                    <p class="mb-2">
-                        <strong class="text-muted">Ngày Sinh:</strong> <br />
-                        <span id="displayDob">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập")</span>
-                    </p>
-                    <p class="mb-2">
-                        <strong class="text-muted">Giới Tính:</strong> <br />
-                        <span id="displayGender">@(Model.Gender ?? "Chưa thiết lập")</span>
-                    </p>
-                </div>
+                <hr style="border-color:rgba(255,255,255,.08);" />
 
-                <!-- Nút chỉnh sửa thông tin -->
-                <button class="btn-neon w-100 mb-2" onclick="openProfileModal()">
-                    ✏️ Chỉnh Sửa Thông Tin 
-                </button>
-
+                <a href="@Url.Action("Logout","Account")" class="btn btn-sm btn-outline-danger w-100 mt-1">
+                    Đăng Xuất
+                </a>
             </div>
         </div>
 
-        <!-- ============ CONTENT: Địa Chỉ + Hạng + Lịch Sử ============ -->
-        <div class="col-lg-8">
+        <!-- ══════════════════════════════════════════════════════
+             CONTENT
+        ══════════════════════════════════════════════════════ -->
+        <div class="col-lg-9 col-md-8">
+            <div id="ajaxAlert" style="display:none;" class="mb-3"></div>
 
-            <!-- Quản lý địa chỉ -->
-            <div class="tech-panel mb-4">
-                <h4 class="text-uppercase mb-4 text-gradient-gold" style="font-weight: 900; letter-spacing: -0.5px;">
-                    Quản Lý Địa Chỉ Giao Nhận
-                </h4>
+            <!-- ── TAB 1: THÔNG TIN CÁ NHÂN ───────────────────── -->
+            <div class="tab-content-area @(activeTab=="profile"?"active":"")" id="tab-profile">
+                <div class="tech-panel">
+                    <h4 class="text-gradient-gold mb-4" style="font-weight:900;text-transform:uppercase;">
+                        👤 Thông Tin Cá Nhân
+                    </h4>
 
-                <form method="post" action="@Url.Action("UpdateAddress", "Account")">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="label-tech">Tỉnh / Thành Phố</label>
-                            <select id="City" name="City" class="form-select input-premium w-100" required>
-                                <option value="">-- Chọn Tỉnh/Thành --</option>
-                            </select>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <span class="label-sm">Họ &amp; Chữ Lót</span>
+                            <p class="text-white fw-600 mb-0" id="dispLastName">@(Model.LastName ?? "—")</p>
                         </div>
-                        <div class="col-md-4">
-                            <label class="label-tech">Quận / Huyện</label>
-                            <select id="District" name="District" class="form-select input-premium w-100" required disabled>
-                                <option value="">-- Chọn Quận/Huyện --</option>
-                            </select>
+                        <div class="col-6">
+                            <span class="label-sm">Tên</span>
+                            <p class="text-white fw-600 mb-0" id="dispFirstName">@(Model.FirstName ?? "—")</p>
                         </div>
-                        <div class="col-md-4">
-                            <label class="label-tech">Phường / Xã</label>
-                            <select id="Ward" name="Ward" class="form-select input-premium w-100" disabled>
-                                <option value="">-- Chọn Phường/Xã --</option>
-                            </select>
+                        <div class="col-6">
+                            <span class="label-sm">Giới Tính</span>
+                            <p class="text-white mb-0" id="dispGender">@(Model.Gender ?? "Chưa thiết lập")</p>
+                        </div>
+                        <div class="col-6">
+                            <span class="label-sm">Ngày Sinh</span>
+                            <p class="text-white mb-0" id="dispDob">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa thiết lập")</p>
+                        </div>
+                        <div class="col-6">
+                            <span class="label-sm">Email</span>
+                            <p class="text-white mb-0" id="dispEmail">@(Model.Email ?? "Chưa thiết lập")</p>
+                        </div>
+                        <div class="col-6">
+                            <span class="label-sm">Số Điện Thoại</span>
+                            <p class="text-white mb-0" id="dispPhone">@(Model.PhoneNumber ?? "Chưa thiết lập")</p>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="label-tech">Số Nhà / Tên Đường</label>
-                        <input type="text" name="HouseNumber" class="form-control input-premium w-100"
-                               placeholder="Ví dụ: 123 Đường Lê Lợi" value="@Model.HouseNumber" required />
-                    </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn-neon">LƯU ĐỊA CHỈ</button>
-                    </div>
-                </form>
+                    <button class="btn-neon px-4" onclick="openProfileModal()">✏️ Chỉnh Sửa</button>
+                </div>
             </div>
 
-            <!-- Tiến trình hạng thành viên // chưa cần làm đến
-            <div class="tech-panel mb-4">
-                <h4 class="text-uppercase mb-4" style="font-weight: 900; letter-spacing: -0.5px;">Tiến Trình Đạt Hạng</h4>
-                <div class="p-3 border rounded mb-4" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05) !important;">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted" style="font-size:0.85rem; font-weight:700;">HẠNG ĐÃ ĐẠT</span>
-                        <span class="text-gradient-gold" style="font-size:0.85rem; font-weight:700;">TIẾN TRÌNH ƯU ĐÃI KẾ TIẾP</span>
-                    </div>
-                    <div class="circuit-progress mb-3">
-                        <div class="circuit-progress-bar" style="width: 75%;"></div>
-                    </div>
-                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.8rem;">
-                        <span class="@(Model.RankLevel == "Bronze" ? "text-gradient-gold fw-bold" : "")">Bronze (0%)</span>
-                        <span class="@(Model.RankLevel == "Silver" ? "text-gradient-gold fw-bold" : "")">Silver (2%)</span>
-                        <span class="@(Model.RankLevel == "Gold" ? "text-gradient-gold fw-bold" : "text-muted")">Gold (5%)</span>
-                        <span class="@(Model.RankLevel == "Diamond" ? "text-gradient-gold fw-bold" : "")">Diamond (10%)</span>
-                    </div>
-                </div>
-            </div> -->
+            <!-- ── TAB 2: ĐỊA CHỈ GIAO NHẬN ──────────────────── -->
+            <div class="tab-content-area @(activeTab=="address"?"active":"")" id="tab-address">
+                <div class="tech-panel">
+                    <h4 class="text-gradient-gold mb-4" style="font-weight:900;text-transform:uppercase;">
+                        📍 Địa Chỉ Giao Nhận
+                    </h4>
 
-            <!-- Lịch sử mua xe -->
-            <div class="tech-panel">
-                <nav>
-                    <div class="nav nav-tabs border-bottom border-secondary mb-4" id="nav-tab" role="tablist">
-                        <button class="nav-link active border-0 bg-transparent text-white font-weight-bold"
-                                id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase"
-                                type="button" role="tab" style="font-weight: 800; text-transform:uppercase;">
-                            Lịch Sử Mua Xe
-                        </button>
-                    </div>
-                </nav>
-                <div class="tab-content" id="nav-tabContent">
-                    <div class="tab-pane fade show active" id="nav-purchase" role="tabpanel">
-                        <table class="table table-dark table-hover align-middle bg-transparent">
-                            <thead>
-                                <tr class="text-muted text-uppercase" style="font-size:0.8rem;">
-                                    <th class="bg-transparent border-secondary">Dòng Xe</th>
-                                    <th class="bg-transparent border-secondary">Ngày Mua</th>
-                                    <th class="bg-transparent border-secondary">Giá Trị</th>
-                                    <th class="bg-transparent border-secondary">Trạng Thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (ViewBag.Orders != null)
-                                {
-                                    var hasVehicles = false;
-                                    foreach (var order in ViewBag.Orders)
+                    @* Địa chỉ hiện tại *@
+                    @if (!string.IsNullOrWhiteSpace(Model.City))
+                    {
+                        <div class="mb-4 p-3 rounded" style="background:rgba(212,175,55,.07); border:1px solid rgba(212,175,55,.2);">
+                            <span class="label-sm">Địa Chỉ Hiện Tại</span>
+                            <p class="text-white mb-0">
+                                @Model.HouseNumber — @Model.Ward, @Model.District, @Model.City
+                            </p>
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("UpdateAddress","Account")" id="addressForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="label-sm">Tỉnh / Thành Phố <span class="text-danger">*</span></label>
+                                <select id="selProvince" name="City" class="form-select input-premium w-100" required>
+                                    <option value="">— Chọn Tỉnh/Thành —</option>
+                                    @foreach (Province p in (ViewBag.Provinces as IEnumerable<Province> ?? new List<Province>()))
+                                    {
+                                        if (p.Name == Model.City)
+                                        {
+                                            <option value="@p.Name" data-code="@p.Code" selected>@p.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@p.Name" data-code="@p.Code">@p.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Quận / Huyện <span class="text-danger">*</span></label>
+                                <select id="selDistrict" name="District" class="form-select input-premium w-100" required disabled>
+                                    <option value="">— Chọn Quận/Huyện —</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Phường / Xã</label>
+                                <select id="selWard" name="Ward" class="form-select input-premium w-100" disabled>
+                                    <option value="">— Chọn Phường/Xã —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="label-sm">Số Nhà / Tên Đường <span class="text-danger">*</span></label>
+                            <input type="text" name="HouseNumber" id="inpHouseNumber"
+                                   class="form-control input-premium w-100"
+                                   placeholder="Ví dụ: 123 Đường Lê Lợi"
+                                   value="@Model.HouseNumber" required />
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn-neon px-5">💾 Lưu Địa Chỉ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ── TAB 3: LỊCH SỬ ĐƠN HÀNG ───────────────────── -->
+            <div class="tab-content-area @(activeTab=="orders"?"active":"")" id="tab-orders">
+                <div class="tech-panel">
+                    <h4 class="text-gradient-gold mb-4" style="font-weight:900;text-transform:uppercase;">
+                        🧾 Lịch Sử Đơn Hàng
+                    </h4>
+
+                    @{
+                        var orders = ViewBag.Orders as IEnumerable<Order> ?? new List<Order>();
+                        var allVehicles = ViewBag.Vehicles as IEnumerable<Vehicle> ?? new List<Vehicle>();
+                    }
+
+                    @if (!orders.Any())
+                    {
+                        <p class="text-muted text-center py-4">Chưa có đơn hàng nào.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle history-table" style="background:transparent;">
+                                <thead>
+                                    <tr class="border-bottom border-secondary">
+                                        <th class="bg-transparent">Sản Phẩm</th>
+                                        <th class="bg-transparent">Ngày</th>
+                                        <th class="bg-transparent">Loại</th>
+                                        <th class="bg-transparent text-end">Giá Trị</th>
+                                        <th class="bg-transparent text-center">Trạng Thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in orders)
                                     {
                                         foreach (var detail in order.OrderDetails)
                                         {
-                                            if (detail.ProductType == "Vehicle")
-                                            {
-                                                hasVehicles = true;
-                                                var vehicle = ((IEnumerable<AutoHub.Models.Entities.Vehicle>)ViewBag.Vehicles)
-                                                    .FirstOrDefault(v => v.Id == detail.ProductId);
-                                                <tr>
-                                                    <td class="bg-transparent border-secondary"><strong>@(vehicle?.Name ?? "Dòng xe khác")</strong></td>
-                                                    <td class="bg-transparent border-secondary">@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                                                    <td class="text-gradient-gold bg-transparent border-secondary" style="font-weight: 700;">@detail.Price.ToString("N0") đ</td>
-                                                    <td class="bg-transparent border-secondary"><span class="badge bg-success">Đã bàn giao</span></td>
-                                                </tr>
-                                            }
+                                            var productName = detail.ProductType == "Vehicle"
+                                                ? allVehicles.FirstOrDefault(v => v.Id == detail.ProductId)?.Name ?? "Xe không xác định"
+                                                : $"Phụ tùng #{detail.ProductId}";
+                                            <tr class="border-bottom border-secondary" style="border-color:rgba(255,255,255,.06)!important;">
+                                                <td class="bg-transparent"><strong>@productName</strong></td>
+                                                <td class="bg-transparent text-muted" style="font-size:.82rem;">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                                <td class="bg-transparent">
+                                                    <span style="font-size:.72rem; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,.07);">
+                                                        @detail.ProductType
+                                                    </span>
+                                                </td>
+                                                <td class="bg-transparent text-end text-gradient-gold fw-700">
+                                                    @detail.Price.ToString("N0") ₫
+                                                </td>
+                                                <td class="bg-transparent text-center">
+                                                    <span class="status-badge status-done">Đã bàn giao</span>
+                                                </td>
+                                            </tr>
                                         }
                                     }
-                                    if (!hasVehicles)
-                                    {
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-3 bg-transparent border-secondary">Chưa có giao dịch mua xe.</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted py-3 bg-transparent border-secondary">Chưa có giao dịch mua xe.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
 
-        </div>
-    </div>
-</div>
+            <!-- ── TAB 4: ĐĂNG TIN XE ─────────────────────────── -->
+            <div class="tab-content-area @(activeTab=="post"?"active":"")" id="tab-post">
+                <div class="tech-panel">
+                    <h4 class="text-gradient-gold mb-4" style="font-weight:900;text-transform:uppercase;">
+                        🚗 Đăng Tin Xe
+                    </h4>
 
-<!-- ===================== MODAL CHỈNH SỬA THÔNG TIN CÁ NHÂN ===================== -->
+                    <form method="post" action="@Url.Action("PostVehicle","Account")"
+                          enctype="multipart/form-data" id="postVehicleForm">
+
+                        @* ─ Thông tin cơ bản ─ *@
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="label-sm">Thương Hiệu <span class="text-danger">*</span></label>
+                                <select name="BrandId" id="pv_brand" class="form-select input-premium w-100" required>
+                                    <option value="">— Chọn thương hiệu —</option>
+                                    @foreach (Brand b in (ViewBag.Brands as IEnumerable<Brand> ?? new List<Brand>()))
+                                    {
+                                        <option value="@b.Id">@b.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-sm">Loại Xe <span class="text-danger">*</span></label>
+                                <select name="VehicleType" id="pv_vtype" class="form-select input-premium w-100" required>
+                                    <option value="">— Chọn loại xe —</option>
+                                    @foreach (SystemDictionary d in (ViewBag.VehicleTypes as IEnumerable<SystemDictionary> ?? new List<SystemDictionary>()))
+                                    {
+                                        <option value="@d.Code">@d.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-sm">Dòng Xe</label>
+                                <select name="vehicleNameId" id="pv_vname" class="form-select input-premium w-100">
+                                    <option value="">— Chọn hoặc nhập mới bên dưới —</option>
+                                    @foreach (VehicleName vn in (ViewBag.VehicleNames as IEnumerable<VehicleName> ?? new List<VehicleName>()))
+                                    {
+                                        <option value="@vn.Id" data-brand="@vn.BrandId">@vn.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-sm">Tên Dòng Xe Mới <span style="font-weight:400; text-transform:none; font-size:.72rem;">(nếu chưa có trong danh sách)</span></label>
+                                <input type="text" name="newVehicleName" class="form-control input-premium w-100"
+                                       placeholder="Ví dụ: Camry, City, Ranger..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-sm">Phiên Bản / Trim</label>
+                                <input type="text" name="variantName" class="form-control input-premium w-100"
+                                       placeholder="Ví dụ: 2.5Q, Wildtrak, Sport..." />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="label-sm">Năm Sản Xuất</label>
+                                <input type="number" name="modelYear" class="form-control input-premium w-100"
+                                       placeholder="2024" min="1990" max="2030" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="label-sm">Số Lượng</label>
+                                <input type="number" name="Quantity" class="form-control input-premium w-100"
+                                       value="1" min="1" required />
+                            </div>
+                        </div>
+
+                        @* ─ Thông số kỹ thuật ─ *@
+                        <hr style="border-color:rgba(255,255,255,.08);" />
+                        <p class="label-sm mb-3" style="font-size:.78rem; letter-spacing:.3px;">Thông Số Kỹ Thuật</p>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="label-sm">Kiểu Dáng</label>
+                                <select name="BodyStyle" class="form-select input-premium w-100">
+                                    <option value="">— Chọn —</option>
+                                    @foreach (SystemDictionary d in (ViewBag.BodyStyles as IEnumerable<SystemDictionary> ?? new List<SystemDictionary>()))
+                                    {
+                                        <option value="@d.Code">@d.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Nhiên Liệu</label>
+                                <select name="FuelType" class="form-select input-premium w-100">
+                                    <option value="">— Chọn —</option>
+                                    @foreach (SystemDictionary d in (ViewBag.FuelTypes as IEnumerable<SystemDictionary> ?? new List<SystemDictionary>()))
+                                    {
+                                        <option value="@d.Code">@d.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Hộp Số</label>
+                                <select name="Transmission" class="form-select input-premium w-100">
+                                    <option value="">— Chọn —</option>
+                                    @foreach (SystemDictionary d in (ViewBag.Transmissions as IEnumerable<SystemDictionary> ?? new List<SystemDictionary>()))
+                                    {
+                                        <option value="@d.Code">@d.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Loại Động Cơ</label>
+                                <select name="EngineType" class="form-select input-premium w-100">
+                                    <option value="">— Chọn —</option>
+                                    @foreach (SystemDictionary d in (ViewBag.EngineTypes as IEnumerable<SystemDictionary> ?? new List<SystemDictionary>()))
+                                    {
+                                        <option value="@d.Code">@d.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Dung Tích (L)</label>
+                                <input type="number" name="EngineCapacity" class="form-control input-premium w-100"
+                                       step="0.1" min="0" placeholder="1.5" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Số Chỗ Ngồi</label>
+                                <input type="number" name="SeatingCapacity" class="form-control input-premium w-100"
+                                       min="1" max="50" placeholder="5" />
+                            </div>
+                        </div>
+
+                        @* ─ Giá ─ *@
+                        <hr style="border-color:rgba(255,255,255,.08);" />
+                        <p class="label-sm mb-3" style="font-size:.78rem; letter-spacing:.3px;">Giá Niêm Yết (VNĐ)</p>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="label-sm">Giá Nhập</label>
+                                <input type="number" name="PurchasePrice" class="form-control input-premium w-100"
+                                       min="0" placeholder="0" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-sm">Giá Bán <span class="text-danger">*</span></label>
+                                <input type="number" name="CurrentPrice" class="form-control input-premium w-100"
+                                       min="0" placeholder="0" required />
+                            </div>
+                        </div>
+
+                        @* ─ Màu sắc ─ *@
+                        <hr style="border-color:rgba(255,255,255,.08);" />
+                        <p class="label-sm mb-2" style="font-size:.78rem; letter-spacing:.3px;">Màu Sắc</p>
+
+                        <div class="d-flex gap-2 mb-2 flex-wrap" id="colorTagContainer"></div>
+                        <div class="d-flex gap-2 mb-4">
+                            <input type="text" id="colorInput" class="form-control input-premium"
+                                   style="max-width:220px;" placeholder="Nhập màu và Enter..." />
+                            <button type="button" class="btn btn-outline-secondary" onclick="addColor()">+ Thêm</button>
+                        </div>
+                        <div id="colorHiddenInputs"></div>
+
+                        @* ─ Ảnh ─ *@
+                        <hr style="border-color:rgba(255,255,255,.08);" />
+                        <p class="label-sm mb-3" style="font-size:.78rem; letter-spacing:.3px;">Hình Ảnh</p>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="label-sm">Ảnh Chính</label>
+                                <input type="file" name="uploadedFile" class="form-control input-premium w-100"
+                                       accept="image/*" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Ảnh Thumbnail</label>
+                                <input type="file" name="thumbnailFile" class="form-control input-premium w-100"
+                                       accept="image/*" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Ảnh Bổ Sung</label>
+                                <input type="file" name="additionalFiles" class="form-control input-premium w-100"
+                                       accept="image/*" multiple />
+                            </div>
+                        </div>
+
+                        @* ─ Mô tả ─ *@
+                        <div class="mb-4">
+                            <label class="label-sm">Mô Tả Xe</label>
+                            <textarea name="Description" rows="4" class="form-control input-premium w-100"
+                                      placeholder="Mô tả chi tiết về xe..."></textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn-neon px-5 py-2" style="font-size:1rem;">
+                                🚀 Đăng Tin Ngay
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>@* /col content *@
+    </div>@* /row *@
+</div>@* /container *@
+</div>@* /account-page *@
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: CHỈNH SỬA THÔNG TIN CÁ NHÂN
+════════════════════════════════════════════════════════════ -->
 <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 rounded-4" style="background:#18181c; border: 1px solid rgba(255,255,255,0.1) !important;">
-            <div class="modal-header border-0 bg-dark rounded-top-4 py-3 px-4">
-                <h5 class="modal-title text-gradient-gold" style="font-weight:900;">✏️ Chỉnh Sửa Thông Tin Liên Hệ</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0" style="background:#18181c; border:1px solid rgba(255,255,255,.1)!important;">
+            <div class="modal-header border-0 px-4 py-3">
+                <h5 class="modal-title text-gradient-gold" style="font-weight:900;">✏️ Chỉnh Sửa Thông Tin</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-white">
                 <div class="row g-3">
-                    <!-- Họ và Tên -->
                     <div class="col-md-6">
-                        <label class="label-tech">Họ <span class="text-danger">*</span></label>
-                        <input type="text" id="profileLastName" class="form-control input-premium w-100"
-                               value="@Model.LastName" placeholder="Nguyễn" />
+                        <label class="label-sm">Họ &amp; Chữ Lót <span class="text-danger">*</span></label>
+                        <input type="text" id="mLastName" class="form-control input-premium w-100"
+                               value="@Model.LastName" placeholder="Nguyễn Văn" />
                     </div>
                     <div class="col-md-6">
-                        <label class="label-tech">Tên <span class="text-danger">*</span></label>
-                        <input type="text" id="profileFirstName" class="form-control input-premium w-100"
-                               value="@Model.FirstName" placeholder="Văn A" />
+                        <label class="label-sm">Tên <span class="text-danger">*</span></label>
+                        <input type="text" id="mFirstName" class="form-control input-premium w-100"
+                               value="@Model.FirstName" placeholder="A" />
                     </div>
-
-                    <!-- Giới tính + Ngày sinh -->
                     <div class="col-md-6">
-                        <label class="label-tech">Giới Tính</label>
-                        <select id="profileGender" class="form-select input-premium w-100">
-                            <option value="">-- Chọn --</option>
+                        <label class="label-sm">Giới Tính</label>
+                        <select id="mGender" class="form-select input-premium w-100">
                             @{
-                                var genderVal = Model.Gender ?? "";
+                                var g = Model.Gender ?? "";
+                                var opts = new[] { "Nam", "Nữ", "Khác" };
                             }
-                            @if (genderVal == "Nam")
+                            @foreach (var opt in opts)
                             {
-                                <option value="Nam" selected>Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            }
-                            else if (genderVal == "Nữ")
-                            {
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ" selected>Nữ</option>
-                                <option value="Khác">Khác</option>
-                            }
-                            else if (genderVal == "Khác")
-                            {
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác" selected>Khác</option>
-                            }
-                            else
-                            {
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
+                                if (opt == g)
+                                {
+                                    <option value="@opt" selected>@opt</option>
+                                }
+                                else
+                                {
+                                    <option value="@opt">@opt</option>
+                                }
                             }
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="label-tech">Ngày Sinh</label>
-                        <input type="date" id="profileDob" class="form-control input-premium w-100"
+                        <label class="label-sm">Ngày Sinh</label>
+                        <input type="date" id="mDob" class="form-control input-premium w-100"
                                value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" />
                     </div>
-
-                    <!-- Email + SĐT -->
                     <div class="col-md-6">
-                        <label class="label-tech">Email</label>
-                        <input type="email" id="profileEmail" class="form-control input-premium w-100"
-                               value="@(Model.Email ?? "")" placeholder="example@gmail.com" />
+                        <label class="label-sm">Email</label>
+                        <input type="email" id="mEmail" class="form-control input-premium w-100"
+                               value="@(Model.Email ?? "")" placeholder="example@@gmail.com" />
                     </div>
                     <div class="col-md-6">
-                        <label class="label-tech">Số Điện Thoại</label>
-                        <input type="tel" id="profilePhone" class="form-control input-premium w-100"
+                        <label class="label-sm">Số Điện Thoại</label>
+                        <input type="tel" id="mPhone" class="form-control input-premium w-100"
                                value="@(Model.PhoneNumber ?? "")" placeholder="0987654321" />
                     </div>
                 </div>
-
-                <!-- Thông báo lỗi trong modal -->
-                <div id="profileModalError" class="mt-3 p-3 rounded" style="display:none; background:rgba(255,80,80,0.1); border:1px solid #ff5050; color:#ff5050; font-size:0.85rem;"></div>
-
+                <div id="mError" class="mt-3 p-3 rounded" style="display:none; background:rgba(255,80,80,.1); border:1px solid #ff5050; color:#ff5050; font-size:.85rem;"></div>
                 <div class="d-flex gap-3 mt-4">
-                    <button class="btn-neon px-5 py-2 flex-grow-1" onclick="submitProfileUpdate()" id="profileSaveBtn">
-                        💾 Lưu Thông Tin
-                    </button>
+                    <button class="btn-neon flex-grow-1" onclick="submitProfile()" id="mSaveBtn">💾 Lưu Thông Tin</button>
                     <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
                 </div>
             </div>
@@ -300,159 +576,220 @@
 </div>
 
 @section Scripts {
-    <script>
-        // =====================================================================
-        // KHỞI TẠO DROPDOWN ĐỊA CHỈ
-        // =====================================================================
-        var userCity = '@(Html.Raw(Model.City))';
-        var userDistrict = '@(Html.Raw(Model.District))';
-        var userWard = '@(Html.Raw(Model.Ward))';
+<script>
+// ════════════════════════════════════════════════════════════
+// TAB NAVIGATION
+// ════════════════════════════════════════════════════════════
+const TAB_PARAM = 'tab';
 
-        $(document).ready(function () {
-            $.get('@Url.Action("GetCities", "Home")', function (cities) {
-                var citySelect = $('#City');
-                $.each(cities, function (i, city) {
-                    citySelect.append($('<option></option>').val(city).text(city));
-                });
-                if (userCity && userCity !== 'Chưa cập nhật') {
-                    citySelect.val(userCity).trigger('change');
-                }
+document.querySelectorAll('.account-nav .nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const tab = link.dataset.tab;
+        switchTab(tab);
+        history.replaceState(null, '', '?tab=' + tab);
+    });
+});
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content-area').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.account-nav .nav-link').forEach(el => el.classList.remove('active'));
+    const content = document.getElementById('tab-' + tab);
+    if (content) content.classList.add('active');
+    const navLink = document.querySelector(`.account-nav .nav-link[data-tab="${tab}"]`);
+    if (navLink) navLink.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════
+// ĐỊA CHỈ CASCADE (Province → District → Ward)
+// Dùng API mới /Home/GetProvinces|GetDistrictsByProvince|GetWardsByDistrict
+// ════════════════════════════════════════════════════════════
+const savedDistrict = '@Html.Raw(Model.District)';
+const savedWard     = '@Html.Raw(Model.Ward)';
+
+let pendingDistrict = savedDistrict;
+let pendingWard     = savedWard;
+
+// Lấy code của tỉnh đang chọn từ option
+function getSelectedProvinceCode() {
+    const sel = document.getElementById('selProvince');
+    const opt = sel.options[sel.selectedIndex];
+    return opt ? opt.getAttribute('data-code') : '';
+}
+
+document.getElementById('selProvince').addEventListener('change', function () {
+    const code = getSelectedProvinceCode();
+    const distSel = document.getElementById('selDistrict');
+    const wardSel = document.getElementById('selWard');
+
+    distSel.innerHTML = '<option value="">— Đang tải... —</option>';
+    distSel.disabled = true;
+    wardSel.innerHTML = '<option value="">— Chọn Phường/Xã —</option>';
+    wardSel.disabled = true;
+
+    if (!code) return;
+
+    fetch('@Url.Action("GetDistrictsByProvince","Home")?provinceCode=' + encodeURIComponent(code))
+        .then(r => r.json())
+        .then(list => {
+            distSel.innerHTML = '<option value="">— Chọn Quận/Huyện —</option>';
+            list.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.name;
+                opt.textContent = d.name;
+                opt.setAttribute('data-code', d.code);
+                if (pendingDistrict && d.name === pendingDistrict) opt.selected = true;
+                distSel.appendChild(opt);
             });
-
-            $('#City').change(function () {
-                var city = $(this).val();
-                var districtSelect = $('#District');
-                var wardSelect = $('#Ward');
-                districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
-                wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
-
-                if (city) {
-                    $.get('@Url.Action("GetDistricts", "Home")?city=' + encodeURIComponent(city), function (districts) {
-                        $.each(districts, function (i, district) {
-                            districtSelect.append($('<option></option>').val(district).text(district));
-                        });
-                        districtSelect.prop('disabled', false);
-                        if (userDistrict && userDistrict !== 'Chưa cập nhật') {
-                            districtSelect.val(userDistrict).trigger('change');
-                            userDistrict = null;
-                        }
-                    });
-                }
-            });
-
-            $('#District').change(function () {
-                var district = $(this).val();
-                var wardSelect = $('#Ward');
-                wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
-                if (district) {
-                    $.get('@Url.Action("GetWards", "Home")?district=' + encodeURIComponent(district), function (wards) {
-                        $.each(wards, function (i, ward) {
-                            wardSelect.append($('<option></option>').val(ward).text(ward));
-                        });
-                        wardSelect.prop('disabled', false);
-                        if (userWard && userWard !== 'Chưa cập nhật') {
-                            wardSelect.val(userWard);
-                            userWard = null;
-                        }
-                    });
-                }
-            });
+            distSel.disabled = false;
+            if (pendingDistrict) {
+                distSel.dispatchEvent(new Event('change'));
+                pendingDistrict = null;
+            }
         });
+});
 
-        // =====================================================================
-        // MODAL CHỈNH SỬA THÔNG TIN CÁ NHÂN
-        // =====================================================================
+document.getElementById('selDistrict').addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    const code = opt ? opt.getAttribute('data-code') : '';
+    const wardSel = document.getElementById('selWard');
 
-        function openProfileModal() {
-            document.getElementById('profileModalError').style.display = 'none';
-            document.getElementById('profileSaveBtn').disabled = false;
-            document.getElementById('profileSaveBtn').textContent = '💾 Lưu Thông Tin';
-            $('#profileModal').modal('show');
-        }
+    wardSel.innerHTML = '<option value="">— Đang tải... —</option>';
+    wardSel.disabled = true;
 
-        function submitProfileUpdate() {
-            const firstName = document.getElementById('profileFirstName').value.trim();
-            const lastName = document.getElementById('profileLastName').value.trim();
-            const gender = document.getElementById('profileGender').value;
-            const dob = document.getElementById('profileDob').value;
-            const email = document.getElementById('profileEmail').value.trim();
-            const phone = document.getElementById('profilePhone').value.trim();
-            const errEl = document.getElementById('profileModalError');
+    if (!code) return;
 
-            // Validate cơ bản
-            if (!firstName || !lastName) {
-                errEl.textContent = '⚠️ Vui lòng nhập đầy đủ Họ và Tên!';
-                errEl.style.display = 'block';
-                return;
-            }
-            if (email) {
-                var emailRegex = new RegExp('^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$');
-                if (!emailRegex.test(email)) {
-                    errEl.textContent = '⚠️ Địa chỉ email không hợp lệ!';
-                    errEl.style.display = 'block';
-                    return;
-                }
-            }
-            if (phone) {
-                var phoneRegex = new RegExp('^(0|\\+84)[0-9]{8,10}$');
-                if (!phoneRegex.test(phone)) {
-                    errEl.textContent = '⚠️ Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)!';
-                    errEl.style.display = 'block';
-                    return;
-                }
-            }
-            errEl.style.display = 'none';
-
-            const btn = document.getElementById('profileSaveBtn');
-            btn.disabled = true;
-            btn.textContent = 'Đang lưu...';
-
-            $.ajax({
-                url: '@Url.Action("UpdateProfile", "Account")',
-                method: 'POST',
-                data: {
-                    FirstName: firstName,
-                    LastName: lastName,
-                    Gender: gender,
-                    DateOfBirth: dob || null,
-                    Email: email || null,
-                    PhoneNumber: phone || null
-                },
-                success: function (res) {
-                    btn.disabled = false;
-                    btn.textContent = '💾 Lưu Thông Tin';
-
-                    if (!res.success) {
-                        errEl.textContent = '⚠️ ' + res.message;
-                        errEl.style.display = 'block';
-                        return;
-                    }
-
-                    // Đóng modal
-                    $('#profileModal').modal('hide');
-
-                    // Cập nhật UI không reload trang
-                    const d = res.data;
-                    document.getElementById('displayFullName').textContent = d.fullName;
-                    document.getElementById('avatarCircle').textContent = d.avatarChar;
-                    document.getElementById('displayEmail').textContent = d.email || 'Chưa thiết lập';
-                    document.getElementById('displayPhone').textContent = d.phoneNumber || 'Chưa thiết lập';
-                    document.getElementById('displayGender').textContent = d.gender || 'Chưa thiết lập';
-                    document.getElementById('displayDob').textContent = d.dateOfBirth || 'Chưa thiết lập';
-
-                    // Hiển thị thông báo thành công
-                    const alertBox = document.getElementById('profileAlert');
-                    alertBox.innerHTML = `<div class="alert py-3" style="border-left:4px solid var(--accent-mint); background:rgba(46,229,157,0.1); color:var(--accent-mint); border-radius:0;">✅ ${res.message}</div>`;
-                    alertBox.style.display = 'block';
-                    setTimeout(() => alertBox.style.display = 'none', 4000);
-                },
-                error: function () {
-                    btn.disabled = false;
-                    btn.textContent = '💾 Lưu Thông Tin';
-                    errEl.textContent = '❌ Lỗi kết nối server. Vui lòng thử lại!';
-                    errEl.style.display = 'block';
-                }
+    fetch('@Url.Action("GetWardsByDistrict","Home")?districtCode=' + encodeURIComponent(code))
+        .then(r => r.json())
+        .then(list => {
+            wardSel.innerHTML = '<option value="">— Chọn Phường/Xã —</option>';
+            list.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.name;
+                opt.textContent = w.name;
+                if (pendingWard && w.name === pendingWard) opt.selected = true;
+                wardSel.appendChild(opt);
             });
+            wardSel.disabled = false;
+            pendingWard = null;
+        });
+});
+
+// Kích hoạt cascade nếu user đã có dữ liệu
+(function () {
+    const prov = document.getElementById('selProvince');
+    if (prov.value && savedDistrict) {
+        prov.dispatchEvent(new Event('change'));
+    }
+})();
+
+// ════════════════════════════════════════════════════════════
+// COLOR TAGS (cho form đăng tin)
+// ════════════════════════════════════════════════════════════
+const colorSet = new Set();
+
+function addColor() {
+    const input = document.getElementById('colorInput');
+    const val = input.value.trim();
+    if (!val || colorSet.has(val)) { input.value = ''; return; }
+    colorSet.add(val);
+    renderColorTags();
+    input.value = '';
+}
+
+document.getElementById('colorInput')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addColor(); }
+});
+
+function removeColor(c) {
+    colorSet.delete(c);
+    renderColorTags();
+}
+
+function renderColorTags() {
+    const container = document.getElementById('colorTagContainer');
+    const hidden    = document.getElementById('colorHiddenInputs');
+    container.innerHTML = '';
+    hidden.innerHTML = '';
+    colorSet.forEach(c => {
+        container.insertAdjacentHTML('beforeend',
+            `<span class="color-tag">${c}<span class="remove" onclick="removeColor('${c.replace(/'/g,"\\'")}')">×</span></span>`);
+        hidden.insertAdjacentHTML('beforeend',
+            `<input type="hidden" name="colors" value="${c.replace(/"/g,'&quot;')}" />`);
+    });
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL THÔNG TIN CÁ NHÂN
+// ════════════════════════════════════════════════════════════
+function openProfileModal() {
+    document.getElementById('mError').style.display = 'none';
+    document.getElementById('mSaveBtn').disabled = false;
+    document.getElementById('mSaveBtn').textContent = '💾 Lưu Thông Tin';
+    new bootstrap.Modal(document.getElementById('profileModal')).show();
+}
+
+function submitProfile() {
+    const firstName = document.getElementById('mFirstName').value.trim();
+    const lastName  = document.getElementById('mLastName').value.trim();
+    const gender    = document.getElementById('mGender').value;
+    const dob       = document.getElementById('mDob').value;
+    const email     = document.getElementById('mEmail').value.trim();
+    const phone     = document.getElementById('mPhone').value.trim();
+    const errEl     = document.getElementById('mError');
+
+    if (!firstName || !lastName) {
+        errEl.textContent = '⚠️ Vui lòng nhập đầy đủ Họ và Tên!';
+        errEl.style.display = 'block'; return;
+    }
+    if (email && !/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+        errEl.textContent = '⚠️ Địa chỉ email không hợp lệ!';
+        errEl.style.display = 'block'; return;
+    }
+    if (phone && !/^(0|\+84)[0-9]{8,10}$/.test(phone)) {
+        errEl.textContent = '⚠️ Số điện thoại không hợp lệ!';
+        errEl.style.display = 'block'; return;
+    }
+    errEl.style.display = 'none';
+
+    const btn = document.getElementById('mSaveBtn');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+    $.ajax({
+        url: '@Url.Action("UpdateProfile","Account")',
+        method: 'POST',
+        data: { FirstName: firstName, LastName: lastName, Gender: gender,
+                DateOfBirth: dob || null, Email: email || null, PhoneNumber: phone || null },
+        success(res) {
+            btn.disabled = false; btn.textContent = '💾 Lưu Thông Tin';
+            if (!res.success) {
+                errEl.textContent = '⚠️ ' + res.message;
+                errEl.style.display = 'block'; return;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+            const d = res.data;
+            // Cập nhật sidebar
+            document.getElementById('sideFullName').textContent  = d.fullName;
+            document.getElementById('sideAvatarChar').textContent = d.avatarChar;
+            // Cập nhật tab profile
+            document.getElementById('dispFirstName').textContent = firstName;
+            document.getElementById('dispLastName').textContent  = lastName;
+            document.getElementById('dispGender').textContent    = d.gender || 'Chưa thiết lập';
+            document.getElementById('dispDob').textContent       = d.dateOfBirth || 'Chưa thiết lập';
+            document.getElementById('dispEmail').textContent     = d.email || 'Chưa thiết lập';
+            document.getElementById('dispPhone').textContent     = d.phoneNumber || 'Chưa thiết lập';
+            // Alert
+            const alert = document.getElementById('ajaxAlert');
+            alert.innerHTML = `<div class="alert-strip alert-success-strip">✅ ${res.message}</div>`;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 4000);
+        },
+        error() {
+            btn.disabled = false; btn.textContent = '💾 Lưu Thông Tin';
+            errEl.textContent = '❌ Lỗi kết nối. Vui lòng thử lại!';
+            errEl.style.display = 'block';
         }
-    </script>
+    });
+}
+</script>
 }

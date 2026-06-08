@@ -32,6 +32,7 @@ builder.Services.AddScoped<IMasterDataRepository,  EfMasterDataRepository>();
 builder.Services.AddScoped<IEmployeeRepository,    EfEmployeeRepository>();
 builder.Services.AddScoped<ICartRepository,        EfCartRepository>();
 builder.Services.AddScoped<IShowroomRepository,    EfShowroomRepository>();
+builder.Services.AddScoped<ILocationRepository,    EfLocationRepository>();
 
 // ── 4. Services ────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IAuthService,              AuthService>();
@@ -102,9 +103,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    
+    // Nén response chỉ bật trên Production. Nếu bật ở Development sẽ làm lỗi tính năng hot-reload của dotnet watch
+    app.UseResponseCompression(); 
 }
-
-app.UseResponseCompression(); // phải đứng trước UseStaticFiles và UseRouting
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession();

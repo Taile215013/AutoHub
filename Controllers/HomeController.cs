@@ -17,17 +17,20 @@ namespace AutoHub.Controllers
         private readonly IServiceRepository _serviceRepository;
         private readonly ILocationService _locationService;
         private readonly ISystemDictionaryService _dictService;
+        private readonly ILocationRepository _locationRepository;
 
         public HomeController(
             IVehicleRepository vehicleRepository, 
             IServiceRepository serviceRepository,
             ILocationService locationService,
-            ISystemDictionaryService dictService)
+            ISystemDictionaryService dictService,
+            ILocationRepository locationRepository)
         {
-            _vehicleRepository = vehicleRepository;
-            _serviceRepository = serviceRepository;
-            _locationService = locationService;
-            _dictService = dictService;
+            _vehicleRepository  = vehicleRepository;
+            _serviceRepository  = serviceRepository;
+            _locationService    = locationService;
+            _dictService        = dictService;
+            _locationRepository = locationRepository;
         }
 
         public async Task<IActionResult> Index(string? vehicleType, string? bodyStyle, string? fuelType)
@@ -79,6 +82,31 @@ namespace AutoHub.Controllers
         {
             var districts = _locationService.GetDistricts(city);
             return Json(districts);
+        }
+
+        // ── API địa chỉ mới — dùng DB Provinces/Districts/Wards ──────────────
+
+        [HttpGet]
+        public async Task<IActionResult> GetProvinces()
+        {
+            var provinces = await _locationRepository.GetProvincesAsync();
+            return Json(provinces.Select(p => new { p.Code, p.Name }));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDistrictsByProvince(string provinceCode)
+        {
+            if (string.IsNullOrWhiteSpace(provinceCode)) return Json(Array.Empty<object>());
+            var districts = await _locationRepository.GetDistrictsByProvinceCodeAsync(provinceCode);
+            return Json(districts.Select(d => new { d.Code, d.Name }));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWardsByDistrict(string districtCode)
+        {
+            if (string.IsNullOrWhiteSpace(districtCode)) return Json(Array.Empty<object>());
+            var wards = await _locationRepository.GetWardsByDistrictCodeAsync(districtCode);
+            return Json(wards.Select(w => new { w.Code, w.Name }));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

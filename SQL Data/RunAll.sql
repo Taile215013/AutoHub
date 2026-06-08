@@ -12,7 +12,8 @@
 --   06 SpareParts          (→ Brands, ProductCategories, Vehicles)
 --   07 Users               (không phụ thuộc)
 --   08 Orders              (→ Users, Vehicles, SpareParts)
---   09 AddressData         (Province/District/Ward → SystemDictionaries)
+--   * Address data (Provinces/Districts/Wards) nạp riêng qua Python script:
+--     python "SQL Data\Source\import_address_to_db.py"
 -- ============================================================
 
 :r "01_SystemDictionaries.sql"
@@ -23,6 +24,6 @@
 :r "06_SpareParts.sql"
 :r "07_Users.sql"
 :r "08_Orders.sql"
-:r "09_AddressData.sql"
 
 PRINT '=== AutoHub seed data loaded successfully. ===';
+PRINT '=== NOTE: Address data (Provinces/Districts/Wards) → run import_address_to_db.py separately ===';

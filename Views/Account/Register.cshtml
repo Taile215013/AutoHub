@@ -55,12 +55,29 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="label-tech">Tỉnh / Thành</label>
-                                <input type="text" name="City" value="@Model?.City" class="form-control input-premium w-100" placeholder="TP. Hồ Chí Minh" />
+                                <label class="label-tech">Tỉnh / Thành <span class="text-danger">*</span></label>
+                                <select id="regProvince" name="City" class="form-select input-premium w-100" required>
+                                    <option value="">— Chọn Tỉnh/Thành —</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="label-tech">Quận / Huyện</label>
-                                <input type="text" name="District" value="@Model?.District" class="form-control input-premium w-100" placeholder="Quận 1..." />
+                                <select id="regDistrict" name="District" class="form-select input-premium w-100" disabled>
+                                    <option value="">— Chọn Quận/Huyện —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="label-tech">Phường / Xã</label>
+                                <select id="regWard" name="Ward" class="form-select input-premium w-100" disabled>
+                                    <option value="">— Chọn Phường/Xã —</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-tech">Số nhà / Tên đường</label>
+                                <input type="text" name="HouseNumber" value="@Model?.HouseNumber"
+                                       class="form-control input-premium w-100" placeholder="123 Lê Lợi..." />
                             </div>
                         </div>
 
@@ -97,3 +114,65 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+(function () {
+    // Tải danh sách tỉnh
+    fetch('@Url.Action("GetProvinces","Home")')
+        .then(r => r.json())
+        .then(list => {
+            const sel = document.getElementById('regProvince');
+            list.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.textContent = p.name;
+                opt.setAttribute('data-code', p.code);
+                sel.appendChild(opt);
+            });
+        });
+
+    document.getElementById('regProvince').addEventListener('change', function () {
+        const opt  = this.options[this.selectedIndex];
+        const code = opt ? opt.getAttribute('data-code') : '';
+        const dist = document.getElementById('regDistrict');
+        const ward = document.getElementById('regWard');
+        dist.innerHTML = '<option value="">— Chọn Quận/Huyện —</option>';
+        dist.disabled = true;
+        ward.innerHTML = '<option value="">— Chọn Phường/Xã —</option>';
+        ward.disabled = true;
+        if (!code) return;
+        fetch('@Url.Action("GetDistrictsByProvince","Home")?provinceCode=' + encodeURIComponent(code))
+            .then(r => r.json())
+            .then(list => {
+                list.forEach(d => {
+                    const o = document.createElement('option');
+                    o.value = d.name; o.textContent = d.name;
+                    o.setAttribute('data-code', d.code);
+                    dist.appendChild(o);
+                });
+                dist.disabled = false;
+            });
+    });
+
+    document.getElementById('regDistrict').addEventListener('change', function () {
+        const opt  = this.options[this.selectedIndex];
+        const code = opt ? opt.getAttribute('data-code') : '';
+        const ward = document.getElementById('regWard');
+        ward.innerHTML = '<option value="">— Chọn Phường/Xã —</option>';
+        ward.disabled = true;
+        if (!code) return;
+        fetch('@Url.Action("GetWardsByDistrict","Home")?districtCode=' + encodeURIComponent(code))
+            .then(r => r.json())
+            .then(list => {
+                list.forEach(w => {
+                    const o = document.createElement('option');
+                    o.value = w.name; o.textContent = w.name;
+                    ward.appendChild(o);
+                });
+                ward.disabled = false;
+            });
+    });
+})();
+</script>
+}

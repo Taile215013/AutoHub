@@ -29,6 +29,11 @@ namespace AutoHub.Data
         public DbSet<VehicleModelYear> VehicleModelYears { get; set; } = null!;
         public DbSet<SparePartCompatibility> SparePartCompatibilities { get; set; } = null!;
 
+        // Địa chỉ hành chính Việt Nam
+        public DbSet<Province> Provinces { get; set; } = null!;
+        public DbSet<District> Districts { get; set; } = null!;
+        public DbSet<Ward> Wards { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -52,6 +57,11 @@ namespace AutoHub.Data
             modelBuilder.Entity<VehicleVariant>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<VehicleModelYear>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<SparePartCompatibility>().HasQueryFilter(e => !e.IsDeleted);
+
+            // Địa chỉ hành chính
+            modelBuilder.Entity<Province>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<District>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Ward>().HasQueryFilter(e => !e.IsDeleted);
 
             modelBuilder.Entity<Brand>()
                 .HasOne(b => b.Country)
@@ -218,6 +228,31 @@ namespace AutoHub.Data
             modelBuilder.Entity<Employee>()
                 .Property(e => e.WeightKg)
                 .HasPrecision(5, 1);
+
+            // Địa chỉ hành chính — dùng Code string làm FK thay vì Id
+            // để giữ đúng mã số chính thống của Nhà nước
+            modelBuilder.Entity<Province>()
+                .HasIndex(p => p.Code).IsUnique();
+
+            modelBuilder.Entity<District>()
+                .HasIndex(d => d.Code).IsUnique();
+
+            modelBuilder.Entity<District>()
+                .HasOne(d => d.Province)
+                .WithMany(p => p.Districts)
+                .HasForeignKey(d => d.ProvinceCode)
+                .HasPrincipalKey(p => p.Code)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Ward>()
+                .HasIndex(w => w.Code).IsUnique();
+
+            modelBuilder.Entity<Ward>()
+                .HasOne(w => w.District)
+                .WithMany(d => d.Wards)
+                .HasForeignKey(w => w.DistrictCode)
+                .HasPrincipalKey(d => d.Code)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
