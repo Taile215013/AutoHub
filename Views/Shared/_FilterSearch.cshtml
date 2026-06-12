@@ -1,0 +1,6 @@
+@model string
+<div class="filter-group position-relative">
+    <label>Tìm Kiếm</label>
+    <input type="text" name="searchTerm" class="filter-input search-input-autocomplete" value="@ViewBag.SearchTerm" placeholder="Nhập từ khóa..." autocomplete="off" data-category="@Model" />
+    <div class="suggestions-box position-absolute bg-white text-dark w-100 shadow rounded" style="display:none; z-index: 1000; top: 100%; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+</div>

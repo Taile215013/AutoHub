@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+    <div class="sorting-block d-flex align-items-center gap-2">
+        <span class="text-muted fw-bold" style="font-size:0.85rem; text-transform:uppercase;">Sắp xếp:</span>
+        <select name="sortOrder" class="form-select form-select-sm bg-dark text-white border-secondary shadow-sm" style="width: auto; min-width: 150px; font-size: 0.9rem;" onchange="this.form.submit()">
+            <option value="">Mặc định</option>
+            <option value="price_asc" selected="@(ViewBag.SortOrder == "price_asc" ? "selected" : null)">Giá thấp đến cao</option>
+            <option value="price_desc" selected="@(ViewBag.SortOrder == "price_desc" ? "selected" : null)">Giá cao đến thấp</option>
+            <option value="name_asc" selected="@(ViewBag.SortOrder == "name_asc" ? "selected" : null)">Tên A - Z</option>
+            <option value="name_desc" selected="@(ViewBag.SortOrder == "name_desc" ? "selected" : null)">Tên Z - A</option>
+        </select>
+    </div>
+    
+    <div class="view-options d-none d-md-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm view-toggle-btn active" data-view="grid-3" title="Lưới 3 cột">
+            <span style="font-size: 1.1rem; line-height: 1;">▦</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm view-toggle-btn" data-view="grid-4" title="Lưới 4 cột">
+            <span style="font-size: 1.1rem; line-height: 1;">▤</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm view-toggle-btn" data-view="list" title="Danh sách">
+            <span style="font-size: 1.1rem; line-height: 1;">☰</span>
+        </button>
+    </div>
+</div>

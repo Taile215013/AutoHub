@@ -88,3 +88,13 @@
 .filter-input:hover {
   border-color: rgba(17, 17, 17, 0.25);
 }
+
+/* --- SEARCH SUGGESTIONS --- */
+.suggestion-item {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background-color: var(--color-ferrari, #e8041d);
+  color: #ffffff !important;
+}

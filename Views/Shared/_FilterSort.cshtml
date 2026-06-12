@@ -1,0 +1,10 @@
+<div class="filter-group">
+    <label>Sắp Xếp</label>
+    <select name="sortOrder" class="filter-select">
+        <option value="">Mặc định</option>
+        <option value="price_asc" selected="@(ViewBag.SortOrder == "price_asc" ? "selected" : null)">Giá thấp đến cao</option>
+        <option value="price_desc" selected="@(ViewBag.SortOrder == "price_desc" ? "selected" : null)">Giá cao đến thấp</option>
+        <option value="name_asc" selected="@(ViewBag.SortOrder == "name_asc" ? "selected" : null)">Tên A - Z</option>
+        <option value="name_desc" selected="@(ViewBag.SortOrder == "name_desc" ? "selected" : null)">Tên Z - A</option>
+    </select>
+</div>

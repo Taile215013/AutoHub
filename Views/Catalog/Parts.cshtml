@@ -14,35 +14,39 @@
 
 <div class="container px-4 py-5">
 
-    <form method="get" action="/parts" class="filter-bar mb-5">
-        <div class="filter-group">
-            <label>Hãng Sản Xuất</label>
-            <select name="brand" class="filter-select">
-                <option value="">Tất cả hãng</option>
-                @foreach (var b in brands)
-                {
-                    <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
-                }
-            </select>
+    <form method="get" action="/parts" class="mb-5">
+        <div class="filter-bar mb-4">
+            <div class="filter-group">
+                <label>Hãng Sản Xuất</label>
+                <select name="brand" class="filter-select">
+                    <option value="">Tất cả hãng</option>
+                    @foreach (var b in brands)
+                    {
+                        <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Danh Mục</label>
+                <select name="category" class="filter-select">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat" selected="@(ViewBag.Category == cat ? "selected" : null)">@cat</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn-neon py-2">Lọc</button>
+            <a href="/parts" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
         </div>
-        <div class="filter-group">
-            <label>Danh Mục</label>
-            <select name="category" class="filter-select">
-                <option value="">Tất cả danh mục</option>
-                @foreach (var cat in categories)
-                {
-                    <option value="@cat" selected="@(ViewBag.Category == cat ? "selected" : null)">@cat</option>
-                }
-            </select>
-        </div>
-        <button type="submit" class="btn-neon py-2">Tìm Kiếm</button>
-        <a href="/parts" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
+        
+        <partial name="_CatalogToolbar" />
     </form>
 
     @if (Model != null && Model.Any())
     {
         <p class="text-muted mb-4">Tìm thấy <strong>@Model.Count()</strong> phụ tùng</p>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        <div id="product-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
             @foreach (var part in Model)
             {
                 <div class="col">
@@ -76,7 +80,7 @@
                                     <span class="badge bg-danger" style="font-size:0.72rem;">Hết hàng</span>
                                 }
                             </div>
-                            <h5 style="font-weight:700; font-size:1rem; margin-bottom:0.3rem;">@part.Name</h5>
+                            <h5 style="font-weight:700; font-size:1rem; margin-bottom:0.3rem;">@(part.Brand?.Name) @part.Name</h5>
                             <p class="text-muted mb-1" style="font-size:0.82rem;">Hãng: <strong>@(part.Brand?.Name ?? "N/A")</strong></p>
                             @if (part.ManufactureYear.HasValue)
                             {
@@ -104,3 +108,4 @@
         </div>
     }
 </div>
+

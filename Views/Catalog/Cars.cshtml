@@ -15,39 +15,52 @@
 
 <div class="container px-4 py-5">
 
-    <form method="get" action="/cars" class="filter-bar mb-5">
-        <div class="filter-group">
-            <label>Hãng Xe</label>
-            <select name="brand" class="filter-select">
-                <option value="">Tất cả hãng</option>
-                @foreach (var b in brands)
-                {
-                    <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
-                }
-            </select>
+    <form method="get" action="/cars" class="mb-5">
+        <div class="filter-bar mb-4">
+            <div class="filter-group">
+                <label>Hãng Xe</label>
+                <select name="brand" class="filter-select">
+                    <option value="">Tất cả hãng</option>
+                    @foreach (var b in brands)
+                    {
+                        <option value="@b" selected="@(ViewBag.Brand == b ? "selected" : null)">@b</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Dáng Xe</label>
+                <select name="bodyStyle" class="filter-select">
+                    <option value="">Tất cả dáng xe</option>
+                    @if (ViewBag.BodyStyles != null)
+                    {
+                        foreach (var bs in ViewBag.BodyStyles)
+                        {
+                            <option value="@bs.Code" selected="@(ViewBag.BodyStyle == bs.Code ? "selected" : null)">@bs.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Nhiên Liệu</label>
+                <select name="fuelType" class="filter-select">
+                    <option value="">Tất cả</option>
+                    @foreach (var fuel in fuelTypes)
+                    {
+                        <option value="@fuel.Code" selected="@(ViewBag.FuelType == fuel.Code ? "selected" : null)">@fuel.Value</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn-neon py-2">Lọc</button>
+            <a href="/cars" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
         </div>
-        <div class="filter-group">
-            <label>Dáng Xe</label>
-            <input type="text" name="bodyStyle" value="@ViewBag.BodyStyle" placeholder="Sedan, SUV, MPV..." class="filter-input" />
-        </div>
-        <div class="filter-group">
-            <label>Nhiên Liệu</label>
-            <select name="fuelType" class="filter-select">
-                <option value="">Tất cả</option>
-                @foreach (var fuel in fuelTypes)
-                {
-                    <option value="@fuel.Code" selected="@(ViewBag.FuelType == fuel.Code ? "selected" : null)">@fuel.Value</option>
-                }
-            </select>
-        </div>
-        <button type="submit" class="btn-neon py-2">Tìm Kiếm</button>
-        <a href="/cars" class="btn-neon py-2 text-white text-decoration-none text-center" style="border-color:#888; color:#888 !important;">Xóa Lọc</a>
+        
+        <partial name="_CatalogToolbar" />
     </form>
 
     @if (Model != null && Model.Any())
     {
         <p class="text-muted mb-4">Tìm thấy <strong>@Model.Count()</strong> xe</p>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div id="product-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             @foreach (var vehicle in Model)
             {
                 <div class="col">
@@ -75,9 +88,10 @@
                                     <span class="badge bg-secondary" style="font-size:0.72rem;">@vehicle.BodyStyle</span>
                                 }
                             </div>
-                            <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })"
-                               style="text-decoration:none; color:inherit;">
-                                <h3 style="font-weight:800; font-size:1.4rem; margin-bottom:0.4rem;">@vehicle.Name</h3>
+                            <a href="@Url.RouteUrl("VehicleDetail", new { category = SeoHelper.GenerateCategorySlug(vehicle.VehicleType), slug = SeoHelper.GenerateSlug(vehicle.Name), id = vehicle.Id })" style="text-decoration:none; color:inherit;">
+                                <h3 style="font-weight:800; font-size:1.4rem; margin-bottom:0.4rem; transition:color 0.3s;" onmouseover="this.style.color='var(--color-ferrari)'" onmouseout="this.style.color='inherit'">
+                                    @(vehicle.Brand?.Name) @vehicle.Name
+                                </h3>
                             </a>
                             <p class="text-muted mb-1" style="font-size:0.88rem;">Hãng: <strong>@(vehicle.Brand?.Name ?? "N/A")</strong></p>
                             <p class="text-muted mb-1" style="font-size:0.88rem;">Động cơ: @vehicle.EngineType @(vehicle.EngineCapacity.HasValue ? $"({vehicle.EngineCapacity}L)" : "")</p>
@@ -114,3 +128,4 @@
         </div>
     }
 </div>
+
